@@ -1,0 +1,33 @@
+:root.dark {
+  --bg-light: #353434;
+  --bg-white: #3a3a3a;
+  --text-dark: #e4e4e4;
+  --text-muted: #a0a0a0;
+  --border-color: #2a2a2a;
+}
+
+/* background */
+.dark body {
+  background: var(--bg-light);
+  color: var(--text-dark);
+}
+
+/* کارت‌ها */
+.dark .news-card,
+.dark .sidebar-widget,
+.dark .news-list-section,
+.dark .special-news-section, 
+.hero-slide-body, .sidebar-news-section, 
+.multimedia-section, .slider-btn {
+  background: var(--bg-white);
+}
+
+/* hover */
+.dark .news-row-item:hover {
+  background: #1a1a1a;
+}
+
+/* ticker */
+.dark .breaking-bar {
+  background: var(--bg-white);
+}
