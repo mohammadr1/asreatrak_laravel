@@ -44,4 +44,24 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+    public function reportedNews()
+    {
+        return $this->hasMany(News::class, 'reporter_id');
+    }
+
+    public function createdNews()
+    {
+        return $this->hasMany(News::class, 'created_by');
+    }
+
+    public function approvedNews()
+    {
+        return $this->hasMany(News::class, 'approved_by');
+    }
 }

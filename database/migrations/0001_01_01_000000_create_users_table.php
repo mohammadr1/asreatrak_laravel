@@ -13,12 +13,51 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('email')->nullable()->unique();
+            $table->string('phone')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
+            
+            // تصویر پروفایل
+            $table->string('profile_image')->nullable();
+
+
+            // آخرین ورود
+            $table->timestamp('last_login_at')->nullable();
+
+            // وضعیت کاربر
+            $table->boolean('is_active')->default(true);
+            // $table->enum('is_active', [
+            //     'active',
+            //     'banned',
+            //     'suspended',
+            //     'deleted_by_admin'
+            // ])->default('active');
+            // درباره خبرنگار یا کاربر
+
+            $table->enum('status', [
+                'active',
+                'banned',
+                'suspended',
+                'deleted_by_admin'
+            ])->default('active');
+
+            $table->text('bio')->nullable();
+
+            // شبکه های اجتماعی
+            $table->json('social_media')->nullable();
+            // {
+            //     "telegram": "https://t.me/user",
+            //     "instagram": "https://instagram.com/user",
+            //     "linkedin": ""
+            // }
+
+            
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
