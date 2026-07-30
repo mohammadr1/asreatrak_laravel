@@ -102,6 +102,7 @@ class SystemSeeder extends Seeder
             [
                 'first_name' => 'Super',
                 'last_name' => 'Admin',
+                'slug' => 'admin',
                 'phone' => '09000000000',
                 'password' => Hash::make('123456'),
                 'is_active' => true,

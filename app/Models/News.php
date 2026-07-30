@@ -1,12 +1,14 @@
 <?php
 
 namespace App\Models;
+
+use App\Enums\NewsStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class News extends Model
 {
-        use SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
         'title',
@@ -29,6 +31,15 @@ class News extends Model
         'meta_description',
         'published_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => NewsStatus::class,
+            'approved_at' => 'datetime',
+            'published_at' => 'datetime',
+        ];
+    }
 
     public function reporter()
     {
@@ -58,5 +69,40 @@ class News extends Model
     public function tags()
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function canTransitionTo(NewsStatus $status, User $user): bool
+    {
+        return match ($this->status) {
+
+            NewsStatus::Draft, NewsStatus::Rejected => $status === NewsStatus::Pending && $user->hasRole('Reporter'),
+
+            NewsStatus::Pending =>
+                in_array($status, [NewsStatus::Approved, NewsStatus::Rejected], true)
+                && $user->can('news.approve'),
+
+            NewsStatus::Approved =>
+                in_array(
+                    $status,
+                    [
+                        NewsStatus::Published,
+                        NewsStatus::Scheduled
+                    ],
+                    true
+                )
+                && $user->can('news.publish'),
+
+            default => false,
+        };
+    }
+
+    public function transitionTo(NewsStatus $status, User $user, array $extra = []): void    {
+        if (! $this->canTransitionTo($status, $user)) {
+            abort(403, 'Transition not allowed');
+        }
+
+        $data = array_merge(['status' => $status], $extra);
+
+        $this->update($data);
     }
 }

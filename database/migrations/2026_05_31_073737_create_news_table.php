@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\NewsStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -33,15 +34,15 @@ return new class extends Migration
 
             // وضعیت انتشار
             $table->enum('status', [
-                'draft',       // پیش‌نویس خبرنگار
-                'pending',     // ارسال شده برای سردبیر
-                'approved',    // تایید سردبیر
-                'rejected',    // رد شده
-                'published',    // منتشر شده
-                'scheduled'
-            ])->default('draft');
+                NewsStatus::Draft->value,       // پیش‌نویس خبرنگار
+                NewsStatus::Pending->value,     // ارسال شده برای سردبیر
+                NewsStatus::Approved->value,    // تایید سردبیر
+                NewsStatus::Rejected->value,    // رد شده
+                NewsStatus::Published->value,   // منتشر شده
+                NewsStatus::scheduled->value
+            ])->default(NewsStatus::Draft->value);
 
-            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('created_by')->nullable()->constrained('users');
 
             $table->foreignId('approved_by')->nullable()->constrained('users');
 
@@ -66,6 +67,11 @@ return new class extends Migration
 
             // زمان انتشار
             $table->timestamp('published_at')->nullable();
+
+
+            $table->boolean('is_breaking')->default(false);
+            $table->boolean('is_featured')->default(false);
+
             $table->softDeletes();
             $table->timestamps();
         });

@@ -9,15 +9,27 @@ class NewsMedia extends Model
 {
     use SoftDeletes;
 
+
     protected $fillable = [
         'news_id',
         'type',
-        'source',
+        'path',
+        'video_url',
         'provider',
+        'title',
         'caption',
         'sort_order',
         'is_featured',
+        'is_active',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_featured' => 'boolean',
+            'is_active' => 'boolean',
+        ];
+    }
 
     public function news()
     {

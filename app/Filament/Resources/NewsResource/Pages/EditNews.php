@@ -16,4 +16,13 @@ class EditNews extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+
+        unset($data['reporter_id']);
+
+        return $data;
+
+    }
 }
