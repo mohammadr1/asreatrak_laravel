@@ -100,14 +100,34 @@ class NewsForm
                                                     ->disabled(fn () => auth()->user()->hasRole('Reporter')),
 
 
+                                                    // Select::make('categories')
+                                                    //     ->relationship('categories', 'name')
+                                                    //     ->multiple()
+                                                    //     ->preload()
+                                                    //     ->searchable(),
+
+
                                                     Select::make('categories')
-                                                        ->relationship('categories', 'title')
+                                                        ->label('دسته‌بندی')
+                                                        ->relationship(
+                                                            'categories',
+                                                            'name'
+                                                        )
                                                         ->multiple()
+                                                        ->searchable()
                                                         ->preload()
-                                                        ->searchable(),
-
-
+                                                        ->required(),
                                                     
+
+                                                    Select::make('tags')
+                                                        ->label('برچسب‌ها')
+                                                        ->relationship(
+                                                            'tags',
+                                                            'name'
+                                                        )
+                                                        ->multiple()
+                                                        ->searchable()
+                                                        ->preload(),
 
                                             ]),
 
@@ -276,6 +296,7 @@ class NewsForm
                                 DateTimePicker::make('published_at')
                                     ->label('زمان انتشار')
                                     ->seconds(false)
+                                    ->timezone('Asia/Tehran')
                                     ->disabled(fn () => auth()->user()->hasRole('Reporter'))
                                     ->visible(fn ($get) => $get('status') === NewsStatus::Scheduled->value)
                                     ->required(fn ($get) => $get('status') === NewsStatus::Scheduled->value),

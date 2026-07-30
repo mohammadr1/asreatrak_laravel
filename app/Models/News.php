@@ -63,12 +63,12 @@ class News extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class);
+        return $this->belongsToMany(Category::class, 'news_category');
     }
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class);
+        return $this->belongsToMany(Tag::class, 'news_tag');
     }
 
     public function canTransitionTo(NewsStatus $status, User $user): bool
@@ -92,6 +92,10 @@ class News extends Model
                 )
                 && $user->can('news.publish'),
 
+            NewsStatus::Scheduled =>
+                $status === NewsStatus::Published
+                && $user->can('news.publish'),
+            
             default => false,
         };
     }

@@ -16,8 +16,13 @@ class Tag extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+
     public function news()
     {
-        return $this->belongsToMany(News::class);
+        return $this->belongsToMany(News::class, 'news_tag');
     }
 }

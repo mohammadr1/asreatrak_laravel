@@ -39,7 +39,7 @@ return new class extends Migration
                 NewsStatus::Approved->value,    // تایید سردبیر
                 NewsStatus::Rejected->value,    // رد شده
                 NewsStatus::Published->value,   // منتشر شده
-                NewsStatus::scheduled->value
+                NewsStatus::Scheduled->value
             ])->default(NewsStatus::Draft->value);
 
             $table->foreignId('created_by')->nullable()->constrained('users');

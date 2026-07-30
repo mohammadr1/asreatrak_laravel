@@ -28,19 +28,31 @@ class PublishScheduledNews extends Command
      */
     public function handle()
     {
-        News::where('status', NewsStatus::Scheduled)
-            ->where('published_at', '<=', now())
-            ->each(function ($news) {
+        // News::where('status', NewsStatus::Scheduled->value)
+        //     ->where('published_at', '<=', now())
+        //     ->each(function ($news) {
 
-                $news->update([
-                    'status' => NewsStatus::Published,
-                    'published_at' => now(),
-                ]);
+        //         $news->update([
+        //             'status' => NewsStatus::Published,
+        //             'published_at' => now(),
+        //         ]);
 
-            });
+        //     });
 
 
-        $this->info('Scheduled news published.');
+        // $this->info('Scheduled news published.');
 
+    News::where('status', NewsStatus::Scheduled->value)
+        ->where('published_at', '<=', now())
+        ->each(function ($news) {
+
+            $news->update([
+                'status' => NewsStatus::Published->value,
+            ]);
+
+        });
+
+
+    $this->info('Scheduled news published.');
     }
 }

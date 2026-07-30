@@ -23,6 +23,12 @@ class NewsTable
                 Tables\Columns\TextColumn::make('title')
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('categories.name')
+                    ->label('دسته‌ها')
+                    ->badge()
+                    ->separator(',')
+                    ->searchable(),
+                    
                 Tables\Columns\TextColumn::make('reporter.name')
                     ->label('خبرنگار')
                     ->searchable(),
