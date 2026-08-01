@@ -97,6 +97,10 @@ return $form
                     ->label('بیوگرافی')
                     ->rows(4),
 
+                // FileUpload::make('watermark')
+                //     ->label('واترمارک')
+                //     ->image()
+                //     ->directory('watermarks/users')
             ]),
 
         Section::make('دسترسی')

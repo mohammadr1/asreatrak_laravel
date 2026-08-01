@@ -1,0 +1,1 @@
+<livewire:media.featured-picker />

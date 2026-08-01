@@ -16,6 +16,7 @@ class News extends Model
         'uptitle',
         'slug',
         'content',
+        'featured_media_id',
         'news_code',
         'reporter_id',
         'views_count',
@@ -56,9 +57,20 @@ class News extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    // public function media()
+    // {
+    //     return $this->hasMany(NewsMedia::class);
+    // }
+
     public function media()
     {
-        return $this->hasMany(NewsMedia::class);
+        return $this->belongsToMany(
+            Media::class,
+            'news_media'
+        )->withPivot([
+            'sort_order',
+            'is_featured',
+        ])->withTimestamps();
     }
 
     public function categories()
@@ -109,4 +121,10 @@ class News extends Model
 
         $this->update($data);
     }
+
+    public function featuredMedia()
+    {
+        return $this->belongsTo(Media::class, 'featured_media_id');
+    }
+
 }

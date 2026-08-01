@@ -15,12 +15,20 @@ return new class extends Migration
         Schema::create('news', function (Blueprint $table) {
             $table->id();
 
+            
+            $table->foreignId('featured_media_id')
+                ->nullable()
+                ->constrained('media')
+                ->nullOnDelete();
+
+
             $table->string('title');
             $table->text('lead')->nullable();
             $table->string('uptitle')->nullable();
             $table->string('slug')->unique(); 
             $table->longText('content')->nullable();
 
+                
             $table->string('news_code')->unique(); // BN-140315-0042
 
             // خبرنگار

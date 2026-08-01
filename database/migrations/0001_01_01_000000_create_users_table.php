@@ -55,6 +55,7 @@ return new class extends Migration
             //     "linkedin": ""
             // }
 
+            // $table->string('watermark')->nullable();
             
             $table->rememberToken();
             $table->timestamps();

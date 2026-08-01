@@ -31,6 +31,7 @@ class User extends Authenticatable
             'status',
             'bio',
             'social_media',
+            'watermark'
         ];
 
     /**
@@ -92,5 +93,10 @@ class User extends Authenticatable
     public function approvedNews()
     {
         return $this->hasMany(News::class, 'approved_by');
+    }
+
+    public function watermark()
+    {
+        return $this->hasOne(Watermark::class);
     }
 }
