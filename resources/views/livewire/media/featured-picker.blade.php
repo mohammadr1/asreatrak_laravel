@@ -146,14 +146,17 @@
                 >
                     <input
                         type="file"
-                        wire:model="upload"
+                        wire:model="uploads"
+                        multiple
+
                         accept="{{ match($type) {
                             'video' => 'video/*',
                             'audio' => 'audio/*',
                             'document' => '.pdf,.doc,.docx,.xls,.xlsx,.txt',
                             default => 'image/*'
                         } }}"
-                        class="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+                        id="media-upload"
+                        class="hidden absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
                     >
 
                     <div
@@ -185,7 +188,7 @@
 
                     <div
                         wire:loading
-                        wire:target="upload"
+                        wire:target="uploads"
                         class="mt-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400"
                     >
                         در حال آماده‌سازی فایل...
@@ -218,7 +221,7 @@
                     </div>
                 </div>
 
-                @error('upload')
+                @error('uploads.*')
                     <div
                         class="mt-4 flex items-start gap-2 rounded-xl border border-red-200
                                bg-red-50 p-3 text-sm text-red-700
@@ -406,6 +409,12 @@
                         >
                             {{ $title }}
                         </div>
+                        <!-- <div
+                            class="truncate text-sm font-bold text-slate-800 dark:text-slate-100"
+                        >
+                            {{ $title }}
+                        </div> -->
+
 
                         <div class="mt-2 flex items-center justify-between gap-2">
                             <span class="text-xs text-slate-400">
@@ -467,6 +476,7 @@
             @endforelse
         </div>
 
+
         {{-- Pagination --}}
         @if($this->media->hasPages())
             <div
@@ -476,5 +486,330 @@
                 {{ $this->media->links() }}
             </div>
         @endif
+
+
+
+
+
+        {{-- Crop Modal --}}
+
+        @if($showCropModal)
+
+        <div
+    class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70"
+>
+<div
+    wire:key="crop-modal-{{ $cropMediaId }}"
+    wire:ignore
+    x-data="{
+        cropper:null,
+
+        init(){
+
+            console.log('CROP INIT');
+
+
+            this.$nextTick(()=>{
+
+
+                let image =
+                    document.getElementById('cropper-image');
+
+
+                if(!image){
+
+                    console.log('IMAGE NOT FOUND');
+
+                    return;
+                }
+
+
+                this.cropper =
+                    new Cropper(
+                        image,
+                        {
+
+                            aspectRatio:16/9,
+
+                            viewMode:1,
+
+                            autoCropArea:1,
+
+                            dragMode:'move',
+
+                            background:false,
+
+                            movable:true,
+
+                            zoomable:true,
+
+                            cropBoxMovable:true,
+
+                            cropBoxResizable:true,
+
+                        }
+                    );
+
+
+                console.log('CROPPER READY');
+
+
+            });
+
+        },
+
+
+        save(){
+
+
+            console.log('SAVE RUN');
+
+
+            if(!this.cropper){
+
+                console.log('NO CROPPER');
+
+                return;
+            }
+
+
+            let data =
+                this.cropper.getData(true);
+
+
+
+            Livewire.dispatch(
+                'saveCrop',
+                {
+                    crop:data
+                }
+            );
+
+
+        }
+
+
+    }"
+    x-init="init()"
+>
+
+    <div class="w-full max-w-5xl rounded-2xl bg-white p-6 dark:bg-slate-900">
+
+
+        <div class="mb-5 flex items-center justify-between">
+
+            <h2 class="text-xl font-black">
+                برش تصویر
+            </h2>
+
+
+            @if($processingQueue)
+
+            <span class="rounded-xl bg-indigo-100 px-4 py-2 text-sm font-bold text-indigo-700">
+
+                تصویر
+                {{ $queueIndex + 1 }}
+                از
+                {{ count($queue) }}
+
+            </span>
+
+            @endif
+
+        </div>
+
+
+
+        <div class="overflow-hidden rounded-xl bg-black">
+
+            <img
+                id="cropper-image"
+                wire:key="image-{{ $cropMediaId }}"
+                src="{{ $cropImage }}"
+                class="max-h-[70vh] w-full object-contain"
+            >
+
+        </div>
+
+
+
+        <div class="mt-6 flex justify-end gap-3">
+
+
+            <button
+                type="button"
+                wire:click="$set('showCropModal',false)"
+                class="rounded-xl bg-slate-200 px-5 py-2 font-bold"
+            >
+                لغو
+            </button>
+
+
+
+            <button
+                type="button"
+                x-on:click="save()"
+                class="rounded-xl bg-indigo-600 px-6 py-2 font-bold text-white"
+            >
+                تایید و ادامه
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+</div>
+
+
+@endif
+
+
+
+
+
+
+
+{{-- Watermark Modal --}}
+@if($showWatermarkModal)
+
+<div
+    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70"
+>
+
+    <div
+        class="w-full max-w-lg rounded-2xl bg-white p-6 dark:bg-slate-900"
+    >
+
+        <h2 class="mb-6 text-xl font-black text-slate-900 dark:text-white">
+            انتخاب واترمارک
+        </h2>
+
+
+        <div class="space-y-4">
+
+
+            {{-- بدون واترمارک --}}
+
+            <label
+                class="flex cursor-pointer items-center gap-3 rounded-xl border p-3
+                       hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+            >
+
+                <input
+                    type="radio"
+                    wire:model="watermarkType"
+                    value="none"
+                >
+
+                <span class="font-bold">
+                    بدون واترمارک
+                </span>
+
+            </label>
+
+
+
+            {{-- واترمارک ها --}}
+
+            @foreach($watermarks as $watermark)
+
+                <label
+                    class="flex cursor-pointer items-center gap-3 rounded-xl border p-3
+                           hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+                >
+
+                    <input
+                        type="radio"
+                        wire:model="watermarkId"
+                        value="{{ $watermark->id }}"
+                        wire:click="$set('watermarkType','custom')"
+                    >
+
+                    <span class="font-bold">
+
+                        {{ $watermark->title }}
+
+                    </span>
+
+                </label>
+
+
+            @endforeach
+
+
+        </div>
+
+
+
+        <div
+            class="mt-8 flex justify-end gap-3"
+        >
+
+            <button
+                type="button"
+                wire:click="$set('showWatermarkModal',false)"
+                class="rounded-xl bg-slate-200 px-5 py-2 font-bold"
+            >
+
+                انصراف
+
+            </button>
+
+
+
+            <button
+                type="button"
+                wire:click="applyWatermark"
+                class="rounded-xl bg-indigo-600 px-6 py-2 font-bold text-white"
+            >
+
+                اعمال روی تصاویر
+
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+@endif
+
+
+@push('scripts')
+
+<script>
+
+
+
+/*
+|--------------------------------------------------------------------------
+| وقتی Livewire تصویر جدید آورد
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener(
+    'livewire:navigated',
+    () => {
+
+        window.dispatchEvent(
+            new Event('resize')
+        );
+
+    }
+);
+
+
+
+</script>
+
+@endpush
+
+
     </div>
 </div>

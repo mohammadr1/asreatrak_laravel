@@ -2,8 +2,10 @@
 
 namespace App\Services\Media;
 
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\EncodedImage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Interfaces\ImageInterface;
 
 class ImageProcessor
 {
@@ -17,61 +19,137 @@ class ImageProcessor
     }
 
     /**
-     * خواندن تصویر
+     * Read image
      */
-    public function read(string $path)
-    {
+    public function read(
+        string $path
+    ): ImageInterface {
+
         return $this->manager->read($path);
+
     }
 
     /**
-     * ذخیره تصویر
+     * Save image
      */
-    public function save($image, string $path, int $quality = 90): void
-    {
-        $image->save($path, quality: $quality);
+    public function save(
+        ImageInterface $image,
+        string $path,
+        int $quality = 90
+    ): void {
+
+        $extension = strtolower(
+            pathinfo($path, PATHINFO_EXTENSION)
+        );
+
+        $encoded = match ($extension) {
+
+            'jpg',
+            'jpeg'
+                => $image->toJpeg($quality),
+
+            'png'
+                => $image->toPng(),
+
+            'webp'
+                => $image->toWebp($quality),
+
+            'gif'
+                => $image->toGif(),
+
+            'avif'
+                => $image->toAvif($quality),
+
+            default
+                => $image->toJpeg($quality),
+
+        };
+
+        file_put_contents(
+            $path,
+            (string) $encoded
+        );
     }
 
     /**
-     * تغییر اندازه
+     * Resize
      */
     public function resize(
         string $input,
         string $output,
         int $width,
-        int $height
+        int $height,
+        int $quality = 90
     ): void {
 
         $image = $this->read($input);
 
-        $image->cover($width, $height);
+        $image->cover(
+            $width,
+            $height
+        );
 
         $this->save(
             $image,
-            $output
+            $output,
+            $quality
         );
     }
 
     /**
-     * تبدیل به webp
+     * Crop
      */
-    public function convertToWebp(
+    public function crop(
         string $input,
         string $output,
-        int $quality = 85
+        int $x,
+        int $y,
+        int $width,
+        int $height,
+        int $quality = 90
     ): void {
 
         $image = $this->read($input);
 
-        $image->toWebp($quality)
-            ->save($output);
+        $image->crop(
+            $width,
+            $height,
+            $x,
+            $y
+        );
 
+        $this->save(
+            $image,
+            $output,
+            $quality
+        );
     }
 
     /**
-     * ذخیره jpg
+     * Rotate
      */
-    public function convertToJpg(
+    public function rotate(
+        string $input,
+        string $output,
+        float $angle,
+        int $quality = 90
+    ): void {
+
+        $image = $this->read($input);
+
+        $image->rotate($angle);
+
+        $this->save(
+            $image,
+            $output,
+            $quality
+        );
+    }
+
+    /**
+     * Flip Horizontal
+     */
+    public function flipHorizontal(
         string $input,
         string $output,
         int $quality = 90
@@ -79,8 +157,92 @@ class ImageProcessor
 
         $image = $this->read($input);
 
-        $image->toJpeg($quality)
-            ->save($output);
+        $image->flip();
 
+        $this->save(
+            $image,
+            $output,
+            $quality
+        );
+    }
+
+    /**
+     * Flip Vertical
+     */
+    public function flipVertical(
+        string $input,
+        string $output,
+        int $quality = 90
+    ): void {
+
+        $image = $this->read($input);
+
+        $image->flop();
+
+        $this->save(
+            $image,
+            $output,
+            $quality
+        );
+    }
+
+    /**
+     * Compress
+     */
+    public function compress(
+        string $input,
+        string $output,
+        int $quality = 80
+    ): void {
+
+        $image = $this->read($input);
+
+        $this->save(
+            $image,
+            $output,
+            $quality
+        );
+    }
+
+
+
+
+/**
+     * اعمال واترمارک
+     */
+    public function applyWatermark(
+        string $inputPath, 
+        string $outputPath, 
+        string $watermarkType, 
+        ?int $reporterId = null
+    ): void {
+        $image = $this->read($inputPath);
+        
+        $watermarkPath = $this->getWatermarkPath($watermarkType, $reporterId);
+        
+        if (file_exists($watermarkPath)) {
+            $watermark = $this->read($watermarkPath);
+            // ثبت واترمارک پایین سمت چپ با فاصله 20 پیکسل
+            $image->place($watermark, 'bottom-left', 20, 20); 
+        }
+
+        $this->save($image, $outputPath);
+    }
+
+    /**
+     * پیدا کردن مسیر دقیق واترمارک
+     */
+    private function getWatermarkPath(string $type, ?int $reporterId): string
+    {
+        // واترمارک اختصاصی خبرنگار
+        if ($type === 'personal' && $reporterId) {
+            $user = \App\Models\User::find($reporterId);
+            if ($user && $user->watermark_path) {
+                return storage_path('app/public/' . $user->watermark_path);
+            }
+        }
+        
+        // مسیر واترمارک عمومی سایت (این عکس باید در مسیر public/images قرار داشته باشد)
+        return public_path('images/general-watermark.png'); 
     }
 }

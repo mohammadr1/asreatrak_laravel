@@ -16,6 +16,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Hidden;
 
 class NewsForm
 {
@@ -153,31 +154,83 @@ class NewsForm
                             ])
                             ->schema([
 
+                            
                         Section::make('تصویر شاخص')
-                            ->schema([
+                        ->schema([
 
-                                Actions::make([
+                            Hidden::make('featured_media_id')
+                                ->default(null)
+                                ->live(),
 
-                                    Action::make('selectFeatured')
-                                        ->label('انتخاب تصویر')
-                                        ->icon('heroicon-o-photo')
-                                        ->modalHeading('انتخاب تصویر شاخص')
-                                        ->modalWidth('7xl')
-                                        ->modalSubmitAction(false)
-                                        ->modalCancelActionLabel('بستن')
-                                        ->modalContent(fn () => view(
-                                            'filament.media.featured-picker'
-                                        )),
+                            Actions::make([
 
-                                ]),
+                                Action::make('selectFeatured')
+                                    ->label('انتخاب تصویر')
+                                    ->icon('heroicon-o-photo')
+                                    ->modalHeading('انتخاب تصویر شاخص')
+                                    ->modalWidth('7xl')
+                                    ->modalSubmitAction(false)
+                                    ->modalCancelActionLabel('بستن')
 
-                                Placeholder::make('featured_preview')
-                                    ->hiddenLabel()
-                                    ->content('هنوز تصویری انتخاب نشده است.'),
+                                    ->modalContent(
+                                        fn () => view(
+                                            'filament.media.featured-picker-wrapper'
+                                        )
+                                    ),
 
                             ]),
 
 
+                            Placeholder::make('featured_preview')
+                                ->hiddenLabel()
+
+                                ->content(function ($get) {
+
+
+                                    $id = $get('featured_media_id');
+
+
+                                    if (! $id) {
+
+                                        return 'هنوز تصویری انتخاب نشده است.';
+
+                                    }
+
+
+                                    $media = \App\Models\Media::find($id);
+
+
+                                    if (! $media) {
+
+                                        return 'تصویر پیدا نشد.';
+
+                                    }
+
+
+                                    return view(
+                                        'filament.media.featured-preview',
+                                        [
+                                            'media' => $media,
+                                        ]
+                                    );
+
+
+                                }),
+
+
+                        ]),
+
+                                Select::make('watermark_type')
+                                    ->label('نوع واترمارک تصاویر')
+                                    ->options([
+                                        'none' => 'بدون واترمارک',
+                                        'general' => 'واترمارک عمومی سایت',
+                                        'personal' => 'واترمارک اختصاصی من',
+                                    ])
+                                    ->default('none')
+                                    ->required(),
+
+                                    
                                 Section::make('انتشار')
                                     ->schema([
 

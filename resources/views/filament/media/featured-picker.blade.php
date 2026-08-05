@@ -1,1 +1,5 @@
-<livewire:media.featured-picker />
+<div>
+
+    <livewire:media.featured-picker />
+
+</div>
