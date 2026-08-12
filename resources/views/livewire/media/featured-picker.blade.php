@@ -1,617 +1,493 @@
-<div
-    dir="rtl"
-    class="min-h-screen rounded-3xl bg-slate-50 p-4 sm:p-6 dark:bg-slate-950"
->
-    <div class="mx-auto max-w-7xl">
+<div dir="rtl" class="w-full">
 
-        {{-- Header --}}
-        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-                <h2 class="text-xl font-black text-slate-900 sm:text-2xl dark:text-white">
-                    کتابخانه رسانه
-                </h2>
+    {{-- ========================================================= --}}
+    {{-- Header --}}
+    {{-- ========================================================= --}}
 
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    فایل موردنظر را جستجو، آپلود یا انتخاب کنید.
-                </p>
-            </div>
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-            <div
-                class="inline-flex w-fit items-center gap-2 rounded-full bg-white px-4 py-2
-                       text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-200
-                       dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800"
-            >
-                <svg
-                    class="h-4 w-4 text-indigo-500"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/>
-                </svg>
-
-                <span>
-                    مدیریت فایل‌ها
-                </span>
-            </div>
-        </div>
-
-        {{-- Tools --}}
-        <div
-            class="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white
-                   shadow-sm dark:border-slate-800 dark:bg-slate-900"
-        >
-            {{-- Search and filters --}}
-            <div class="grid gap-3 border-b border-slate-100 p-4 md:grid-cols-[1fr_180px] sm:p-5 dark:border-slate-800">
-
-                {{-- Search --}}
-                <div class="relative">
-                    <svg
-                        class="pointer-events-none absolute right-4 top-1/2 h-5 w-5
-                               -translate-y-1/2 text-slate-400"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="m21 21-4.35-4.35"/>
-                    </svg>
-
-                    <input
-                        type="search"
-                        wire:model.live.debounce.400ms="search"
-                        placeholder="جستجو بر اساس نام فایل..."
-                        class="h-12 w-full rounded-xl border-0 bg-slate-100 pr-12 pl-4
-                               text-sm text-slate-900 outline-none ring-1 ring-transparent
-                               transition placeholder:text-slate-400
-                               focus:bg-white focus:ring-2 focus:ring-indigo-500
-                               dark:bg-slate-800 dark:text-white dark:focus:bg-slate-900"
-                    >
-
-                    <div
-                        wire:loading
-                        wire:target="search"
-                        class="absolute left-4 top-1/2 -translate-y-1/2"
-                    >
-                        <svg
-                            class="h-4 w-4 animate-spin text-indigo-500"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            />
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4Z"
-                            />
-                        </svg>
-                    </div>
-                </div>
-
-                {{-- Type filter --}}
-                <div class="relative">
-                    <select
-                        wire:model.live="type"
-                        class="h-12 w-full appearance-none rounded-xl border-0 bg-slate-100
-                               px-4 pl-10 text-sm font-semibold text-slate-700 outline-none
-                               ring-1 ring-transparent transition focus:bg-white
-                               focus:ring-2 focus:ring-indigo-500
-                               dark:bg-slate-800 dark:text-slate-200 dark:focus:bg-slate-900"
-                    >
-                        <option value="image">تصاویر</option>
-                        <option value="video">ویدئوها</option>
-                        <option value="document">اسناد</option>
-                        <option value="audio">فایل‌های صوتی</option>
-                    </select>
-
-                    <svg
-                        class="pointer-events-none absolute left-4 top-1/2 h-4 w-4
-                               -translate-y-1/2 text-slate-400"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path d="m6 9 6 6 6-6"/>
-                    </svg>
-                </div>
-            </div>
-
-            {{-- Upload --}}
-            <div
-                x-data="{ uploading: false, progress: 0 }"
-                x-on:livewire-upload-start="uploading = true"
-                x-on:livewire-upload-finish="uploading = false; progress = 0"
-                x-on:livewire-upload-cancel="uploading = false; progress = 0"
-                x-on:livewire-upload-error="uploading = false; progress = 0"
-                x-on:livewire-upload-progress="progress = $event.detail.progress"
-                class="p-4 sm:p-5"
-            >
-                <label
-                    class="group relative flex min-h-44 cursor-pointer flex-col items-center
-                           justify-center overflow-hidden rounded-2xl border-2 border-dashed
-                           border-slate-300 bg-slate-50 p-6 text-center transition
-                           hover:border-indigo-400 hover:bg-indigo-50/50
-                           dark:border-slate-700 dark:bg-slate-950/50
-                           dark:hover:border-indigo-500 dark:hover:bg-indigo-950/20"
-                >
-                    <input
-                        type="file"
-                        wire:model="uploads"
-                        multiple
-
-                        accept="{{ match($type) {
-                            'video' => 'video/*',
-                            'audio' => 'audio/*',
-                            'document' => '.pdf,.doc,.docx,.xls,.xlsx,.txt',
-                            default => 'image/*'
-                        } }}"
-                        id="media-upload"
-                        class="hidden absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                    >
-
-                    <div
-                        class="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl
-                               bg-indigo-100 text-indigo-600 transition
-                               group-hover:scale-110 group-hover:bg-indigo-600
-                               group-hover:text-white dark:bg-indigo-950 dark:text-indigo-400"
-                    >
-                        <svg
-                            class="h-7 w-7"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <path d="M12 16V4"/>
-                            <path d="m7 9 5-5 5 5"/>
-                            <path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/>
-                        </svg>
-                    </div>
-
-                    <div class="font-bold text-slate-800 dark:text-slate-100">
-                        فایل را اینجا رها کنید
-                    </div>
-
-                    <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        یا برای انتخاب فایل کلیک کنید
-                    </div>
-
-                    <div
-                        wire:loading
-                        wire:target="uploads"
-                        class="mt-4 text-sm font-semibold text-indigo-600 dark:text-indigo-400"
-                    >
-                        در حال آماده‌سازی فایل...
-                    </div>
-                </label>
-
-                {{-- Upload progress --}}
-                <div
-                    x-cloak
-                    x-show="uploading"
-                    class="mt-4"
-                >
-                    <div class="mb-2 flex items-center justify-between text-xs">
-                        <span class="font-semibold text-slate-600 dark:text-slate-300">
-                            در حال آپلود
-                        </span>
-
-                        <span
-                            class="font-bold text-indigo-600 dark:text-indigo-400"
-                            x-text="`${progress}%`"
-                        ></span>
-                    </div>
-
-                    <div class="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-                        <div
-                            class="h-full rounded-full bg-gradient-to-l from-indigo-600 to-violet-500
-                                   transition-all duration-300"
-                            :style="`width: ${progress}%`"
-                        ></div>
-                    </div>
-                </div>
-
-                @error('uploads.*')
-                    <div
-                        class="mt-4 flex items-start gap-2 rounded-xl border border-red-200
-                               bg-red-50 p-3 text-sm text-red-700
-                               dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400"
-                    >
-                        <svg
-                            class="mt-0.5 h-5 w-5 shrink-0"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                        >
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 8v4"/>
-                            <path d="M12 16h.01"/>
-                        </svg>
-
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
-            </div>
-        </div>
-
-        {{-- Loading skeleton --}}
-        <div
-            wire:loading.grid
-            wire:target="search,type"
-            class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-        >
-            @for($i = 0; $i < 10; $i++)
-                <div
-                    class="animate-pulse overflow-hidden rounded-2xl border border-slate-200
-                           bg-white p-2 dark:border-slate-800 dark:bg-slate-900"
-                >
-                    <div class="h-36 rounded-xl bg-slate-200 dark:bg-slate-800"></div>
-
-                    <div class="p-2">
-                        <div class="h-3 w-4/5 rounded bg-slate-200 dark:bg-slate-800"></div>
-                        <div class="mt-3 h-2 w-2/5 rounded bg-slate-100 dark:bg-slate-800"></div>
-                    </div>
-                </div>
-            @endfor
-        </div>
-
-        {{-- Media grid --}}
-        <div
-            wire:loading.remove
-            wire:target="search,type"
-            class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-        >
-            @forelse($this->media as $item)
-                @php
-                    $isSelected = $selected == $item->id;
-                    $title = $item->title ?: $item->filename;
-                    $extension = strtoupper(pathinfo($item->filename, PATHINFO_EXTENSION));
-                @endphp
-
-                <button
-                    type="button"
-                    wire:key="media-{{ $item->id }}"
-                    wire:click="select({{ $item->id }})"
-                    @class([
-                        'group relative overflow-hidden rounded-2xl border bg-white p-2 text-right',
-                        'shadow-sm transition-all duration-300',
-                        'hover:-translate-y-1 hover:shadow-xl',
-                        'dark:bg-slate-900',
-                        'border-indigo-500 ring-4 ring-indigo-500/15' => $isSelected,
-                        'border-slate-200 hover:border-indigo-300 dark:border-slate-800 dark:hover:border-indigo-700' => !$isSelected,
-                    ])
-                >
-                    {{-- Preview --}}
-                    <div class="relative h-36 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
-                        @if($type === 'image')
-                            <img
-                                src="{{ asset('storage/'.$item->original_path) }}"
-                                alt="{{ $title }}"
-                                loading="lazy"
-                                class="h-full w-full object-cover transition duration-500
-                                       group-hover:scale-110"
-                            >
-                        @elseif($type === 'video')
-                            <video
-                                preload="metadata"
-                                class="h-full w-full object-cover transition duration-500
-                                       group-hover:scale-105"
-                            >
-                                <source src="{{ asset('storage/'.$item->original_path) }}">
-                            </video>
-
-                            <div class="absolute inset-0 flex items-center justify-center bg-black/20">
-                                <div
-                                    class="flex h-12 w-12 items-center justify-center rounded-full
-                                           bg-white/90 text-indigo-600 shadow-lg backdrop-blur"
-                                >
-                                    <svg class="mr-0.5 h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M8 5v14l11-7L8 5Z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        @else
-                            <div class="flex h-full flex-col items-center justify-center">
-                                <div
-                                    class="flex h-14 w-14 items-center justify-center rounded-2xl
-                                           bg-indigo-100 text-indigo-600
-                                           dark:bg-indigo-950 dark:text-indigo-400"
-                                >
-                                    @if($type === 'audio')
-                                        <svg
-                                            class="h-7 w-7"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                        >
-                                            <path d="M9 18V5l12-2v13"/>
-                                            <circle cx="6" cy="18" r="3"/>
-                                            <circle cx="18" cy="16" r="3"/>
-                                        </svg>
-                                    @else
-                                        <svg
-                                            class="h-7 w-7"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="2"
-                                        >
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/>
-                                            <path d="M14 2v6h6"/>
-                                            <path d="M8 13h8"/>
-                                            <path d="M8 17h8"/>
-                                        </svg>
-                                    @endif
-                                </div>
-
-                                <span class="mt-2 text-xs font-black text-slate-400">
-                                    {{ $extension }}
-                                </span>
-                            </div>
-                        @endif
-
-                        {{-- Image overlay --}}
-                        <div
-                            class="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent
-                                   to-transparent opacity-0 transition group-hover:opacity-100"
-                        ></div>
-
-                        {{-- Selected badge --}}
-                        @if($isSelected)
-                            <div
-                                class="absolute right-2 top-2 flex items-center gap-1 rounded-full
-                                       bg-indigo-600 px-2.5 py-1 text-[11px] font-bold text-white
-                                       shadow-lg"
-                            >
-                                <svg
-                                    class="h-3.5 w-3.5"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="3"
-                                >
-                                    <path d="m5 12 4 4L19 6"/>
-                                </svg>
-
-                                انتخاب شد
-                            </div>
-                        @endif
-
-                        {{-- Extension badge --}}
-                        @if($extension)
-                            <span
-                                class="absolute bottom-2 left-2 rounded-md bg-slate-950/70 px-2
-                                       py-1 text-[10px] font-bold text-white backdrop-blur"
-                            >
-                                {{ $extension }}
-                            </span>
-                        @endif
-                    </div>
-
-                    {{-- Information --}}
-                    <div class="px-1 pb-1 pt-3">
-                        <div
-                            class="truncate text-sm font-bold text-slate-800
-                                   dark:text-slate-100"
-                            title="{{ $title }}"
-                        >
-                            {{ $title }}
-                        </div>
-                        <!-- <div
-                            class="truncate text-sm font-bold text-slate-800 dark:text-slate-100"
-                        >
-                            {{ $title }}
-                        </div> -->
-
-
-                        <div class="mt-2 flex items-center justify-between gap-2">
-                            <span class="text-xs text-slate-400">
-                                {{ number_format($item->size / 1024, 0) }} KB
-                            </span>
-
-                            <span
-                                @class([
-                                    'h-2 w-2 rounded-full transition',
-                                    'bg-indigo-500 ring-4 ring-indigo-100 dark:ring-indigo-950' => $isSelected,
-                                    'bg-slate-300 dark:bg-slate-700' => !$isSelected,
-                                ])
-                            ></span>
-                        </div>
-                    </div>
-                </button>
-            @empty
-                <div
-                    class="col-span-full flex min-h-72 flex-col items-center justify-center
-                           rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8
-                           text-center dark:border-slate-800 dark:bg-slate-900"
-                >
-                    <div
-                        class="flex h-20 w-20 items-center justify-center rounded-full
-                               bg-slate-100 text-slate-400 dark:bg-slate-800"
-                    >
-                        <svg
-                            class="h-9 w-9"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                        >
-                            <rect width="18" height="18" x="3" y="3" rx="2"/>
-                            <circle cx="9" cy="9" r="2"/>
-                            <path d="m21 15-5-5L5 21"/>
-                        </svg>
-                    </div>
-
-                    <h3 class="mt-5 font-bold text-slate-800 dark:text-slate-100">
-                        رسانه‌ای پیدا نشد
-                    </h3>
-
-                    <p class="mt-2 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
-                        فایل جدیدی آپلود کنید یا عبارت جستجو و نوع رسانه را تغییر دهید.
-                    </p>
-
-                    @if($search)
-                        <button
-                            type="button"
-                            wire:click="$set('search', '')"
-                            class="mt-5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold
-                                   text-white transition hover:bg-indigo-700"
-                        >
-                            پاک کردن جستجو
-                        </button>
-                    @endif
-                </div>
-            @endforelse
-        </div>
-
-
-        {{-- Pagination --}}
-        @if($this->media->hasPages())
-            <div
-                class="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
-                       dark:border-slate-800 dark:bg-slate-900"
-            >
-                {{ $this->media->links() }}
-            </div>
-        @endif
-
-
-
-
-
-        {{-- Crop Modal --}}
-
-        @if($showCropModal)
-
-        <div
-    class="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70"
->
-<div
-    wire:key="crop-modal-{{ $cropMediaId }}"
-    wire:ignore
-    x-data="{
-        cropper:null,
-
-        init(){
-
-            console.log('CROP INIT');
-
-
-            this.$nextTick(()=>{
-
-
-                let image =
-                    document.getElementById('cropper-image');
-
-
-                if(!image){
-
-                    console.log('IMAGE NOT FOUND');
-
-                    return;
-                }
-
-
-                this.cropper =
-                    new Cropper(
-                        image,
-                        {
-
-                            aspectRatio:16/9,
-
-                            viewMode:1,
-
-                            autoCropArea:1,
-
-                            dragMode:'move',
-
-                            background:false,
-
-                            movable:true,
-
-                            zoomable:true,
-
-                            cropBoxMovable:true,
-
-                            cropBoxResizable:true,
-
-                        }
-                    );
-
-
-                console.log('CROPPER READY');
-
-
-            });
-
-        },
-
-
-        save(){
-
-
-            console.log('SAVE RUN');
-
-
-            if(!this.cropper){
-
-                console.log('NO CROPPER');
-
-                return;
-            }
-
-
-            let data =
-                this.cropper.getData(true);
-
-
-
-            Livewire.dispatch(
-                'saveCrop',
-                {
-                    crop:data
-                }
-            );
-
-
-        }
-
-
-    }"
-    x-init="init()"
->
-
-    <div class="w-full max-w-5xl rounded-2xl bg-white p-6 dark:bg-slate-900">
-
-
-        <div class="mb-5 flex items-center justify-between">
-
-            <h2 class="text-xl font-black">
-                برش تصویر
+        <div>
+            <h2 class="text-2xl font-black text-slate-900 dark:text-white">
+                مدیریت رسانه
             </h2>
 
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                تصویر موردنظر را انتخاب یا رسانه جدیدی آپلود کنید.
+            </p>
+        </div>
 
-            @if($processingQueue)
+        {{-- Selection status --}}
 
-            <span class="rounded-xl bg-indigo-100 px-4 py-2 text-sm font-bold text-indigo-700">
+        @if($selectionMode === 'single')
 
-                تصویر
-                {{ $queueIndex + 1 }}
-                از
-                {{ count($queue) }}
+        <div class="rounded-xl bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700
+                       dark:bg-indigo-950/40 dark:text-indigo-300">
+            انتخاب یک تصویر
+        </div>
 
+        @else
+
+        <div class="rounded-xl bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700
+                       dark:bg-indigo-950/40 dark:text-indigo-300">
+            انتخاب چند تصویر
+            <span class="mr-1">
+                ({{ $this->selectedCount }} از {{ $maxSelection }})
+            </span>
+        </div>
+
+        @endif
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- Media Variant --}}
+    {{-- ========================================================= --}}
+
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm
+               dark:border-slate-800 dark:bg-slate-900">
+
+        <div class="grid grid-cols-3 gap-2">
+
+            {{-- Watermarked --}}
+
+            <button type="button" wire:click="setMediaVariant('watermarked')" class="
+                    rounded-xl px-4 py-3 text-sm font-bold transition
+                " @class([ 'bg-indigo-600 text-white shadow-md'=> $mediaVariant === 'watermarked',
+
+                'bg-slate-100 text-slate-600 hover:bg-slate-200
+                dark:bg-slate-800 dark:text-slate-300'
+                => $mediaVariant !== 'watermarked',
+                ])
+                >
+                <div>
+                    واترمارک‌دار
+                </div>
+
+                <div class="mt-1 text-[11px] font-normal opacity-80">
+                    نسخه آماده انتشار
+                </div>
+            </button>
+
+
+            {{-- Cropped --}}
+
+            <button type="button" wire:click="setMediaVariant('cropped')" class="
+                    rounded-xl px-4 py-3 text-sm font-bold transition
+                " @class([ 'bg-indigo-600 text-white shadow-md'=> $mediaVariant === 'cropped',
+
+                'bg-slate-100 text-slate-600 hover:bg-slate-200
+                dark:bg-slate-800 dark:text-slate-300'
+                => $mediaVariant !== 'cropped',
+                ])
+                >
+                <div>
+                    بدون واترمارک
+                </div>
+
+                <div class="mt-1 text-[11px] font-normal opacity-80">
+                    نسخه کراپ‌شده
+                </div>
+            </button>
+
+
+            {{-- Original --}}
+
+            <button type="button" wire:click="setMediaVariant('original')" class="
+                    rounded-xl px-4 py-3 text-sm font-bold transition
+                " @class([ 'bg-indigo-600 text-white shadow-md'=> $mediaVariant === 'original',
+
+                'bg-slate-100 text-slate-600 hover:bg-slate-200
+                dark:bg-slate-800 dark:text-slate-300'
+                => $mediaVariant !== 'original',
+                ])
+                >
+                <div>
+                    تصویر اصلی
+                </div>
+
+                <div class="mt-1 text-[11px] font-normal opacity-80">
+                    بدون پردازش
+                </div>
+            </button>
+
+        </div>
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- Search --}}
+    {{-- ========================================================= --}}
+
+    <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm
+               dark:border-slate-800 dark:bg-slate-900">
+
+        <div class="relative">
+
+            <input type="text" wire:model.live.debounce.400ms="search" placeholder="جستجو در نام تصویر یا فایل..."
+                class="
+                    w-full rounded-xl border border-slate-200 bg-slate-50
+                    px-4 py-3 text-sm outline-none transition
+                    focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
+                    dark:border-slate-700 dark:bg-slate-950
+                    dark:text-white
+                ">
+
+        </div>
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- Upload --}}
+    {{-- ========================================================= --}}
+
+    <div class="
+            mb-8 rounded-2xl border-2 border-dashed
+            border-slate-300 bg-slate-50 p-6
+            transition hover:border-indigo-400
+            dark:border-slate-700 dark:bg-slate-950
+        ">
+
+        <label for="media-upload" class="flex cursor-pointer flex-col items-center justify-center text-center">
+
+            <div class="
+                    mb-4 flex h-16 w-16 items-center justify-center
+                    rounded-2xl bg-indigo-100 text-indigo-600
+                    dark:bg-indigo-950 dark:text-indigo-400
+                ">
+
+                <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 16V4" />
+                    <path d="m7 9 5-5 5 5" />
+                    <path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4" />
+                </svg>
+
+            </div>
+
+            <div class="font-black text-slate-800 dark:text-white">
+                آپلود تصویر جدید
+            </div>
+
+            <div class="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                تصویر را انتخاب کنید؛ سپس مرحله کراپ و واترمارک انجام می‌شود.
+            </div>
+
+            <input id="media-upload" type="file" wire:model="uploads" multiple accept="image/*" class="hidden">
+
+        </label>
+
+
+        {{-- Upload loading --}}
+
+        <div wire:loading wire:target="uploads" class="mt-4 text-center text-sm font-bold text-indigo-600">
+            در حال بارگذاری تصویر...
+        </div>
+
+
+        @error('uploads.*')
+
+        <div class="mt-4 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-700">
+            {{ $message }}
+        </div>
+
+        @enderror
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- Media Grid --}}
+    {{-- ========================================================= --}}
+
+    <div wire:loading.remove wire:target="search"
+        class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+
+        @forelse($this->media as $item)
+
+        @php
+
+        $isSelected = $this->isSelected($item->id);
+
+        $title =
+        $item->title
+        ?: $item->filename;
+
+        $extension =
+        strtoupper(
+        pathinfo(
+        $item->filename,
+        PATHINFO_EXTENSION
+        )
+        );
+
+        $preview =
+        $item->variantUrl(
+        $mediaVariant
+        );
+
+        @endphp
+
+
+        <div wire:key="media-card-{{ $item->id }}" class="
+                    group relative overflow-hidden rounded-2xl
+                    border bg-white p-2 shadow-sm transition
+                    hover:-translate-y-1 hover:shadow-xl
+                    dark:bg-slate-900
+                " @class([ 'border-indigo-500 ring-4 ring-indigo-500/10'=> $isSelected,
+
+            'border-slate-200 dark:border-slate-800'
+            => ! $isSelected,
+            ])
+            >
+
+            {{-- ================================================= --}}
+            {{-- Image --}}
+            {{-- ================================================= --}}
+
+            <button type="button" wire:click="toggleSelection({{ $item->id }})" class="block w-full text-right">
+
+                <div class="
+                            relative aspect-video overflow-hidden
+                            rounded-xl bg-slate-100
+                            dark:bg-slate-800
+                        ">
+
+                    <img src="{{ $preview }}" alt="{{ $title }}" loading="lazy" class="
+                                h-full w-full object-cover
+                                transition duration-500
+                                group-hover:scale-105
+                            ">
+
+
+                    {{-- Selection overlay --}}
+
+                    @if($isSelected)
+
+                    <div class="
+                                    absolute inset-0 flex items-center
+                                    justify-center bg-indigo-600/25
+                                ">
+
+                        <div class="
+                                        flex h-12 w-12 items-center
+                                        justify-center rounded-full
+                                        bg-indigo-600 text-white
+                                        shadow-xl
+                                    ">
+
+                            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <path d="m5 12 4 4L19 6" />
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                    @endif
+
+
+                    {{-- Variant badge --}}
+
+                    <div class="
+                                absolute right-2 top-2 rounded-lg
+                                bg-black/70 px-2 py-1
+                                text-[10px] font-bold text-white
+                                backdrop-blur
+                            ">
+
+                        @switch($mediaVariant)
+
+                        @case('watermarked')
+                        واترمارک
+                        @break
+
+                        @case('cropped')
+                        کراپ‌شده
+                        @break
+
+                        @default
+                        اصلی
+
+                        @endswitch
+
+                    </div>
+
+
+                    {{-- Extension --}}
+
+                    <div class="
+                                absolute bottom-2 left-2 rounded-md
+                                bg-black/70 px-2 py-1
+                                text-[10px] font-bold text-white
+                            ">
+                        {{ $extension }}
+                    </div>
+
+                </div>
+
+
+                {{-- Title --}}
+
+                <div class="mt-3 px-1">
+
+                    <div class="
+                                truncate text-sm font-bold
+                                text-slate-800
+                                dark:text-slate-100
+                            " title="{{ $title }}">
+                        {{ $title }}
+                    </div>
+
+                    <div class="
+                                mt-1 text-xs text-slate-400
+                            ">
+                        {{ $item->width }} × {{ $item->height }}
+                    </div>
+
+                </div>
+
+            </button>
+
+
+            {{-- ================================================= --}}
+            {{-- Select Button --}}
+            {{-- ================================================= --}}
+
+            <button type="button" wire:click="toggleSelection({{ $item->id }})" class="
+                        mt-3 flex w-full items-center
+                        justify-center gap-2 rounded-xl
+                        px-3 py-2.5 text-xs font-black
+                        transition
+                    " @class([ 'bg-indigo-600 text-white hover:bg-indigo-700'=> $isSelected,
+
+                'bg-slate-100 text-slate-700 hover:bg-indigo-50
+                hover:text-indigo-700
+                dark:bg-slate-800 dark:text-slate-200'
+                => ! $isSelected,
+                ])
+                >
+
+                @if($isSelected)
+
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m5 12 4 4L19 6" />
+                </svg>
+
+                انتخاب شد
+
+                @else
+
+                انتخاب تصویر
+
+                @endif
+
+            </button>
+
+        </div>
+
+        @empty
+
+        <div class="
+                    col-span-full flex min-h-72
+                    flex-col items-center justify-center
+                    rounded-2xl border-2 border-dashed
+                    border-slate-200 bg-white p-8 text-center
+                    dark:border-slate-800 dark:bg-slate-900
+                ">
+
+            <div class="
+                        flex h-20 w-20 items-center justify-center
+                        rounded-full bg-slate-100 text-slate-400
+                        dark:bg-slate-800
+                    ">
+
+                <svg class="h-9 w-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect width="18" height="18" x="3" y="3" rx="2" />
+
+                    <circle cx="9" cy="9" r="2" />
+
+                    <path d="m21 15-5-5L5 21" />
+
+                </svg>
+
+            </div>
+
+            <h3 class="
+                        mt-5 font-black text-slate-800
+                        dark:text-slate-100
+                    ">
+                رسانه‌ای پیدا نشد
+            </h3>
+
+            <p class="
+                        mt-2 max-w-sm text-sm leading-6
+                        text-slate-500 dark:text-slate-400
+                    ">
+                فایل جدیدی آپلود کنید یا عبارت جستجو را تغییر دهید.
+            </p>
+
+        </div>
+
+        @endforelse
+
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- Pagination --}}
+    {{-- ========================================================= --}}
+
+    @if($this->media->hasPages())
+
+    <div class="
+                mt-8 rounded-2xl border border-slate-200
+                bg-white p-4 shadow-sm
+                dark:border-slate-800 dark:bg-slate-900
+            ">
+        {{ $this->media->links() }}
+    </div>
+
+    @endif
+
+
+    {{-- ========================================================= --}}
+    {{-- Selection Footer --}}
+    {{-- ========================================================= --}}
+
+    @if(
+    ($selectionMode === 'single' && $selected)
+    ||
+    ($selectionMode === 'multiple' && count($selectedMediaIds))
+    )
+
+
+    {{-- تایید انتخاب رسانه --}}
+    <div
+        class="sticky bottom-0 z-20 mt-4 flex items-center justify-between gap-3 rounded-2xl border border-slate-300 bg-slate-100 p-4 shadow-lg dark:border-slate-700 dark:bg-slate-800 bg-gray-100">
+
+        <div class="text-sm font-bold text-slate-600 dark:text-slate-300">
+
+            @if($selectionMode === 'single')
+
+            @if($selected)
+            <span class="text-emerald-600 dark:text-emerald-400">
+                یک تصویر انتخاب شده است
+            </span>
+            @else
+            <span>
+                هنوز تصویری انتخاب نشده است
+            </span>
+            @endif
+
+            @else
+
+            <span>
+                {{ $this->selectedCount }}
+                تصویر از
+                {{ $maxSelection }}
+                تصویر انتخاب شده است
             </span>
 
             @endif
@@ -619,197 +495,850 @@
         </div>
 
 
+        <button type="button" wire:click="choose" wire:loading.attr="disabled" @disabled( $selectionMode==='single' ? !
+            $selected : empty($selectedMediaIds) )
+            class="rounded-xl bg-indigo-600 px-6 py-3 font-black text-black transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40">
+            <span wire:loading.remove wire:target="choose">
+                تأیید انتخاب
+            </span>
 
-        <div class="overflow-hidden rounded-xl bg-black">
-
-            <img
-                id="cropper-image"
-                wire:key="image-{{ $cropMediaId }}"
-                src="{{ $cropImage }}"
-                class="max-h-[70vh] w-full object-contain"
-            >
-
-        </div>
-
-
-
-        <div class="mt-6 flex justify-end gap-3">
-
-
-            <button
-                type="button"
-                wire:click="$set('showCropModal',false)"
-                class="rounded-xl bg-slate-200 px-5 py-2 font-bold"
-            >
-                لغو
-            </button>
-
-
-
-            <button
-                type="button"
-                x-on:click="save()"
-                class="rounded-xl bg-indigo-600 px-6 py-2 font-bold text-white"
-            >
-                تایید و ادامه
-            </button>
-
-
-        </div>
-
+            <span wire:loading wire:target="choose">
+                در حال انتخاب...
+            </span>
+        </button>
 
     </div>
 
-</div>
-</div>
+    @endif
 
 
-@endif
+    {{-- ========================================================= --}}
+    {{-- Crop Modal --}}
+    {{-- ========================================================= --}}
+
+    @if($showCropModal)
+
+    <div class="
+                fixed inset-0 z-[99999]
+                flex items-center justify-center
+                bg-black/80 p-4
+            ">
+
+        <div wire:key="crop-modal-{{ $cropMediaId }}" wire:ignore x-data="{
+                    cropper: null,
+
+                    init() {
+
+                        this.$nextTick(() => {
+
+                            const image =
+                                document.getElementById(
+                                    'cropper-image'
+                                );
+
+                            if (!image) {
+                                return;
+                            }
+
+                            const createCropper = () => {
+
+                                if (this.cropper) {
+
+                                    this.cropper.destroy();
+
+                                    this.cropper = null;
+                                }
+
+                                this.cropper =
+                                    new Cropper(
+                                        image,
+                                        {
+                                            aspectRatio: 16 / 9,
+                                            viewMode: 1,
+                                            dragMode: 'move',
+                                            autoCropArea: 1,
+                                            responsive: true,
+                                            background: false,
+                                            movable: true,
+                                            zoomable: true,
+                                            cropBoxMovable: true,
+                                            cropBoxResizable: true,
+                                        }
+                                    );
+
+                            };
+
+                            if (image.complete) {
+
+                                createCropper();
+
+                            } else {
+
+                                image.onload =
+                                    createCropper;
+                            }
+
+                        });
+
+                    },
+
+                    save() {
+
+                        if (!this.cropper) {
+                            return;
+                        }
+
+                        const data =
+                            this.cropper.getData();
+
+                        Livewire.dispatch(
+                            'saveCrop',
+                            {
+                                crop: data
+                            }
+                        );
+
+                    },
+
+                    rotateLeft() {
+
+                        if (this.cropper) {
+                            this.cropper.rotate(-90);
+                        }
+
+                    },
+
+                    rotateRight() {
+
+                        if (this.cropper) {
+                            this.cropper.rotate(90);
+                        }
+
+                    },
+
+                    zoomIn() {
+
+                        if (this.cropper) {
+                            this.cropper.zoom(0.1);
+                        }
+
+                    },
+
+                    zoomOut() {
+
+                        if (this.cropper) {
+                            this.cropper.zoom(-0.1);
+                        }
+
+                    },
+
+                    reset() {
+
+                        if (this.cropper) {
+                            this.cropper.reset();
+                        }
+
+                    },
+
+                    destroy() {
+
+                        if (this.cropper) {
+
+                            this.cropper.destroy();
+
+                            this.cropper = null;
+                        }
+
+                    }
+                }" x-init="init()" x-on:close-cropper.window="destroy()" class="
+                    w-full max-w-6xl
+                    overflow-hidden rounded-3xl
+                    bg-white shadow-2xl
+                    dark:bg-slate-900
+                ">
+
+            {{-- Header --}}
+
+            <div class="
+                        flex items-center justify-between
+                        border-b border-slate-200
+                        px-6 py-4
+                        dark:border-slate-800
+                    ">
+
+                <div>
+
+                    <h2 class="
+                                text-xl font-black
+                                text-slate-900
+                                dark:text-white
+                            ">
+                        برش تصویر
+                    </h2>
+
+                    @if($processingQueue)
+
+                    <div class="
+                                    mt-1 text-xs font-bold
+                                    text-slate-500
+                                ">
+                        تصویر
+                        {{ $queueIndex + 1 }}
+                        از
+                        {{ count($queue) }}
+                    </div>
+
+                    @endif
+
+                </div>
+
+            </div>
 
 
+            {{-- Image --}}
+
+            <div class="
+                        flex max-h-[70vh]
+                        min-h-[400px]
+                        items-center justify-center
+                        overflow-hidden bg-black
+                    ">
+
+                <img id="cropper-image" src="{{ $cropImage }}" alt="Crop image" class="
+                            block max-h-[70vh]
+                            max-w-full
+                        ">
+
+            </div>
 
 
+            {{-- Tools --}}
+
+            <div class="
+                        flex flex-wrap items-center
+                        justify-center gap-2
+                        border-t border-slate-200
+                        px-6 py-4
+                        dark:border-slate-800
+                    ">
+
+                <button type="button" x-on:click="rotateRight()"
+                    class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold dark:bg-slate-800">
+                    چرخش راست
+                </button>
+
+                <button type="button" x-on:click="rotateLeft()"
+                    class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold dark:bg-slate-800">
+                    چرخش چپ
+                </button>
+
+                <button type="button" x-on:click="zoomIn()"
+                    class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold dark:bg-slate-800">
+                    +
+                </button>
+
+                <button type="button" x-on:click="zoomOut()"
+                    class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold dark:bg-slate-800">
+                    −
+                </button>
+
+                <button type="button" x-on:click="reset()"
+                    class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold dark:bg-slate-800">
+                    بازنشانی
+                </button>
+
+            </div>
 
 
+            {{-- Footer --}}
 
-{{-- Watermark Modal --}}
-@if($showWatermarkModal)
+            <div class="
+                        flex items-center justify-between
+                        border-t border-slate-200
+                        px-6 py-4
+                        dark:border-slate-800
+                    ">
 
-<div
-    class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70"
->
-
-    <div
-        class="w-full max-w-lg rounded-2xl bg-white p-6 dark:bg-slate-900"
-    >
-
-        <h2 class="mb-6 text-xl font-black text-slate-900 dark:text-white">
-            انتخاب واترمارک
-        </h2>
-
-
-        <div class="space-y-4">
+                <button type="button" wire:click="$set('showCropModal', false)" class="
+                            rounded-xl bg-slate-100
+                            px-5 py-2.5 font-bold
+                            dark:bg-slate-800
+                        ">
+                    لغو
+                </button>
 
 
-            {{-- بدون واترمارک --}}
+                <button type="button" x-on:click="save()" class="
+                            rounded-xl bg-indigo-600
+                            px-7 py-2.5 font-black
+                            text-white shadow-lg
+                            hover:bg-indigo-700
+                        ">
+                    تایید و ادامه
+                </button>
 
-            <label
-                class="flex cursor-pointer items-center gap-3 rounded-xl border p-3
-                       hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-            >
+            </div>
 
-                <input
-                    type="radio"
-                    wire:model="watermarkType"
-                    value="none"
-                >
+        </div>
 
-                <span class="font-bold">
-                    بدون واترمارک
-                </span>
+    </div>
 
-            </label>
+    @endif
 
 
+    {{-- ========================================================= --}}
+    {{-- Watermark Modal --}}
+    {{-- ========================================================= --}}
 
-            {{-- واترمارک ها --}}
+    @if($showWatermarkModal)
 
-            @foreach($watermarks as $watermark)
+    <div class="
+            fixed inset-0 z-[99999]
+            flex items-center justify-center
+            bg-black/80 p-4
+        ">
 
-                <label
-                    class="flex cursor-pointer items-center gap-3 rounded-xl border p-3
-                           hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-                >
+        <div class="
+                w-full max-w-xl
+                rounded-3xl bg-white
+                p-6 shadow-2xl
+                dark:bg-slate-900
+            ">
 
-                    <input
-                        type="radio"
-                        wire:model="watermarkId"
-                        value="{{ $watermark->id }}"
-                        wire:click="$set('watermarkType','custom')"
+            {{-- Header --}}
+
+            <div class="mb-6">
+
+                <h2 class="
+                        text-xl font-black
+                        text-slate-900
+                        dark:text-white
+                    ">
+                    انتخاب واترمارک
+                </h2>
+
+                <p class="
+                        mt-2 text-sm
+                        text-slate-500
+                        dark:text-slate-400
+                    ">
+                    مشخص کنید نسخه نهایی تصاویر با چه واترمارکی ذخیره شود.
+                </p>
+
+            </div>
+
+
+            {{-- ================================================= --}}
+            {{-- Main Options --}}
+            {{-- ================================================= --}}
+
+            <div class="space-y-3">
+
+                {{-- بدون واترمارک --}}
+
+                <button type="button" wire:click="setWatermarkType('none')" class="
+                        flex w-full items-center gap-3
+                        rounded-2xl border p-4
+                        text-right transition
+                        hover:border-indigo-400
+                    " @class([ 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/10'=> $watermarkType === 'none',
+
+                    'border-slate-200 dark:border-slate-700'
+                    => $watermarkType !== 'none',
+                    ])
                     >
 
-                    <span class="font-bold">
+                    <div class="
+                            flex h-5 w-5 shrink-0
+                            items-center justify-center
+                            rounded-full border-2
+                        " @class([ 'border-indigo-600'=> $watermarkType === 'none',
 
-                        {{ $watermark->title }}
+                        'border-slate-300 dark:border-slate-600'
+                        => $watermarkType !== 'none',
+                        ])
+                        >
 
+                        @if($watermarkType === 'none')
+
+                        <div class="
+                                    h-2.5 w-2.5
+                                    rounded-full
+                                    bg-indigo-600
+                                "></div>
+
+                        @endif
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="
+                                font-black
+                                text-slate-900
+                                dark:text-white
+                            ">
+                            بدون واترمارک
+                        </div>
+
+                        <div class="
+                                mt-1 text-xs
+                                text-slate-500
+                                dark:text-slate-400
+                            ">
+                            فقط نسخه کراپ‌شده ذخیره می‌شود.
+                        </div>
+
+                    </div>
+
+                </button>
+
+
+                {{-- ================================================= --}}
+                {{-- واترمارک عمومی --}}
+                {{-- ================================================= --}}
+
+                @php
+                $systemWatermark =
+                collect($watermarks)
+                ->firstWhere('type', 'system');
+                @endphp
+
+                <button type="button" wire:click="setWatermarkType('system')" class="
+                        flex w-full items-center gap-3
+                        rounded-2xl border p-4
+                        text-right transition
+                        hover:border-indigo-400
+                    " @class([ 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/10'=> $watermarkType ===
+                    'system',
+
+                    'border-slate-200 dark:border-slate-700'
+                    => $watermarkType !== 'system',
+                    ])
+                    >
+
+                    <div class="
+                            flex h-5 w-5 shrink-0
+                            items-center justify-center
+                            rounded-full border-2
+                        " @class([ 'border-indigo-600'=> $watermarkType === 'system',
+
+                        'border-slate-300 dark:border-slate-600'
+                        => $watermarkType !== 'system',
+                        ])
+                        >
+
+                        @if($watermarkType === 'system')
+
+                        <div class="
+                                    h-2.5 w-2.5
+                                    rounded-full bg-indigo-600
+                                "></div>
+
+                        @endif
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="
+                                font-black
+                                text-slate-900
+                                dark:text-white
+                            ">
+                            واترمارک عمومی
+                        </div>
+
+                        <div class="
+                                mt-1 text-xs
+                                text-slate-500
+                                dark:text-slate-400
+                            ">
+                            واترمارک عمومی سامانه
+                        </div>
+
+                    </div>
+
+                </button>
+
+
+                {{-- ================================================= --}}
+                {{-- ADMIN: انتخاب خبرنگار --}}
+                {{-- ================================================= --}}
+
+                @if(auth()->user()?->hasRole('Admin'))
+
+                    <button
+                        type="button"
+                        wire:click="setWatermarkType('reporter')"
+                        class="
+                            flex w-full items-center gap-3
+                            rounded-2xl border p-4
+                            text-right transition
+                            hover:border-indigo-400
+                        "
+                        @class([
+                            'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/10'
+                                => $watermarkType === 'reporter',
+
+                            'border-slate-200 dark:border-slate-700'
+                                => $watermarkType !== 'reporter',
+                        ])
+                    >
+
+                        <div
+                            class="
+                                flex h-5 w-5 shrink-0
+                                items-center justify-center
+                                rounded-full border-2
+                            "
+                            @class([
+                                'border-indigo-600'
+                                    => $watermarkType === 'reporter',
+
+                                'border-slate-300 dark:border-slate-600'
+                                    => $watermarkType !== 'reporter',
+                            ])
+                        >
+
+                            @if($watermarkType === 'reporter')
+
+                                <div
+                                    class="
+                                        h-2.5 w-2.5
+                                        rounded-full
+                                        bg-indigo-600
+                                    "
+                                ></div>
+
+                            @endif
+
+                        </div>
+
+                        <div class="flex-1">
+
+                            <div
+                                class="
+                                    font-black
+                                    text-slate-900
+                                    dark:text-white
+                                "
+                            >
+                                انتخاب واترمارک خبرنگار
+                            </div>
+
+                            <div
+                                class="
+                                    mt-1 text-xs
+                                    text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+
+                                @if($selectedReporterId)
+
+                                    @php
+                                        $selectedReporter = collect($reporterWatermarks)
+                                            ->firstWhere('user_id', $selectedReporterId);
+                                    @endphp
+
+                                    {{ $selectedReporter['user_name'] ?? 'خبرنگار انتخاب‌شده' }}
+
+                                @else
+
+                                    برای انتخاب خبرنگار کلیک کنید
+
+                                @endif
+
+                            </div>
+
+                        </div>
+
+                        <svg
+                            class="h-5 w-5 text-slate-400"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="m9 18 6-6-6-6" />
+                        </svg>
+
+                    </button>
+
+
+                    {{-- Reporter List --}}
+
+                    @if($showReporterWatermarks)
+
+                        <div
+                            class="
+                                mt-3 rounded-2xl
+                                border border-indigo-200
+                                bg-indigo-50/50 p-3
+                                dark:border-indigo-900
+                                dark:bg-indigo-950/20
+                            "
+                        >
+
+                            <div
+                                class="
+                                    mb-3 px-2 text-xs
+                                    font-black text-slate-500
+                                    dark:text-slate-400
+                                "
+                            >
+                                انتخاب خبرنگار
+                            </div>
+
+                            <div class="max-h-64 space-y-2 overflow-y-auto">
+
+                                @forelse($reporterWatermarks as $watermark)
+
+                                    <button
+                                        type="button"
+                                        wire:click="selectReporterWatermark({{ $watermark['id'] }})"
+                                        class="
+                                            flex w-full items-center
+                                            gap-3 rounded-xl
+                                            bg-white p-3 text-right
+                                            transition hover:bg-indigo-100
+                                            dark:bg-slate-800
+                                            dark:hover:bg-slate-700
+                                        "
+                                    >
+
+                                        <div
+                                            class="
+                                                flex h-10 w-10
+                                                shrink-0 items-center
+                                                justify-center rounded-full
+                                                bg-indigo-100
+                                                font-black text-indigo-700
+                                                dark:bg-indigo-950
+                                                dark:text-indigo-300
+                                            "
+                                        >
+                                            {{ mb_substr($watermark['user_name'], 0, 1) }}
+                                        </div>
+
+                                        <div class="flex-1">
+
+                                            <div
+                                                class="
+                                                    font-black
+                                                    text-slate-900
+                                                    dark:text-white
+                                                "
+                                            >
+                                                {{ $watermark['user_name'] }}
+                                            </div>
+
+                                            <div
+                                                class="
+                                                    mt-1 text-xs
+                                                    text-slate-500
+                                                    dark:text-slate-400
+                                                "
+                                            >
+                                                {{ $watermark['title'] }}
+                                            </div>
+
+                                        </div>
+
+                                        @if($watermarkId == $watermark['id'])
+
+                                            <svg
+                                                class="h-5 w-5 text-emerald-600"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="3"
+                                            >
+                                                <path d="m5 12 4 4L19 6" />
+                                            </svg>
+
+                                        @endif
+
+                                    </button>
+
+                                @empty
+
+                                    <div
+                                        class="
+                                            rounded-xl
+                                            bg-white p-4 text-center
+                                            text-sm font-bold
+                                            text-slate-500
+                                            dark:bg-slate-800
+                                            dark:text-slate-400
+                                        "
+                                    >
+                                        هیچ واترمارک خبرنگاری ثبت نشده است.
+                                    </div>
+
+                                @endforelse
+
+                            </div>
+
+                        </div>
+
+                    @endif
+
+
+
+            
+
+                @endif
+
+
+                {{-- ================================================= --}}
+                {{-- REPORTER: واترمارک اختصاصی خودم --}}
+                {{-- ================================================= --}}
+
+                @if(auth()->user()?->hasRole('Reporter'))
+
+                <button
+                    type="button"
+                    wire:click="setWatermarkType('personal')"
+                    class="
+                        flex w-full items-center gap-3
+                        rounded-2xl border p-4
+                        text-right transition
+                        hover:border-indigo-400
+                    "
+                    @class([
+                        'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-500/10'
+                            => $watermarkType === 'personal',
+
+                        'border-slate-200 dark:border-slate-700'
+                            => $watermarkType !== 'personal',
+                    ])
+                >
+
+                    <div
+                        class="
+                            flex h-5 w-5 shrink-0
+                            items-center justify-center
+                            rounded-full border-2
+                        "
+                        @class([
+                            'border-indigo-600'
+                                => $watermarkType === 'personal',
+
+                            'border-slate-300 dark:border-slate-600'
+                                => $watermarkType !== 'personal',
+                        ])
+                    >
+
+                        @if($watermarkType === 'personal')
+
+                            <div
+                                class="
+                                    h-2.5 w-2.5
+                                    rounded-full bg-indigo-600
+                                "
+                            ></div>
+
+                        @endif
+
+                    </div>
+
+                    <div>
+
+                        <div
+                            class="
+                                font-black
+                                text-slate-900
+                                dark:text-white
+                            "
+                        >
+                            واترمارک اختصاصی خودم
+                        </div>
+
+                        <div
+                            class="
+                                mt-1 text-xs
+                                text-slate-500
+                                dark:text-slate-400
+                            "
+                        >
+                            واترمارک اختصاصی حساب کاربری شما
+                        </div>
+
+                    </div>
+
+                </button>
+
+            @endif
+
+            </div>
+
+
+            {{-- Error --}}
+
+            @error('watermarkId')
+
+            <div class="
+                        mt-4 rounded-xl
+                        bg-red-50 p-3
+                        text-sm font-bold
+                        text-red-700
+                    ">
+                {{ $message }}
+            </div>
+
+            @enderror
+
+
+            {{-- ================================================= --}}
+            {{-- Footer --}}
+            {{-- ================================================= --}}
+
+            <div class="mt-8 flex justify-end gap-3">
+
+                <button type="button" wire:click="$set('showWatermarkModal', false)" class="
+                        rounded-xl
+                        bg-slate-100
+                        px-5 py-2.5
+                        font-bold
+                        text-slate-900
+                        dark:bg-slate-800
+                        dark:text-white
+                    ">
+                    انصراف
+                </button>
+
+
+                <button type="button" wire:click="applyWatermark" wire:loading.attr="disabled" class="
+                        rounded-xl
+                        bg-indigo-600
+                        px-6 py-2.5
+                        font-black
+                        text-white
+                        shadow-lg
+                        hover:bg-indigo-700
+                        disabled:opacity-50
+                    ">
+
+                    <span wire:loading.remove wire:target="applyWatermark">
+                        اعمال و ذخیره
                     </span>
 
-                </label>
+                    <span wire:loading wire:target="applyWatermark">
+                        در حال پردازش...
+                    </span>
 
+                </button>
 
-            @endforeach
-
-
-        </div>
-
-
-
-        <div
-            class="mt-8 flex justify-end gap-3"
-        >
-
-            <button
-                type="button"
-                wire:click="$set('showWatermarkModal',false)"
-                class="rounded-xl bg-slate-200 px-5 py-2 font-bold"
-            >
-
-                انصراف
-
-            </button>
-
-
-
-            <button
-                type="button"
-                wire:click="applyWatermark"
-                class="rounded-xl bg-indigo-600 px-6 py-2 font-bold text-white"
-            >
-
-                اعمال روی تصاویر
-
-            </button>
-
+            </div>
 
         </div>
 
-
     </div>
 
-</div>
+    @endif
 
-@endif
-
-
-@push('scripts')
-
-<script>
-
-
-
-/*
-|--------------------------------------------------------------------------
-| وقتی Livewire تصویر جدید آورد
-|--------------------------------------------------------------------------
-*/
-
-document.addEventListener(
-    'livewire:navigated',
-    () => {
-
-        window.dispatchEvent(
-            new Event('resize')
-        );
-
-    }
-);
-
-
-
-</script>
-
-@endpush
-
-
-    </div>
 </div>

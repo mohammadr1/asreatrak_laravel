@@ -70,6 +70,13 @@ return new class extends Migration
 
 
 
+            $table->string('cropped_path')->nullable();
+
+            $table->string('watermarked_path')->nullable();
+
+            $table->json('crop_data')->nullable();
+
+
             $table->index('mime_type');
 
 

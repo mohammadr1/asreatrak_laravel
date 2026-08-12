@@ -6,6 +6,8 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\EncodedImage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Interfaces\ImageInterface;
+use App\Services\Media\DTO\ImageData;
+
 
 class ImageProcessor
 {
@@ -245,4 +247,32 @@ class ImageProcessor
         // مسیر واترمارک عمومی سایت (این عکس باید در مسیر public/images قرار داشته باشد)
         return public_path('images/general-watermark.png'); 
     }
+
+    public function inspect(
+        string $path
+    ): ImageData {
+
+        $image = $this->read($path);
+
+        return new ImageData(
+
+            path: $path,
+
+            width: $image->width(),
+
+            height: $image->height(),
+
+            mime: mime_content_type($path),
+
+            size: filesize($path),
+
+            extension: strtolower(
+                pathinfo($path, PATHINFO_EXTENSION)
+            ),
+
+        );
+
+    }
+
+
 }
