@@ -7,7 +7,6 @@ use App\Models\Watermark;
 use App\Services\Media\Contracts\MediaServiceInterface;
 use App\Services\Media\ImageProcessor;
 use App\Services\Media\WatermarkService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
@@ -37,43 +36,37 @@ class FeaturedPicker extends Component
 
     public int $perPage = 24;
 
-
     /*
     |--------------------------------------------------------------------------
     | Picker Context
     |--------------------------------------------------------------------------
     */
 
-    /**
-     * single | multiple
-     */
     public string $selectionMode = 'single';
 
-    /**
-     * featured | gallery | editor
-     */
     public string $selectionContext = 'featured';
 
-    /**
-     * watermarked | cropped | original
-     */
     public string $mediaVariant = 'watermarked';
 
-    /**
-     * انتخاب تکی
-     */
     public ?int $selected = null;
 
-    /**
-     * انتخاب چندتایی
-     */
+    public ?string $selectedVariant = null;
+
     public array $selectedMediaIds = [];
 
-    /**
-     * حداکثر انتخاب
-     */
+    public array $selectedMediaVariants = [];
+
     public int $maxSelection = 15;
 
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Selection
+    |--------------------------------------------------------------------------
+    */
+
+    public bool $deleteMode = false;
+
+    public array $deleteSelectedMediaIds = [];
 
     /*
     |--------------------------------------------------------------------------
@@ -84,7 +77,6 @@ class FeaturedPicker extends Component
     public bool $isAdmin = false;
 
     public bool $isReporter = false;
-
 
     /*
     |--------------------------------------------------------------------------
@@ -98,19 +90,10 @@ class FeaturedPicker extends Component
 
     public string $watermarkType = 'none';
 
-    /**
-     * واترمارک خبرنگاران برای ادمین
-     */
     public array $reporterWatermarks = [];
 
-    /**
-     * آیا لیست خبرنگاران برای ادمین باز است؟
-     */
     public bool $showReporterWatermarks = false;
 
-    /**
-     * خبرنگار انتخاب‌شده
-     */
     public ?int $selectedReporterId = null;
 
     /*
@@ -121,7 +104,17 @@ class FeaturedPicker extends Component
 
     public array $uploads = [];
 
+    public string $uploadTitle = '';
+
+    /*
+    |--------------------------------------------------------------------------
+    | Current Upload Session
+    |--------------------------------------------------------------------------
+    */
+
     public array $queue = [];
+
+    public array $uploadSessionMediaIds = [];
 
     public int $queueIndex = 0;
 
@@ -181,7 +174,6 @@ class FeaturedPicker extends Component
     public function boot(
         MediaServiceInterface $mediaService
     ): void {
-
         $this->mediaService = $mediaService;
     }
 
@@ -191,56 +183,33 @@ class FeaturedPicker extends Component
     |--------------------------------------------------------------------------
     */
 
-
     public function mount(
         string $context = 'featured'
     ): void {
-
-        $this->configure(
-            $context
-        );
+        $this->configure($context);
 
         $user = Auth::user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | تشخیص دسترسی
-        |--------------------------------------------------------------------------
-        */
 
         $this->isAdmin = $user?->hasRole('Admin') ?? false;
 
         $this->isReporter = $user?->hasRole('Reporter') ?? false;
 
-        /*
-        |--------------------------------------------------------------------------
-        | اگر سیستم نقش‌ها با حروف کوچک ذخیره شده
-        |--------------------------------------------------------------------------
-        */
-
         if (! $this->isAdmin && $user) {
-
-            $this->isAdmin =
-                $user->hasRole('admin');
-
+            $this->isAdmin = $user->hasRole('admin');
         }
 
         if (! $this->isReporter && $user) {
-
-            $this->isReporter =
-                $user->hasRole('reporter');
-
+            $this->isReporter = $user->hasRole('reporter');
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | واترمارک‌های قابل مشاهده
-        |--------------------------------------------------------------------------
-        */
 
         $this->loadWatermarks();
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Watermarks
+    |--------------------------------------------------------------------------
+    */
 
     protected function loadWatermarks(): void
     {
@@ -260,12 +229,6 @@ class FeaturedPicker extends Component
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | واترمارک عمومی
-        |--------------------------------------------------------------------------
-        */
-
         $systemWatermark = Watermark::query()
             ->where('is_active', true)
             ->where('type', 'system')
@@ -273,7 +236,6 @@ class FeaturedPicker extends Component
             ->first();
 
         if ($systemWatermark) {
-
             $this->watermarks[] = [
                 'id' => $systemWatermark->id,
                 'title' => $systemWatermark->title,
@@ -281,18 +243,7 @@ class FeaturedPicker extends Component
             ];
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Admin
-        |--------------------------------------------------------------------------
-        |
-        | ادمین لیست واترمارک خبرنگاران را فقط
-        | بعد از انتخاب «انتخاب واترمارک خبرنگار» می‌بیند.
-        |
-        */
-
         if ($this->isAdmin) {
-
             $this->reporterWatermarks = Watermark::query()
                 ->where('is_active', true)
                 ->where('type', 'user')
@@ -301,21 +252,33 @@ class FeaturedPicker extends Component
                 ->orderBy('title')
                 ->get()
                 ->map(function (Watermark $watermark) {
+                    $userName = 'خبرنگار نامشخص';
+
+                    if ($watermark->user) {
+                        $userName = trim(
+                            ($watermark->user->first_name ?? '')
+                            . ' '
+                            . ($watermark->user->last_name ?? '')
+                        );
+
+                        if ($userName === '') {
+                            $userName = 'خبرنگار نامشخص';
+                        }
+                    }
 
                     return [
                         'id' => $watermark->id,
-
                         'title' => $watermark->title,
-
                         'type' => 'user',
-
                         'user_id' => $watermark->user_id,
-
-                        'user_name' => $watermark->user
-                            ? $watermark->user->full_name
-                            : 'خبرنگار نامشخص',
+                        'user_name' => $userName,
+                        'user' => [
+                            'id' => $watermark->user?->id,
+                            'first_name' => $watermark->user?->first_name,
+                            'last_name' => $watermark->user?->last_name,
+                            'name' => $userName,
+                        ],
                     ];
-
                 })
                 ->values()
                 ->toArray();
@@ -323,17 +286,7 @@ class FeaturedPicker extends Component
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Reporter
-        |--------------------------------------------------------------------------
-        |
-        | خبرنگار فقط واترمارک اختصاصی خودش را دارد.
-        |
-        */
-
         if ($this->isReporter) {
-
             $personalWatermark = Watermark::query()
                 ->where('is_active', true)
                 ->where('type', 'user')
@@ -342,19 +295,14 @@ class FeaturedPicker extends Component
                 ->first();
 
             if ($personalWatermark) {
-
                 $this->watermarks[] = [
                     'id' => $personalWatermark->id,
-
                     'title' => $personalWatermark->title,
-
                     'type' => 'personal',
                 ];
             }
         }
     }
-
-
 
     /*
     |--------------------------------------------------------------------------
@@ -365,35 +313,23 @@ class FeaturedPicker extends Component
     public function configure(
         string $context = 'featured'
     ): void {
-
         $this->selectionContext = $context;
 
         switch ($context) {
-
             case 'gallery':
-
                 $this->selectionMode = 'multiple';
-
                 $this->maxSelection = 15;
-
                 break;
 
             case 'editor':
-
                 $this->selectionMode = 'single';
-
                 $this->maxSelection = 1;
-
                 break;
 
             case 'featured':
-
             default:
-
                 $this->selectionMode = 'single';
-
                 $this->maxSelection = 1;
-
                 break;
         }
 
@@ -420,33 +356,30 @@ class FeaturedPicker extends Component
     public function setMediaVariant(
         string $variant
     ): void {
-
-        if (
-            ! in_array(
-                $variant,
-                [
-                    'watermarked',
-                    'cropped',
-                    'original',
-                ],
-                true
-            )
-        ) {
+        if (! in_array(
+            $variant,
+            [
+                'watermarked',
+                'cropped',
+                'original',
+            ],
+            true
+        )) {
             return;
         }
 
         $this->mediaVariant = $variant;
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Watermark Type
+    |--------------------------------------------------------------------------
+    */
 
-    public function setWatermarkType(string $type): void
-    {
-        /*
-        |--------------------------------------------------------------------------
-        | Reset
-        |--------------------------------------------------------------------------
-        */
-
+    public function setWatermarkType(
+        string $type
+    ): void {
         $this->watermarkId = null;
 
         $this->selectedReporterId = null;
@@ -455,27 +388,13 @@ class FeaturedPicker extends Component
 
         $this->resetErrorBag('watermarkId');
 
-        /*
-        |--------------------------------------------------------------------------
-        | بدون واترمارک
-        |--------------------------------------------------------------------------
-        */
-
         if ($type === 'none') {
-
             $this->watermarkType = 'none';
 
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | واترمارک عمومی
-        |--------------------------------------------------------------------------
-        */
-
         if ($type === 'system') {
-
             $this->watermarkType = 'system';
 
             $watermark = Watermark::query()
@@ -485,23 +404,14 @@ class FeaturedPicker extends Component
                 ->first();
 
             if ($watermark) {
-
                 $this->watermarkId = $watermark->id;
             }
 
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | انتخاب واترمارک خبرنگار - فقط Admin
-        |--------------------------------------------------------------------------
-        */
-
         if ($type === 'reporter') {
-
             if (! $this->isAdmin) {
-
                 $this->addError(
                     'watermarkId',
                     'شما اجازه انتخاب واترمارک خبرنگار را ندارید.'
@@ -517,16 +427,8 @@ class FeaturedPicker extends Component
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | واترمارک اختصاصی خودم - Reporter
-        |--------------------------------------------------------------------------
-        */
-
         if ($type === 'personal') {
-
             if (! $this->isReporter) {
-
                 return;
             }
 
@@ -546,20 +448,21 @@ class FeaturedPicker extends Component
                 ->first();
 
             if ($watermark) {
-
                 $this->watermarkId = $watermark->id;
             }
-
-            return;
         }
     }
-    
 
+    /*
+    |--------------------------------------------------------------------------
+    | Select Reporter Watermark
+    |--------------------------------------------------------------------------
+    */
 
-    public function selectReporterWatermark(int $watermarkId): void
-    {
+    public function selectReporterWatermark(
+        int $watermarkId
+    ): void {
         if (! $this->isAdmin) {
-
             $this->addError(
                 'watermarkId',
                 'شما اجازه انتخاب واترمارک خبرنگار دیگر را ندارید.'
@@ -577,7 +480,6 @@ class FeaturedPicker extends Component
             ->first();
 
         if (! $watermark) {
-
             $this->addError(
                 'watermarkId',
                 'واترمارک خبرنگار معتبر نیست.'
@@ -596,85 +498,81 @@ class FeaturedPicker extends Component
 
         $this->resetErrorBag('watermarkId');
     }
-        
+
     /*
     |--------------------------------------------------------------------------
-    | Selection
+    | Media Selection
     |--------------------------------------------------------------------------
     */
 
     public function toggleSelection(
         int $mediaId
     ): void {
+        if ($this->deleteMode) {
+            $this->toggleDeleteSelection($mediaId);
 
-        $media = Media::find(
-            $mediaId
-        );
+            return;
+        }
+
+        $media = Media::find($mediaId);
 
         if (! $media) {
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Single
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            $this->selectionMode === 'single'
-        ) {
-
+        if ($this->selectionMode === 'single') {
             $this->selected = $mediaId;
+
+            $this->selectedVariant = $this->mediaVariant;
 
             $this->selectedMediaIds = [
                 $mediaId,
             ];
 
-            return;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Multiple
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            in_array(
-                $mediaId,
-                $this->selectedMediaIds,
-                true
-            )
-        ) {
-
-            $this->selectedMediaIds =
-                array_values(
-                    array_filter(
-                        $this->selectedMediaIds,
-                        fn ($id) =>
-                            $id !== $mediaId
-                    )
-                );
+            $this->selectedMediaVariants = [
+                $mediaId => $this->mediaVariant,
+            ];
 
             return;
         }
 
+        $isSelected = in_array(
+            $mediaId,
+            $this->selectedMediaIds,
+            true
+        );
+
+        if ($isSelected) {
+            $this->selectedMediaIds = array_values(
+                array_filter(
+                    $this->selectedMediaIds,
+                    fn ($id) => $id !== $mediaId
+                )
+            );
+
+            unset(
+                $this->selectedMediaVariants[$mediaId]
+            );
+
+            return;
+        }
+
         if (
-            count(
-                $this->selectedMediaIds
-            ) >= $this->maxSelection
+            count($this->selectedMediaIds)
+            >= $this->maxSelection
         ) {
             return;
         }
 
-        $this->selectedMediaIds[] =
-            $mediaId;
+        $this->selectedMediaIds[] = $mediaId;
+
+        $this->selectedMediaVariants[$mediaId] =
+            $this->mediaVariant;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Clear
+    | Clear Selection
     |--------------------------------------------------------------------------
     */
 
@@ -682,7 +580,11 @@ class FeaturedPicker extends Component
     {
         $this->selected = null;
 
+        $this->selectedVariant = null;
+
         $this->selectedMediaIds = [];
+
+        $this->selectedMediaVariants = [];
     }
 
     /*
@@ -693,26 +595,268 @@ class FeaturedPicker extends Component
 
     public function getSelectedCountProperty(): int
     {
-        return count(
-            $this->selectedMediaIds
-        );
+        return count($this->selectedMediaIds);
+    }
+
+    public function getDeleteSelectedCountProperty(): int
+    {
+        return count($this->deleteSelectedMediaIds);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Selected
+    | Is Selected
     |--------------------------------------------------------------------------
     */
 
     public function isSelected(
         int $mediaId
     ): bool {
-
         return in_array(
             $mediaId,
             $this->selectedMediaIds,
             true
         );
+    }
+
+    public function isDeleteSelected(
+        int $mediaId
+    ): bool {
+        return in_array(
+            $mediaId,
+            $this->deleteSelectedMediaIds,
+            true
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Mode
+    |--------------------------------------------------------------------------
+    */
+
+    public function toggleDeleteMode(): void
+    {
+        $this->deleteMode = ! $this->deleteMode;
+
+        $this->deleteSelectedMediaIds = [];
+
+        if ($this->deleteMode) {
+            $this->clearSelection();
+        }
+    }
+
+    public function toggleDeleteSelection(
+        int $mediaId
+    ): void {
+        $mediaId = (int) $mediaId;
+
+        if (in_array(
+            $mediaId,
+            $this->deleteSelectedMediaIds,
+            true
+        )) {
+            $this->deleteSelectedMediaIds = array_values(
+                array_filter(
+                    $this->deleteSelectedMediaIds,
+                    fn ($id) => $id !== $mediaId
+                )
+            );
+
+            return;
+        }
+
+        $this->deleteSelectedMediaIds[] = $mediaId;
+    }
+
+    public function clearDeleteSelection(): void
+    {
+        $this->deleteSelectedMediaIds = [];
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Media
+    |--------------------------------------------------------------------------
+    */
+
+    public function deleteMedia(
+        int $mediaId
+    ): void {
+        $media = Media::find($mediaId);
+
+        if (! $media) {
+            return;
+        }
+
+        $this->deleteMediaRecord($media);
+
+        $this->removeDeletedMediaFromState($mediaId);
+
+        $this->resetPage();
+    }
+
+    public function deleteSelectedMedia(): void
+    {
+        if (empty($this->deleteSelectedMediaIds)) {
+            return;
+        }
+
+        $mediaItems = Media::query()
+            ->whereIn(
+                'id',
+                $this->deleteSelectedMediaIds
+            )
+            ->get();
+
+        foreach ($mediaItems as $media) {
+            $this->deleteMediaRecord($media);
+        }
+
+        $this->deleteSelectedMediaIds = [];
+
+        $this->deleteMode = false;
+
+        $this->resetPage();
+    }
+
+    protected function deleteMediaRecord(
+        Media $media
+    ): void {
+        $disk = Storage::disk(
+            $media->disk ?: 'public'
+        );
+
+        $paths = array_unique(
+            array_filter([
+                $media->original_path,
+                $media->cropped_path,
+                $media->watermarked_path,
+            ])
+        );
+
+        foreach ($paths as $path) {
+            if ($disk->exists($path)) {
+                $disk->delete($path);
+            }
+        }
+
+        $media->delete();
+    }
+
+    protected function removeDeletedMediaFromState(
+        int $mediaId
+    ): void {
+        $this->selectedMediaIds = array_values(
+            array_filter(
+                $this->selectedMediaIds,
+                fn ($id) => $id !== $mediaId
+            )
+        );
+
+        unset(
+            $this->selectedMediaVariants[$mediaId]
+        );
+
+        $this->deleteSelectedMediaIds = array_values(
+            array_filter(
+                $this->deleteSelectedMediaIds,
+                fn ($id) => $id !== $mediaId
+            )
+        );
+
+        $this->queue = array_values(
+            array_filter(
+                $this->queue,
+                fn ($id) => $id !== $mediaId
+            )
+        );
+
+        $this->uploadSessionMediaIds = array_values(
+            array_filter(
+                $this->uploadSessionMediaIds,
+                fn ($id) => $id !== $mediaId
+            )
+        );
+
+        if ($this->selected === $mediaId) {
+            $this->selected = null;
+
+            $this->selectedVariant = null;
+        }
+
+        if ($this->cropMediaId === $mediaId) {
+            $this->cropMediaId = null;
+
+            $this->cropImage = null;
+
+            $this->cropData = null;
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cancel Current Upload Session
+    |--------------------------------------------------------------------------
+    */
+
+    public function cancelCurrentUpload(): void
+    {
+        $this->cleanupCurrentUploadSession();
+
+        $this->dispatch('closeCropper');
+    }
+
+    protected function cleanupCurrentUploadSession(): void
+    {
+        $ids = array_unique(
+            array_merge(
+                $this->queue,
+                $this->uploadSessionMediaIds
+            )
+        );
+
+        if (! empty($ids)) {
+            $mediaItems = Media::query()
+                ->whereIn('id', $ids)
+                ->get();
+
+            foreach ($mediaItems as $media) {
+                $this->deleteMediaRecord($media);
+            }
+        }
+
+        $this->uploads = [];
+
+        $this->uploadTitle = '';
+
+        $this->queue = [];
+
+        $this->uploadSessionMediaIds = [];
+
+        $this->queueIndex = 0;
+
+        $this->processingQueue = false;
+
+        $this->showCropModal = false;
+
+        $this->cropMediaId = null;
+
+        $this->cropImage = null;
+
+        $this->cropData = null;
+
+        $this->showWatermarkModal = false;
+
+        $this->watermarkType = 'none';
+
+        $this->watermarkId = null;
+
+        $this->selectedReporterId = null;
+
+        $this->showReporterWatermarks = false;
+
+        $this->resetErrorBag();
     }
 
     /*
@@ -723,37 +867,30 @@ class FeaturedPicker extends Component
 
     public function confirmSelection(): void
     {
-        /*
-        |--------------------------------------------------------------------------
-        | Single
-        |--------------------------------------------------------------------------
-        */
+        if ($this->deleteMode) {
+            return;
+        }
 
-        if (
-            $this->selectionMode === 'single'
-        ) {
-
+        if ($this->selectionMode === 'single') {
             if (! $this->selected) {
                 return;
             }
 
-            $media = Media::find(
-                $this->selected
-            );
+            $media = Media::find($this->selected);
 
             if (! $media) {
                 return;
             }
 
-            if ($this->selectionContext === 'featured') {
+            $variant = $this->selectedVariant
+                ?: $this->mediaVariant;
 
+            if ($this->selectionContext === 'featured') {
                 $this->dispatch(
                     'featured-image-selected',
                     id: $media->id,
-                    variant: $this->mediaVariant,
-                    url: $media->variantUrl(
-                        $this->mediaVariant
-                    ),
+                    variant: $variant,
+                    url: $media->variantUrl($variant),
                 );
 
                 return;
@@ -762,27 +899,15 @@ class FeaturedPicker extends Component
             $this->dispatch(
                 'media-selected',
                 mediaId: $media->id,
-                variant: $this->mediaVariant,
-                url: $media->variantUrl(
-                    $this->mediaVariant
-                ),
+                variant: $variant,
+                url: $media->variantUrl($variant),
                 context: $this->selectionContext,
             );
 
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Multiple
-        |--------------------------------------------------------------------------
-        */
-
-        if (
-            empty(
-                $this->selectedMediaIds
-            )
-        ) {
+        if (empty($this->selectedMediaIds)) {
             return;
         }
 
@@ -796,33 +921,21 @@ class FeaturedPicker extends Component
 
         $items = [];
 
-        foreach (
-            $this->selectedMediaIds
-            as $mediaId
-        ) {
-
-            if (
-                ! isset(
-                    $media[$mediaId]
-                )
-            ) {
+        foreach ($this->selectedMediaIds as $mediaId) {
+            if (! isset($media[$mediaId])) {
                 continue;
             }
 
-            $item =
-                $media[$mediaId];
+            $item = $media[$mediaId];
+
+            $variant =
+                $this->selectedMediaVariants[$mediaId]
+                ?? $this->mediaVariant;
 
             $items[] = [
-
                 'id' => $item->id,
-
-                'variant' =>
-                    $this->mediaVariant,
-
-                'url' =>
-                    $item->variantUrl(
-                        $this->mediaVariant
-                    ),
+                'variant' => $variant,
+                'url' => $item->variantUrl($variant),
             ];
         }
 
@@ -832,12 +945,6 @@ class FeaturedPicker extends Component
             context: $this->selectionContext,
         );
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Choose
-    |--------------------------------------------------------------------------
-    */
 
     public function choose(): void
     {
@@ -852,9 +959,18 @@ class FeaturedPicker extends Component
 
     public function updatedUploads(): void
     {
-        if (
-            empty($this->uploads)
-        ) {
+        // فقط فایل انتخاب شده است.
+        // آپلود و پردازش با دکمه جداگانه انجام می‌شود.
+    }
+
+    public function startUpload(): void
+    {
+        if (empty($this->uploads)) {
+            $this->addError(
+                'uploads',
+                'حداقل یک تصویر انتخاب کنید.'
+            );
+
             return;
         }
 
@@ -865,27 +981,137 @@ class FeaturedPicker extends Component
 
     protected function uploadImages(): void
     {
+        if ($this->processingQueue) {
+            return;
+        }
+
         $this->queue = [];
 
-        foreach (
-            $this->uploads as $file
-        ) {
+        $this->uploadSessionMediaIds = [];
 
-            $media =
-                $this->mediaService->upload(
-                    $file,
-                    Auth::id()
+        $this->queueIndex = 0;
+
+        $this->resetErrorBag();
+
+        $processor = app(ImageProcessor::class);
+
+        foreach ($this->uploads as $file) {
+            $media = $this->mediaService->upload(
+                $file,
+                Auth::id()
+            );
+
+            if (! $media) {
+                continue;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Apply upload title
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                trim($this->uploadTitle) !== ''
+            ) {
+                $media->update([
+                    'title' => trim($this->uploadTitle),
+                ]);
+            }
+
+            $this->uploadSessionMediaIds[] = $media->id;
+
+            $disk = Storage::disk(
+                $media->disk ?: 'public'
+            );
+
+            if (! $media->original_path) {
+                $this->deleteMediaRecord($media);
+
+                continue;
+            }
+
+            $sourcePath = $disk->path(
+                $media->original_path
+            );
+
+            if (! file_exists($sourcePath)) {
+                $this->deleteMediaRecord($media);
+
+                continue;
+            }
+
+            $temporaryDirectory = trim(
+                ($media->directory ?: 'media')
+                . '/crop-source',
+                '/'
+            );
+
+            $disk->makeDirectory(
+                $temporaryDirectory
+            );
+
+            /*
+            |--------------------------------------------------------------------------
+            | Crop source is always a lightweight JPEG
+            |--------------------------------------------------------------------------
+            */
+
+            $temporaryFilename =
+                pathinfo(
+                    $media->filename,
+                    PATHINFO_FILENAME
+                )
+                . '_crop-source.jpg';
+
+            $temporaryRelativePath =
+                $temporaryDirectory
+                . '/'
+                . $temporaryFilename;
+
+            $temporaryAbsolutePath =
+                $disk->path(
+                    $temporaryRelativePath
                 );
 
-            $this->queue[] =
-                $media->id;
+            try {
+                $processor->prepareForCrop(
+                    input: $sourcePath,
+                    output: $temporaryAbsolutePath,
+                    maxWidth: 1600,
+                    maxHeight: 1200,
+                    quality: 75,
+                );
+            } catch (\Throwable $e) {
+                report($e);
+
+                $this->deleteMediaRecord($media);
+
+                continue;
+            }
+
+            if (! file_exists($temporaryAbsolutePath)) {
+                $this->deleteMediaRecord($media);
+
+                continue;
+            }
+
+            if ($disk->exists($media->original_path)) {
+                $disk->delete($media->original_path);
+            }
+
+            $media->update([
+                'original_path' => $temporaryRelativePath,
+            ]);
+
+            $this->queue[] = $media->id;
         }
 
         $this->uploads = [];
 
-        if (
-            empty($this->queue)
-        ) {
+        if (empty($this->queue)) {
+            $this->uploadSessionMediaIds = [];
+
             return;
         }
 
@@ -898,33 +1124,25 @@ class FeaturedPicker extends Component
 
     /*
     |--------------------------------------------------------------------------
-    | Crop Queue
+    | Load Current Crop
     |--------------------------------------------------------------------------
     */
 
     protected function loadCurrentCrop(): void
     {
-        if (
-            ! isset(
-                $this->queue[
-                    $this->queueIndex
-                ]
-            )
-        ) {
-
+        if (! isset(
+            $this->queue[$this->queueIndex]
+        )) {
             $this->finishQueue();
 
             return;
         }
 
         $media = Media::find(
-            $this->queue[
-                $this->queueIndex
-            ]
+            $this->queue[$this->queueIndex]
         );
 
         if (! $media) {
-
             $this->queueIndex++;
 
             $this->loadCurrentCrop();
@@ -932,20 +1150,56 @@ class FeaturedPicker extends Component
             return;
         }
 
-        $this->cropMediaId =
-            $media->id;
+        if (! $media->original_path) {
+            $this->queueIndex++;
+
+            $this->loadCurrentCrop();
+
+            return;
+        }
+
+        $sourcePath = Storage::disk(
+            $media->disk ?: 'public'
+        )->path(
+            $media->original_path
+        );
+
+        if (! file_exists($sourcePath)) {
+            $this->queueIndex++;
+
+            $this->loadCurrentCrop();
+
+            return;
+        }
+
+        $this->cropMediaId = $media->id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Crop preview URL
+        |--------------------------------------------------------------------------
+        |
+        | از localhost استفاده نمی‌کنیم.
+        | URL نسبی روی همان آدرسی که کاربر با آن
+        | سایت را باز کرده resolve می‌شود.
+        |
+        */
 
         $this->cropImage =
-            Storage::disk(
-                'public'
-            )->url(
-                $media->original_path
+            '/storage/' .
+            ltrim(
+                $media->original_path,
+                '/'
             );
+
+        $this->cropData = null;
 
         $this->showCropModal = true;
 
         $this->dispatch(
-            'openCropper'
+            'openCropper',
+            imageUrl: $this->cropImage,
+            mediaId: $media->id,
         );
     }
 
@@ -957,11 +1211,15 @@ class FeaturedPicker extends Component
 
     public function nextImage(): void
     {
-        $this->dispatch(
-            'closeCropper'
-        );
+        $this->dispatch('closeCropper');
 
         $this->showCropModal = false;
+
+        $this->cropData = null;
+
+        $this->cropMediaId = null;
+
+        $this->cropImage = null;
 
         $this->queueIndex++;
 
@@ -976,34 +1234,68 @@ class FeaturedPicker extends Component
 
     protected function finishQueue(): void
     {
-        $this->dispatch(
-            'closeCropper'
-        );
+        $this->dispatch('closeCropper');
 
         $this->processingQueue = false;
 
         $this->showCropModal = false;
 
-        /*
-        | queue را فعلاً نگه می‌داریم
-        | چون Watermark باید روی همین
-        | تصاویر اعمال شود.
-        */
+        $this->cropData = null;
+
+        $this->cropMediaId = null;
+
+        $this->cropImage = null;
+
+        $this->watermarkType = 'none';
+
+        $this->watermarkId = null;
+
+        $this->selectedReporterId = null;
+
+        $this->showReporterWatermarks = false;
+
+        $this->resetErrorBag();
 
         $this->showWatermarkModal = true;
     }
 
     /*
     |--------------------------------------------------------------------------
-    | Crop
+    | Save Crop
     |--------------------------------------------------------------------------
     */
 
     public function saveCrop(
         array $crop
     ): void {
-
         if (! $this->cropMediaId) {
+            return;
+        }
+
+        $x = isset($crop['x'])
+            ? (float) $crop['x']
+            : 0;
+
+        $y = isset($crop['y'])
+            ? (float) $crop['y']
+            : 0;
+
+        $width = isset($crop['width'])
+            ? (float) $crop['width']
+            : 0;
+
+        $height = isset($crop['height'])
+            ? (float) $crop['height']
+            : 0;
+
+        if ($width <= 0 || $height <= 0) {
+            $this->addError(
+                'crop',
+                'محدوده برش معتبر نیست. لطفاً دوباره تصویر را انتخاب کنید.'
+            );
+
+            $this->dispatch('cropError');
+
             return;
         }
 
@@ -1015,115 +1307,259 @@ class FeaturedPicker extends Component
             return;
         }
 
-        $processor =
-            app(
-                ImageProcessor::class
+        if (! $media->original_path) {
+            $this->addError(
+                'crop',
+                'تصویر اصلی پیدا نشد.'
             );
 
-        $source =
-            Storage::disk(
-                'public'
-            )->path(
-                $media->original_path
+            return;
+        }
+
+        $processor = app(
+            ImageProcessor::class
+        );
+
+        $disk = Storage::disk(
+            $media->disk ?: 'public'
+        );
+
+        $source = $disk->path(
+            $media->original_path
+        );
+
+        if (! file_exists($source)) {
+            $this->addError(
+                'crop',
+                'فایل تصویر اصلی روی دیسک پیدا نشد.'
             );
 
-        $croppedDirectory =
-            $media->directory .
-            '/cropped';
+            return;
+        }
 
-        Storage::disk(
-            'public'
-        )->makeDirectory(
+        $sourceInfo = @getimagesize($source);
+
+        if (! $sourceInfo) {
+            $this->addError(
+                'crop',
+                'ابعاد تصویر قابل تشخیص نیست.'
+            );
+
+            return;
+        }
+
+        $sourceWidth = (int) $sourceInfo[0];
+
+        $sourceHeight = (int) $sourceInfo[1];
+
+        if (
+            $sourceWidth <= 0 ||
+            $sourceHeight <= 0
+        ) {
+            $this->addError(
+                'crop',
+                'ابعاد تصویر نامعتبر است.'
+            );
+
+            return;
+        }
+
+        $x = max(
+            0,
+            min(
+                $x,
+                $sourceWidth - 1
+            )
+        );
+
+        $y = max(
+            0,
+            min(
+                $y,
+                $sourceHeight - 1
+            )
+        );
+
+        $width = min(
+            $width,
+            $sourceWidth - $x
+        );
+
+        $height = min(
+            $height,
+            $sourceHeight - $y
+        );
+
+        $width = (int) round($width);
+
+        $height = (int) round($height);
+
+        $x = (int) round($x);
+
+        $y = (int) round($y);
+
+        if (
+            $width < 1 ||
+            $height < 1
+        ) {
+            $this->addError(
+                'crop',
+                'اندازه ناحیه برش باید حداقل یک پیکسل باشد.'
+            );
+
+            return;
+        }
+
+        $croppedDirectory = trim(
+            ($media->directory ?: 'media')
+            . '/cropped',
+            '/'
+        );
+
+        $disk->makeDirectory(
             $croppedDirectory
         );
+
+        $extension = strtolower(
+            $media->extension ?: 'jpg'
+        );
+
+        if ($extension === 'jpeg') {
+            $extension = 'jpg';
+        }
 
         $croppedFilename =
             pathinfo(
                 $media->filename,
                 PATHINFO_FILENAME
-            ) .
-            '_cropped.' .
-            $media->extension;
+            )
+            . '_cropped.'
+            . $extension;
 
         $croppedPath =
-            $croppedDirectory .
-            '/' .
-            $croppedFilename;
+            $croppedDirectory
+            . '/'
+            . $croppedFilename;
 
-        $destination =
-            Storage::disk(
-                'public'
-            )->path(
-                $croppedPath
-            );
-
-        $processor->crop(
-            $source,
-            $destination,
-            (int) round($crop['x']),
-            (int) round($crop['y']),
-            (int) round($crop['width']),
-            (int) round($crop['height'])
+        $destination = $disk->path(
+            $croppedPath
         );
 
+        try {
+            $processor->crop(
+                $source,
+                $destination,
+                $x,
+                $y,
+                $width,
+                $height
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            $this->addError(
+                'crop',
+                'پردازش تصویر انجام نشد. لطفاً دوباره امتحان کنید.'
+            );
+
+            return;
+        }
+
+        if (! file_exists($destination)) {
+            $this->addError(
+                'crop',
+                'فایل برش‌خورده ایجاد نشد.'
+            );
+
+            return;
+        }
+
+        $outputInfo = @getimagesize(
+            $destination
+        );
+
+        if (! $outputInfo) {
+            $this->addError(
+                'crop',
+                'تصویر برش‌خورده معتبر نیست.'
+            );
+
+            return;
+        }
+
+        $temporarySourcePath = $media->original_path;
+
         if (
-            ! file_exists(
-                $destination
-            )
+            $temporarySourcePath
+            &&
+            $temporarySourcePath !== $croppedPath
+            &&
+            $disk->exists($temporarySourcePath)
         ) {
-            throw new \RuntimeException(
-                'Cropped image was not created.'
+            $disk->delete(
+                $temporarySourcePath
             );
         }
 
-        [$width, $height] =
-            getimagesize(
-                $destination
-            );
+        $outputWidth = (int) $outputInfo[0];
 
-        $media->update([
-
-            'cropped_path' =>
-                $croppedPath,
-
-            'crop_data' =>
-                $crop,
-
-            'width' =>
-                $width,
-
-            'height' =>
-                $height,
-
-            'size' =>
-                filesize(
-                    $destination
-                ),
-
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Next
-        |--------------------------------------------------------------------------
-        */
+        $outputHeight = (int) $outputInfo[1];
 
         if (
-            $this->processingQueue &&
-            $this->queueIndex <
+            $outputWidth <= 0 ||
+            $outputHeight <= 0
+        ) {
+            $this->addError(
+                'crop',
+                'ابعاد تصویر خروجی نامعتبر است.'
+            );
+
+            return;
+        }
+
+        $media->update([
+            'original_path' => null,
+
+            'cropped_path' => $croppedPath,
+
+            'crop_data' => [
+                'x' => $x,
+                'y' => $y,
+                'width' => $width,
+                'height' => $height,
+            ],
+
+            'width' => $outputWidth,
+
+            'height' => $outputHeight,
+
+            'size' => filesize($destination),
+        ]);
+
+        $this->cropData = [
+            'x' => $x,
+            'y' => $y,
+            'width' => $width,
+            'height' => $height,
+        ];
+
+        if (
+            $this->processingQueue
+            &&
+            $this->queueIndex
+            <
             count($this->queue) - 1
         ) {
-
             $this->nextImage();
 
             return;
         }
 
-        $this->dispatch(
-            'closeCropper'
-        );
+        $this->dispatch('closeCropper');
 
         $this->showCropModal = false;
+
+        $this->processingQueue = false;
 
         $this->showWatermarkModal = true;
     }
@@ -1137,91 +1573,50 @@ class FeaturedPicker extends Component
     public function getMediaProperty()
     {
         return Media::query()
-
             ->active()
-
             ->images()
-
             ->when(
                 $this->search,
                 function ($query) {
-
                     $query->where(
                         function ($q) {
-
                             $q->where(
                                 'title',
                                 'like',
                                 "%{$this->search}%"
                             )
-
                             ->orWhere(
                                 'filename',
                                 'like',
                                 "%{$this->search}%"
                             );
-
                         }
                     );
-
                 }
             )
-
             ->latest()
-
             ->paginate(
                 $this->perPage
             );
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Apply Watermark
+    |--------------------------------------------------------------------------
+    */
 
-
-
-    
     public function applyWatermark(): void
     {
-        if (! $this->cropMediaId) {
-            $this->showWatermarkModal = false;
-            return;
-        }
-
-        $media = Media::find($this->cropMediaId);
-
-        if (! $media) {
-            $this->showWatermarkModal = false;
-            return;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | بدون واترمارک
-        |--------------------------------------------------------------------------
-        */
-
         if ($this->watermarkType === 'none') {
-
-            $this->selected = $media->id;
-
-            $this->showWatermarkModal = false;
-
-            $this->dispatch(
-                'featured-image-selected',
-                id: $media->id,
-                variant: 'cropped',
-                url: $media->variantUrl('cropped'),
+            $this->finishProcessedUpload(
+                'cropped'
             );
 
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | باید واترمارک انتخاب شده باشد
-        |--------------------------------------------------------------------------
-        */
-
         if (! $this->watermarkId) {
-
             $this->addError(
                 'watermarkId',
                 'لطفاً یک واترمارک انتخاب کنید.'
@@ -1230,38 +1625,19 @@ class FeaturedPicker extends Component
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Query واترمارک
-        |--------------------------------------------------------------------------
-        */
-
         $watermarkQuery = Watermark::query()
             ->where('id', $this->watermarkId)
             ->where('is_active', true);
 
-        /*
-        |--------------------------------------------------------------------------
-        | عمومی
-        |--------------------------------------------------------------------------
-        */
-
         if ($this->watermarkType === 'system') {
-
-            $watermarkQuery
-                ->where('type', 'system');
+            $watermarkQuery->where(
+                'type',
+                'system'
+            );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | واترمارک خبرنگار
-        |--------------------------------------------------------------------------
-        */
-
         if ($this->watermarkType === 'reporter') {
-
             if (! $this->isAdmin) {
-
                 $this->addError(
                     'watermarkId',
                     'شما اجازه استفاده از واترمارک خبرنگار دیگر را ندارید.'
@@ -1275,18 +1651,10 @@ class FeaturedPicker extends Component
                 ->whereNotNull('user_id');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | واترمارک اختصاصی خود خبرنگار
-        |--------------------------------------------------------------------------
-        */
-
         if ($this->watermarkType === 'personal') {
-
             $user = Auth::user();
 
             if (! $user) {
-
                 $this->addError(
                     'watermarkId',
                     'کاربر معتبر نیست.'
@@ -1297,13 +1665,15 @@ class FeaturedPicker extends Component
 
             $watermarkQuery
                 ->where('type', 'user')
-                ->where('user_id', $user->id);
+                ->where(
+                    'user_id',
+                    $user->id
+                );
         }
 
         $watermark = $watermarkQuery->first();
 
         if (! $watermark) {
-
             $this->addError(
                 'watermarkId',
                 'واترمارک انتخاب‌شده معتبر نیست.'
@@ -1312,145 +1682,229 @@ class FeaturedPicker extends Component
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | تصویر ورودی
-        |--------------------------------------------------------------------------
-        */
-
-        $sourceRelativePath =
-            $media->cropped_path
-            ?: $media->original_path;
-
-        if (! $sourceRelativePath) {
-
+        if (empty($this->queue)) {
             $this->addError(
                 'watermarkId',
-                'تصویر پردازش‌شده پیدا نشد.'
+                'تصویری برای پردازش وجود ندارد.'
             );
 
             return;
         }
-
-        $disk = Storage::disk($media->disk);
-
-        $sourcePath = $disk->path(
-            $sourceRelativePath
-        );
-
-        if (! file_exists($sourcePath)) {
-
-            $this->addError(
-                'watermarkId',
-                'فایل تصویر روی دیسک پیدا نشد.'
-            );
-
-            return;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | مسیر خروجی
-        |--------------------------------------------------------------------------
-        */
-
-        $directory =
-            $media->directory . '/watermarked';
-
-        $disk->makeDirectory($directory);
-
-        $filename =
-            pathinfo(
-                $media->filename,
-                PATHINFO_FILENAME
-            )
-            . '_wm.'
-            . $media->extension;
-
-        $watermarkedRelativePath =
-            $directory . '/' . $filename;
-
-        $watermarkedAbsolutePath =
-            $disk->path(
-                $watermarkedRelativePath
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | اعمال واترمارک
-        |--------------------------------------------------------------------------
-        */
 
         $watermarkService = app(
             WatermarkService::class
         );
 
-        $watermarkService->apply(
-            imagePath: $sourcePath,
-            watermark: $watermark,
-            outputPath: $watermarkedAbsolutePath,
-            position: 'bottom-left',
-            scale: 22,
-            padding: 30,
-        );
+        foreach ($this->queue as $mediaId) {
+            $media = Media::find($mediaId);
 
-        /*
-        |--------------------------------------------------------------------------
-        | بررسی خروجی
-        |--------------------------------------------------------------------------
-        */
+            if (! $media) {
+                continue;
+            }
 
-        if (! file_exists($watermarkedAbsolutePath)) {
+            if (! $media->cropped_path) {
+                continue;
+            }
 
-            $this->addError(
-                'watermarkId',
-                'فایل واترمارک‌شده ایجاد نشد.'
+            $sourceRelativePath =
+                $media->cropped_path;
+
+            $disk = Storage::disk(
+                $media->disk ?: 'public'
             );
+
+            $sourcePath = $disk->path(
+                $sourceRelativePath
+            );
+
+            if (! file_exists($sourcePath)) {
+                continue;
+            }
+
+            $directory = trim(
+                ($media->directory ?: 'media')
+                . '/watermarked',
+                '/'
+            );
+
+            $disk->makeDirectory(
+                $directory
+            );
+
+            $extension = strtolower(
+                $media->extension ?: 'jpg'
+            );
+
+            if ($extension === 'jpeg') {
+                $extension = 'jpg';
+            }
+
+            $filename =
+                pathinfo(
+                    $media->filename,
+                    PATHINFO_FILENAME
+                )
+                . '_wm.'
+                . $extension;
+
+            $watermarkedRelativePath =
+                $directory
+                . '/'
+                . $filename;
+
+            $watermarkedAbsolutePath =
+                $disk->path(
+                    $watermarkedRelativePath
+                );
+
+            try {
+                $watermarkService->apply(
+                    imagePath: $sourcePath,
+                    watermark: $watermark,
+                    outputPath: $watermarkedAbsolutePath,
+                    position: 'bottom-left',
+                    scale: 22,
+                    padding: 30,
+                );
+            } catch (\Throwable $e) {
+                report($e);
+
+                $this->addError(
+                    'watermarkId',
+                    'اعمال واترمارک روی یکی از تصاویر انجام نشد.'
+                );
+
+                return;
+            }
+
+            if (! file_exists(
+                $watermarkedAbsolutePath
+            )) {
+                $this->addError(
+                    'watermarkId',
+                    'فایل واترمارک‌شده ایجاد نشد.'
+                );
+
+                return;
+            }
+
+            $media->update([
+                'watermarked_path' =>
+                    $watermarkedRelativePath,
+
+                'watermark_id' =>
+                    $watermark->id,
+
+                'watermark_type' =>
+                    $this->watermarkType,
+
+                'has_watermark' =>
+                    true,
+            ]);
+        }
+
+        $this->finishProcessedUpload(
+            'watermarked'
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Finish Processed Upload
+    |--------------------------------------------------------------------------
+    */
+
+    protected function finishProcessedUpload(
+        string $variant
+    ): void {
+        $this->showWatermarkModal = false;
+
+        $this->resetErrorBag();
+
+        $items = Media::query()
+            ->whereIn(
+                'id',
+                $this->queue
+            )
+            ->get()
+            ->keyBy('id');
+
+        if ($this->selectionMode === 'single') {
+            $mediaId = $this->queue[0] ?? null;
+
+            $media = $mediaId
+                ? ($items[$mediaId] ?? null)
+                : null;
+
+            if ($media) {
+                $this->selected = $media->id;
+
+                $this->selectedVariant = $variant;
+
+                $this->selectedMediaIds = [
+                    $media->id,
+                ];
+
+                $this->selectedMediaVariants = [
+                    $media->id => $variant,
+                ];
+            }
+
+            $this->resetCurrentUploadState();
 
             return;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | بروزرسانی Media
-        |--------------------------------------------------------------------------
-        */
+        $this->selectedMediaIds = [];
 
-        $media->update([
-            'watermarked_path' => $watermarkedRelativePath,
-            'watermark_id' => $watermark->id,
-            'watermark_type' => $this->watermarkType,
-            'has_watermark' => true,
-        ]);
+        $this->selectedMediaVariants = [];
 
-        /*
-        |--------------------------------------------------------------------------
-        | انتخاب نهایی
-        |--------------------------------------------------------------------------
-        */
+        foreach ($this->queue as $mediaId) {
+            if (! isset($items[$mediaId])) {
+                continue;
+            }
 
-        $this->selected = $media->id;
+            $this->selectedMediaIds[] = $mediaId;
+
+            $this->selectedMediaVariants[$mediaId] =
+                $variant;
+        }
+
+        $this->resetCurrentUploadState();
+    }
+
+    protected function resetCurrentUploadState(): void
+    {
+        $this->uploads = [];
+
+        $this->uploadTitle = '';
+
+        $this->queue = [];
+
+        $this->uploadSessionMediaIds = [];
+
+        $this->queueIndex = 0;
+
+        $this->processingQueue = false;
+
+        $this->cropMediaId = null;
+
+        $this->cropImage = null;
+
+        $this->cropData = null;
+
+        $this->showCropModal = false;
 
         $this->showWatermarkModal = false;
 
-        $this->resetErrorBag('watermarkId');
+        $this->watermarkType = 'none';
 
-        /*
-        |--------------------------------------------------------------------------
-        | ارسال تصویر نهایی به Filament
-        |--------------------------------------------------------------------------
-        */
+        $this->watermarkId = null;
 
-        $this->dispatch(
-            'featured-image-selected',
-            id: $media->id,
-            variant: 'watermarked',
-            url: $media->variantUrl('watermarked'),
-        );
+        $this->selectedReporterId = null;
+
+        $this->showReporterWatermarks = false;
     }
-
-
-
 
     /*
     |--------------------------------------------------------------------------

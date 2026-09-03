@@ -1,19 +1,19 @@
-import Alpine from 'alpinejs'
+// import Alpine from 'alpinejs'
 
-console.log('MEDIA EDITOR LOADED')
+// console.log('MEDIA EDITOR LOADED')
 
-document.addEventListener('alpine:init', () => {
+// document.addEventListener('alpine:init', () => {
 
-    console.log('REGISTER IMAGE EDITOR')
+//     console.log('REGISTER IMAGE EDITOR')
 
-    Alpine.data('imageEditor', () => ({
+//     Alpine.data('imageEditor', () => ({
 
-        message: 'hello',
+//         message: 'hello',
 
-        init() {
-            console.log('IMAGE EDITOR INIT')
-        }
+//         init() {
+//             console.log('IMAGE EDITOR INIT')
+//         }
 
-    }))
+//     }))
 
-})
+// })

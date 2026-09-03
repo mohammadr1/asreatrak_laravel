@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Enums\NewsStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\ReportType;
+
 
 class News extends Model
 {
@@ -126,5 +129,14 @@ class News extends Model
     {
         return $this->belongsTo(Media::class, 'featured_media_id');
     }
+
+    public function reportType(): BelongsTo
+    {
+        return $this->belongsTo(
+            ReportType::class,
+            'report_type'
+        );
+    }
+
 
 }

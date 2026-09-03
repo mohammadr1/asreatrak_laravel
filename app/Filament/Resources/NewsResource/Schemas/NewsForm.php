@@ -154,81 +154,167 @@ class NewsForm
                             ])
                             ->schema([
 
-                            
                         Section::make('تصویر شاخص')
-                        ->schema([
+                            ->schema([
 
-                            Hidden::make('featured_media_id')
-                                ->default(null)
-                                ->live(),
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Media ID
+                                |--------------------------------------------------------------------------
+                                */
 
-                            Actions::make([
+                                Hidden::make('featured_media_id')
+                                    ->default(null)
+                                    ->live(),
 
-                                Action::make('selectFeatured')
-                                    ->label('انتخاب تصویر')
-                                    ->icon('heroicon-o-photo')
-                                    ->modalHeading('انتخاب تصویر شاخص')
-                                    ->modalWidth('7xl')
-                                    ->modalSubmitAction(false)
-                                    ->modalCancelActionLabel('بستن')
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Selected Variant
+                                |--------------------------------------------------------------------------
+                                */
 
-                                    ->modalContent(
-                                        fn () => view(
-                                            'filament.media.featured-picker-wrapper'
-                                        )
-                                    ),
+                                Hidden::make('featured_media_variant')
+                                    ->default(null)
+                                    ->live(),
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Media Name
+                                |--------------------------------------------------------------------------
+                                |
+                                | فقط برای نمایش و جستجو در فرم.
+                                | مقدار اصلی در جدول Media ذخیره می‌شود.
+                                |
+                                */
+
+                                // TextInput::make('featured_media_title')
+                                //     ->label('نام رسانه')
+                                //     ->placeholder('نام یا عنوان تصویر را وارد کنید')
+                                //     ->maxLength(255)
+                                //     ->live()
+                                //     ->visible(fn ($get) => filled($get('featured_media_id'))),
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Select Image
+                                |--------------------------------------------------------------------------
+                                */
+
+                                Actions::make([
+
+                                    Action::make('selectFeatured')
+                                        ->label('انتخاب تصویر')
+                                        ->icon('heroicon-o-photo')
+                                        ->modalHeading('انتخاب تصویر شاخص')
+                                        ->modalWidth('7xl')
+                                        ->modalSubmitAction(false)
+                                        ->modalCancelActionLabel('بستن')
+
+                                        ->modalContent(
+                                            fn () => view(
+                                                'filament.media.featured-picker-wrapper'
+                                            )
+                                        ),
+
+                                ]),
+
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Preview
+                                |--------------------------------------------------------------------------
+                                */
+
+                                Placeholder::make('featured_preview')
+                                    ->hiddenLabel()
+
+                                    ->content(function ($get) {
+
+                                        $id = $get('featured_media_id');
+
+                                        $variant = $get('featured_media_variant');
+
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | No media selected
+                                        |--------------------------------------------------------------------------
+                                        */
+
+                                        if (! $id) {
+
+                                            return 'هنوز تصویری انتخاب نشده است.';
+
+                                        }
+
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | Variant must exist
+                                        |--------------------------------------------------------------------------
+                                        */
+
+                                        if (! $variant) {
+
+                                            return 'نسخه تصویر انتخاب نشده است.';
+
+                                        }
+
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | Find media
+                                        |--------------------------------------------------------------------------
+                                        */
+
+                                        $media = \App\Models\Media::find($id);
+
+                                        if (! $media) {
+
+                                            return 'تصویر پیدا نشد.';
+
+                                        }
+
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | EXACT selected variant
+                                        |--------------------------------------------------------------------------
+                                        */
+
+                                        $url = $media->variantUrl(
+                                            $variant
+                                        );
+
+                                        /*
+                                        |--------------------------------------------------------------------------
+                                        | Requested variant does not exist
+                                        |--------------------------------------------------------------------------
+                                        */
+
+                                        if (! $url) {
+
+                                            return view(
+                                                'filament.media.featured-preview',
+                                                [
+                                                    'media' => $media,
+                                                    'variant' => $variant,
+                                                    'url' => null,
+                                                ]
+                                            );
+
+                                        }
+
+                                        return view(
+                                            'filament.media.featured-preview',
+                                            [
+                                                'media' => $media,
+                                                'variant' => $variant,
+                                                'url' => $url,
+                                            ]
+                                        );
+
+                                    })
 
                             ]),
-
-
-                            Placeholder::make('featured_preview')
-                                ->hiddenLabel()
-
-                                ->content(function ($get) {
-
-
-                                    $id = $get('featured_media_id');
-
-
-                                    if (! $id) {
-
-                                        return 'هنوز تصویری انتخاب نشده است.';
-
-                                    }
-
-
-                                    $media = \App\Models\Media::find($id);
-
-
-                                    if (! $media) {
-
-                                        return 'تصویر پیدا نشد.';
-
-                                    }
-
-
-                                    return view(
-                                        'filament.media.featured-preview',
-                                        [
-                                            'media' => $media,
-                                        ]
-                                    );
-
-
-                                }),
-
-
-                        ]),
-
-                                Select::make('watermark_type')
-                                    ->label('نوع واترمارک تصاویر')
-                                    ->options([
-                                        'none' => 'بدون واترمارک',
-                                        'general' => 'واترمارک عمومی سایت',
-                                        'personal' => 'واترمارک اختصاصی من',
-                                    ])
-                                    ->default('none')
-                                    ->required(),
 
                                     
                                 Section::make('انتشار')
@@ -262,7 +348,7 @@ class NewsForm
                                     ]),
 
 
-                                Section::make('دسته‌بندی و برچسب')
+                                Section::make('اقدامات')
                                     ->schema([
 
                                         Select::make('categories')
@@ -278,9 +364,35 @@ class NewsForm
                                             ->relationship('tags', 'name')
                                             ->multiple()
                                             ->searchable()
-                                            ->preload(),
+                                            ->preload()
+                                            ->required(),
+
+                                            
+                                    Select::make('report_type')
+                                        ->label('نوع مطلب')
+                                        ->relationship(
+                                            name: 'reportType',
+                                            titleAttribute: 'name'
+                                        )
+                                        ->searchable()
+                                        ->preload()
+                                        ->required(),
+
+                                    Select::make('production_method')
+                                        ->label('نحوه تولید')
+                                        ->options([
+                                            'بازنشری' => 'بازنشری',
+                                            'پوششی' => 'پوششی',
+                                            'تولیدی' => 'تولیدی',
+                                            'دریافتی' => 'دریافتی',
+                                        ])
+                                        ->native(false)
+                                        ->required(),
+
 
                                     ]),
+
+
 
                             ]),
 

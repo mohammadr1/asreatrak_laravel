@@ -21,6 +21,9 @@ return new class extends Migration
                 ->constrained('media')
                 ->nullOnDelete();
 
+            $table->string('featured_media_variant')
+                ->nullable();
+
 
             $table->string('title');
             $table->text('lead')->nullable();
@@ -60,7 +63,10 @@ return new class extends Migration
 
             $table->string('short_link')->nullable();
 
-            $table->string('report_type')->nullable();
+            $table->foreignId('report_type')
+                ->nullable()
+                ->constrained('report_type')
+                ->nullOnDelete();
 
             $table->enum('production_method', [
                 'بازنشری',

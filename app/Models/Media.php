@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class Media extends Model
 {
@@ -140,77 +141,107 @@ class Media extends Model
      */
     public function getOriginalUrlAttribute(): string
     {
-        if (! $this->original_path) {
-            return '';
-        }
-
-        return asset(
-            'storage/' .
-            ltrim($this->original_path, '/')
-        );
+        return $this->mediaPathUrl(
+            $this->original_path
+        ) ?? '';
     }
 
-    /**
-     * URL تصویر کراپ‌شده
-     */
     public function getCroppedUrlAttribute(): string
     {
-        if (! $this->cropped_path) {
-            return $this->original_url;
-        }
-
-        return asset(
-            'storage/' .
-            ltrim($this->cropped_path, '/')
-        );
+        return $this->mediaPathUrl(
+            $this->cropped_path
+        ) ?? '';
     }
 
-    /**
-     * URL تصویر واترمارک‌دار
-     */
     public function getWatermarkedUrlAttribute(): string
     {
-        if (! $this->watermarked_path) {
-            return $this->cropped_url;
-        }
-
-        return asset(
-            'storage/' .
-            ltrim($this->watermarked_path, '/')
-        );
+        return $this->mediaPathUrl(
+            $this->watermarked_path
+        ) ?? '';
     }
 
-    /**
-     * URL نسخه پیش‌فرض رسانه
-     */
     public function getUrlAttribute(): string
     {
         return $this->watermarked_url;
     }
 
     /**
-     * URL بر اساس نوع نسخه
+     * Return a URL for the exact requested media variant.
+     *
+     * مهم:
+     * این متد دیگر از یک variant به variant دیگر fallback نمی‌کند.
      */
     public function variantUrl(
         string $variant = 'watermarked'
-    ): string {
-
+    ): ?string {
         return match ($variant) {
 
-            'original' =>
-                $this->original_url,
+            'watermarked' =>
+                $this->mediaPathUrl(
+                    $this->watermarked_path
+                ),
 
             'cropped' =>
-                $this->cropped_url,
+                $this->mediaPathUrl(
+                    $this->cropped_path
+                ),
 
-            'watermarked' =>
-                $this->watermarked_url,
+            'original' =>
+                $this->mediaPathUrl(
+                    $this->original_path
+                ),
 
-            default =>
-                $this->watermarked_url,
+            default => null,
         };
     }
 
+    /**
+     * Generate a media URL that works correctly
+     * when the Laravel application is opened from
+     * another device on the local network.
+     */
+    protected function mediaPathUrl(
+        ?string $path
+    ): ?string {
+        if (! $path) {
+            return null;
+        }
+
+        $diskName = $this->disk ?: 'public';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Local public disk
+        |--------------------------------------------------------------------------
+        |
+        | Do NOT return:
+        | http://localhost:8000/storage/...
+        |
+        | because localhost on a phone points to the phone itself.
+        |
+        | Relative URL works from:
+        |
+        | Desktop:
+        | http://localhost:8000
+        |
+        | Mobile:
+        | http://192.168.x.x:8000
+        |
+        */
+
+        if ($diskName === 'public') {
+            return '/storage/' . ltrim(
+                $path,
+                '/'
+            );
+        }
+
+        return Storage::disk(
+            $diskName
+        )->url(
+            $path
+        );
+    }
     /*
     |--------------------------------------------------------------------------
     | Helpers

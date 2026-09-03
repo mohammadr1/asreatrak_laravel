@@ -8,80 +8,152 @@ document.addEventListener('livewire:init', () => {
 
         console.log('FEATURED IMAGE EVENT:', event);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Selected media data
+        |--------------------------------------------------------------------------
+        */
+
         const id = event?.id;
+        const variant = event?.variant;
+        const url = event?.url;
 
         if (!id) {
-            console.error('FEATURED IMAGE ID NOT FOUND');
-            return;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Filament / Livewire field
-        |--------------------------------------------------------------------------
-        */
-
-        let input =
-            document.querySelector(
-                'input[name="featured_media_id"]'
-            );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Backward compatibility
-        |--------------------------------------------------------------------------
-        */
-
-        if (!input) {
-
-            input =
-                document.querySelector(
-                    'input[name="featured_image_id"]'
-                );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | اگر input مستقیم پیدا نشد
-        |--------------------------------------------------------------------------
-        */
-
-        if (!input) {
-
             console.error(
-                'FEATURED MEDIA INPUT NOT FOUND',
-                id
+                'FEATURED IMAGE ID NOT FOUND',
+                event
             );
 
             return;
         }
 
         console.log(
-            'FEATURED MEDIA INPUT FOUND:',
-            input
+            'SELECTED FEATURED MEDIA:',
+            {
+                id,
+                variant,
+                url,
+            }
         );
 
         /*
         |--------------------------------------------------------------------------
-        | مقداردهی
+        | Find featured_media_id field
         |--------------------------------------------------------------------------
         */
 
-        input.value = id;
+        let mediaInput =
+            document.querySelector(
+                'input[name="featured_media_id"]'
+            );
+
+        if (!mediaInput) {
+
+            mediaInput =
+                document.getElementById(
+                    'data.featured_media_id'
+                );
+        }
 
         /*
         |--------------------------------------------------------------------------
-        | اطلاع به Livewire
+        | Find featured_media_variant field
         |--------------------------------------------------------------------------
         */
 
-        input.dispatchEvent(
+        let variantInput =
+            document.querySelector(
+                'input[name="featured_media_variant"]'
+            );
+
+        if (!variantInput) {
+
+            variantInput =
+                document.getElementById(
+                    'data.featured_media_variant'
+                );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Media ID field missing
+        |--------------------------------------------------------------------------
+        */
+
+        if (!mediaInput) {
+
+            console.error(
+                'FEATURED MEDIA ID INPUT NOT FOUND',
+                {
+                    id,
+                    variant,
+                }
+            );
+
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Variant field missing
+        |--------------------------------------------------------------------------
+        */
+
+        if (!variantInput) {
+
+            console.error(
+                'FEATURED MEDIA VARIANT INPUT NOT FOUND',
+                {
+                    id,
+                    variant,
+                }
+            );
+
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Set Media ID
+        |--------------------------------------------------------------------------
+        */
+
+        mediaInput.value = id;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Set EXACT selected variant
+        |--------------------------------------------------------------------------
+        */
+
+        variantInput.value =
+            variant || 'cropped';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Notify Filament / Livewire
+        |--------------------------------------------------------------------------
+        */
+
+        mediaInput.dispatchEvent(
             new Event('input', {
                 bubbles: true,
             })
         );
 
-        input.dispatchEvent(
+        mediaInput.dispatchEvent(
+            new Event('change', {
+                bubbles: true,
+            })
+        );
+
+        variantInput.dispatchEvent(
+            new Event('input', {
+                bubbles: true,
+            })
+        );
+
+        variantInput.dispatchEvent(
             new Event('change', {
                 bubbles: true,
             })
@@ -89,19 +161,50 @@ document.addEventListener('livewire:init', () => {
 
         /*
         |--------------------------------------------------------------------------
-        | اطمینان از به‌روزرسانی Alpine / Filament
+        | Store selected data
         |--------------------------------------------------------------------------
         */
 
-        input.dispatchEvent(
-            new Event('blur', {
-                bubbles: true,
-            })
+        mediaInput.dataset.mediaVariant =
+            variant || 'cropped';
+
+        mediaInput.dataset.mediaUrl =
+            url || '';
+
+        variantInput.dataset.mediaVariant =
+            variant || 'cropped';
+
+        variantInput.dataset.mediaUrl =
+            url || '';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dispatch preview event
+        |--------------------------------------------------------------------------
+        */
+
+        window.dispatchEvent(
+            new CustomEvent(
+                'featured-media-preview',
+                {
+                    detail: {
+                        id: id,
+                        variant:
+                            variant || 'cropped',
+                        url: url || '',
+                    },
+                }
+            )
         );
 
         console.log(
-            'FEATURED MEDIA SELECTED:',
-            id
+            'FEATURED MEDIA SAVED:',
+            {
+                id,
+                variant:
+                    variant || 'cropped',
+                url,
+            }
         );
     });
 
