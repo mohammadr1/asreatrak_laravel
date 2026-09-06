@@ -1,5 +1,3 @@
-console.log('MEDIA PICKER JS LOADED');
-
 document.addEventListener('livewire:init', () => {
 
     console.log('LIVEWIRE MEDIA PICKER READY');
@@ -8,15 +6,9 @@ document.addEventListener('livewire:init', () => {
 
         console.log('FEATURED IMAGE EVENT:', event);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Selected media data
-        |--------------------------------------------------------------------------
-        */
-
         const id = event?.id;
-        const variant = event?.variant;
-        const url = event?.url;
+        const variant = event?.variant || 'cropped';
+        const url = event?.url || '';
 
         if (!id) {
             console.error(
@@ -27,86 +19,27 @@ document.addEventListener('livewire:init', () => {
             return;
         }
 
-        console.log(
-            'SELECTED FEATURED MEDIA:',
-            {
-                id,
-                variant,
-                url,
-            }
-        );
-
-        /*
-        |--------------------------------------------------------------------------
-        | Find featured_media_id field
-        |--------------------------------------------------------------------------
-        */
-
-        let mediaInput =
+        const mediaInput =
             document.querySelector(
                 'input[name="featured_media_id"]'
             );
 
-        if (!mediaInput) {
-
-            mediaInput =
-                document.getElementById(
-                    'data.featured_media_id'
-                );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Find featured_media_variant field
-        |--------------------------------------------------------------------------
-        */
-
-        let variantInput =
+        const variantInput =
             document.querySelector(
                 'input[name="featured_media_variant"]'
             );
 
-        if (!variantInput) {
-
-            variantInput =
-                document.getElementById(
-                    'data.featured_media_variant'
-                );
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Media ID field missing
-        |--------------------------------------------------------------------------
-        */
-
         if (!mediaInput) {
-
             console.error(
-                'FEATURED MEDIA ID INPUT NOT FOUND',
-                {
-                    id,
-                    variant,
-                }
+                'FEATURED MEDIA ID INPUT NOT FOUND'
             );
 
             return;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Variant field missing
-        |--------------------------------------------------------------------------
-        */
 
         if (!variantInput) {
-
             console.error(
-                'FEATURED MEDIA VARIANT INPUT NOT FOUND',
-                {
-                    id,
-                    variant,
-                }
+                'FEATURED MEDIA VARIANT INPUT NOT FOUND'
             );
 
             return;
@@ -114,24 +47,70 @@ document.addEventListener('livewire:init', () => {
 
         /*
         |--------------------------------------------------------------------------
-        | Set Media ID
+        | Set DOM values
         |--------------------------------------------------------------------------
         */
 
-        mediaInput.value = id;
+        mediaInput.value = String(id);
+
+        variantInput.value = variant;
 
         /*
         |--------------------------------------------------------------------------
-        | Set EXACT selected variant
+        | Sync directly with Livewire / Filament
         |--------------------------------------------------------------------------
         */
 
-        variantInput.value =
-            variant || 'cropped';
+        const componentElement =
+            mediaInput.closest('[wire\\:id]');
+
+        if (componentElement) {
+
+            const componentId =
+                componentElement.getAttribute('wire:id');
+
+            const component =
+                Livewire.find(componentId);
+
+            if (component) {
+
+                component.set(
+                    'data.featured_media_id',
+                    String(id)
+                );
+
+                component.set(
+                    'data.featured_media_variant',
+                    variant
+                );
+
+                console.log(
+                    'FILAMENT STATE UPDATED:',
+                    {
+                        featured_media_id: id,
+                        featured_media_variant: variant,
+                    }
+                );
+
+            } else {
+
+                console.error(
+                    'LIVEWIRE COMPONENT NOT FOUND'
+                );
+
+            }
+
+        } else {
+
+            console.error(
+                'FILAMENT COMPONENT ELEMENT NOT FOUND'
+            );
+
+        }
 
         /*
         |--------------------------------------------------------------------------
-        | Notify Filament / Livewire
+        | Keep DOM events too
         |--------------------------------------------------------------------------
         */
 
@@ -161,25 +140,7 @@ document.addEventListener('livewire:init', () => {
 
         /*
         |--------------------------------------------------------------------------
-        | Store selected data
-        |--------------------------------------------------------------------------
-        */
-
-        mediaInput.dataset.mediaVariant =
-            variant || 'cropped';
-
-        mediaInput.dataset.mediaUrl =
-            url || '';
-
-        variantInput.dataset.mediaVariant =
-            variant || 'cropped';
-
-        variantInput.dataset.mediaUrl =
-            url || '';
-
-        /*
-        |--------------------------------------------------------------------------
-        | Dispatch preview event
+        | Preview
         |--------------------------------------------------------------------------
         */
 
@@ -188,23 +149,88 @@ document.addEventListener('livewire:init', () => {
                 'featured-media-preview',
                 {
                     detail: {
-                        id: id,
-                        variant:
-                            variant || 'cropped',
-                        url: url || '',
+                        id: Number(id),
+                        variant: variant,
+                        url: url,
                     },
                 }
             )
         );
 
         console.log(
-            'FEATURED MEDIA SAVED:',
+            'FEATURED MEDIA SAVED TO FORM STATE:',
             {
                 id,
-                variant:
-                    variant || 'cropped',
+                variant,
                 url,
             }
+        );
+    });
+
+
+    Livewire.on('media-multiple-selected', (event) => {
+
+        console.log(
+            'MEDIA MULTIPLE SELECTED:',
+            event
+        );
+
+        if (
+            event?.context !== 'gallery'
+        ) {
+            return;
+        }
+
+        const items =
+            Array.isArray(event?.items)
+                ? event.items
+                : [];
+
+        if (!items.length) {
+            console.warn(
+                'NO GALLERY MEDIA SELECTED'
+            );
+
+            return;
+        }
+
+        const formElement =
+            document.querySelector(
+                '[wire\\:id]'
+            );
+
+        if (!formElement) {
+            console.error(
+                'FILAMENT LIVEWIRE COMPONENT NOT FOUND'
+            );
+
+            return;
+        }
+
+        const componentId =
+            formElement.getAttribute(
+                'wire:id'
+            );
+
+        const component =
+            Livewire.find(componentId);
+
+        if (!component) {
+            console.error(
+                'LIVEWIRE COMPONENT INSTANCE NOT FOUND'
+            );
+
+            return;
+        }
+
+        component.set(
+            'data.gallery_media',
+            items
+        );
+
+        console.log(
+            'GALLERY MEDIA STATE SAVED:',
+            items
         );
     });
 

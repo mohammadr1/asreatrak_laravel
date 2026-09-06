@@ -20,6 +20,7 @@ class News extends Model
         'slug',
         'content',
         'featured_media_id',
+        'featured_media_variant',
         'news_code',
         'reporter_id',
         'views_count',
@@ -42,6 +43,7 @@ class News extends Model
             'status' => NewsStatus::class,
             'approved_at' => 'datetime',
             'published_at' => 'datetime',
+            'featured_media_id' => 'integer',
         ];
     }
 
@@ -69,11 +71,16 @@ class News extends Model
     {
         return $this->belongsToMany(
             Media::class,
-            'news_media'
-        )->withPivot([
-            'sort_order',
-            'is_featured',
-        ])->withTimestamps();
+            'news_media',
+            'news_id',
+            'media_id'
+        )
+            ->withPivot([
+                'sort_order',
+                'is_featured',
+            ])
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
     }
 
     public function categories()

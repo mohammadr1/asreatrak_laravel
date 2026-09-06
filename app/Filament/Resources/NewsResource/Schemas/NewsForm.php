@@ -4,7 +4,6 @@ namespace App\Filament\Resources\NewsResource\Schemas;
 
 use App\Enums\NewsStatus;
 use Filament\Forms\Form;
-use Illuminate\Support\Str;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Placeholder;
@@ -17,6 +16,8 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
+use App\Models\ReportType;
+use Filament\Forms\Components\View;
 
 class NewsForm
 {
@@ -25,378 +26,502 @@ class NewsForm
         return $form
             ->schema([
 
-                Grid::make(12)
-                    ->schema([
+            View::make('filament.forms.validation-summary')
+                ->columnSpanFull(),
+                    Grid::make(12)
+                        ->schema([
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | ستون اصلی
-                        |--------------------------------------------------------------------------
-                        */
+                            /*
+                            |--------------------------------------------------------------------------
+                            | ستون اصلی
+                            |--------------------------------------------------------------------------
+                            */
 
-                        Grid::make()
-                            ->columnSpan([
-                                'lg' => 8,
-                            ])
-                            ->schema([
+                            Grid::make()
+                                ->columnSpan([
+                                    'lg' => 8,
+                                ])
+                                ->schema([
 
-                                Section::make('اطلاعات اصلی خبر')
-                                    ->columns(2)
-                                    ->schema([
+                                    Section::make('اطلاعات اصلی خبر')
+                                        ->columns(2)
+                                        ->schema([
 
-                                        TextInput::make('uptitle')
-                                            ->label('روتیتر')
-                                            ->maxLength(255)
-                                            ->columnSpanFull(),
+                                            TextInput::make('uptitle')
+                                                ->label('روتیتر')
+                                                ->maxLength(255)
+                                                ->columnSpanFull(),
 
-                                        TextInput::make('title')
-                                            ->label('عنوان خبر')
-                                            ->required()
-                                            ->live(onBlur: true)
-                                            ->maxLength(255)
-                                            ->afterStateUpdated(function ($state, callable $set) {
+                                            TextInput::make('title')
+                                                ->label('عنوان خبر')
+                                                ->required()
+                                                ->unique(ignoreRecord: true)
+                                                ->live(onBlur: true)
+                                                ->maxLength(255)
+                                                ->afterStateUpdated(function (
+                                                    $state,
+                                                    $old,
+                                                    callable $set,
+                                                    callable $get
+                                                ) {
 
-                                                if (filled($state)) {
-                                                    $set(
-                                                        'slug',
-                                                        Str::slug($state)
+                                                    if (! filled($state)) {
+                                                        return;
+                                                    }
+
+                                                    $currentSlug = trim(
+                                                        (string) $get('slug')
                                                     );
-                                                }
-
-                                            }),
-
-                                        TextInput::make('news_code')
-                                            ->label('کد خبر')
-                                            ->required()
-                                            ->default(fn () => now()->format('YmdHis'))
-                                            ->unique(ignoreRecord: true),
-
-                                        Select::make('reporter_id')
-                                            ->label('خبرنگار')
-                                            ->relationship(
-                                                name: 'reporter',
-                                                titleAttribute: 'first_name'
-                                            )
-                                            ->getOptionLabelFromRecordUsing(
-                                                fn ($record) => $record->name
-                                            )
-                                            ->searchable()
-                                            ->preload()
-                                            ->required()
-                                            ->default(auth()->id())
-                                            ->disabled(
-                                                fn () => auth()->user()->hasRole('Reporter')
-                                            ),
-
-                                        Textarea::make('lead')
-                                            ->label('لید خبر')
-                                            ->required()
-                                            ->rows(4)
-                                            ->maxLength(1000)
-                                            ->columnSpanFull(),
-
-                                        RichEditor::make('content')
-                                            ->label('متن خبر')
-                                            ->required()
-                                            ->columnSpanFull()
-                                            ->toolbarButtons([
-                                                'bold',
-                                                'italic',
-                                                'underline',
-                                                'strike',
-                                                'link',
-                                                'bulletList',
-                                                'orderedList',
-                                                'blockquote',
-                                                'codeBlock',
-                                                'h2',
-                                                'h3',
-                                            ]),
-
-                                        Placeholder::make('editor_comment')
-                                            ->label('پیام سردبیر')
-                                            ->content(
-                                                fn ($record) =>
-                                                    $record?->rejection_reason
-                                                    ?: 'پیامی ثبت نشده است.'
-                                            )
-                                            ->visible(
-                                                fn ($record) =>
-                                                    $record &&
-                                                    $record->status === NewsStatus::Rejected
-                                            ),
-
-                                    ]),
-
-                                Section::make('تنظیمات فنی')
-                                    ->collapsed()
-                                    ->schema([
-
-                                        TextInput::make('slug')
-                                            ->label('اسلاگ')
-                                            ->required()
-                                            ->unique(ignoreRecord: true)
-                                            ->maxLength(255),
-
-                                    ]),
-
-                            ]),
 
                                                     /*
-                        |--------------------------------------------------------------------------
-                        | ستون کناری
-                        |--------------------------------------------------------------------------
-                        */
+                                                    |--------------------------------------------------------------------------
+                                                    | ساخت اسلاگ قبلی بر اساس عنوان قبلی
+                                                    |--------------------------------------------------------------------------
+                                                    */
 
-                        Grid::make()
-                            ->columnSpan([
-                                'lg' => 4,
-                            ])
-                            ->schema([
+                                                    $oldSlug = trim(
+                                                        (string) $old
+                                                    );
 
-                        Section::make('تصویر شاخص')
-                            ->schema([
+                                                    $oldSlug = preg_replace(
+                                                        '/\s+/u',
+                                                        '-',
+                                                        $oldSlug
+                                                    );
 
-                                /*
-                                |--------------------------------------------------------------------------
-                                | Media ID
-                                |--------------------------------------------------------------------------
-                                */
+                                                    $oldSlug = preg_replace(
+                                                        '/-+/u',
+                                                        '-',
+                                                        $oldSlug
+                                                    );
 
-                                Hidden::make('featured_media_id')
-                                    ->default(null)
-                                    ->live(),
+                                                    $oldSlug = trim(
+                                                        $oldSlug,
+                                                        '-'
+                                                    );
 
-                                /*
-                                |--------------------------------------------------------------------------
-                                | Selected Variant
-                                |--------------------------------------------------------------------------
-                                */
+                                                    /*
+                                                    |--------------------------------------------------------------------------
+                                                    | ساخت اسلاگ جدید
+                                                    |--------------------------------------------------------------------------
+                                                    */
 
-                                Hidden::make('featured_media_variant')
-                                    ->default(null)
-                                    ->live(),
+                                                    $newSlug = trim(
+                                                        (string) $state
+                                                    );
+
+                                                    $newSlug = preg_replace(
+                                                        '/\s+/u',
+                                                        '-',
+                                                        $newSlug
+                                                    );
+
+                                                    $newSlug = preg_replace(
+                                                        '/-+/u',
+                                                        '-',
+                                                        $newSlug
+                                                    );
+
+                                                    $newSlug = trim(
+                                                        $newSlug,
+                                                        '-'
+                                                    );
+
+                                                    /*
+                                                    |--------------------------------------------------------------------------
+                                                    | تعیین اینکه اسلاگ هنوز خودکار است یا دستی
+                                                    |--------------------------------------------------------------------------
+                                                    |
+                                                    | اگر اسلاگ خالی باشد:
+                                                    |     خودکار بساز.
+                                                    |
+                                                    | اگر اسلاگ فعلی همان اسلاگ عنوان قبلی باشد:
+                                                    |     یعنی هنوز دستی تغییر نکرده → آپدیت کن.
+                                                    |
+                                                    | اگر متفاوت باشد:
+                                                    |     یعنی کاربر دستی تغییر داده → دست نزن.
+                                                    |
+                                                    */
+
+                                                    if (
+                                                        $currentSlug === '' ||
+                                                        $currentSlug === $oldSlug
+                                                    ) {
+                                                        $set(
+                                                            'slug',
+                                                            $newSlug
+                                                        );
+                                                    }
+                                                }),
+
+                                            TextInput::make('news_code')
+                                                ->label('کد خبر')
+                                                ->default(fn () => now()->format('YmdHis'))
+                                                ->required()
+                                                ->unique(ignoreRecord: true)
+                                                ->disabled()
+                                                ->dehydrated(),
+
+                                            Select::make('reporter_id')
+                                                ->label('خبرنگار')
+                                                ->relationship(
+                                                    name: 'reporter',
+                                                    titleAttribute: 'first_name'
+                                                )
+                                                ->getOptionLabelFromRecordUsing(
+                                                    fn ($record) => $record->name
+                                                )
+                                                ->searchable()
+                                                ->preload()
+                                                ->required()
+                                                ->default(auth()->id())
+                                                ->visible(
+                                                    fn () => auth()->user()?->hasRole('Admin')
+                                                ),
+
+                                            Textarea::make('lead')
+                                                ->label('لید خبر')
+                                                ->required()
+                                                ->rows(4)
+                                                ->maxLength(1000)
+                                                ->columnSpanFull(),
+
+                                            RichEditor::make('content')
+                                                ->label('متن خبر')
+                                                ->required()
+                                                ->columnSpanFull()
+                                                ->toolbarButtons([
+                                                    'bold',
+                                                    'italic',
+                                                    'underline',
+                                                    'strike',
+                                                    'link',
+                                                    'bulletList',
+                                                    'orderedList',
+                                                    'blockquote',
+                                                    'codeBlock',
+                                                    'h2',
+                                                    'h3',
+                                                ]),
+
+                                            Placeholder::make('editor_comment')
+                                                ->label('پیام سردبیر')
+                                                ->content(
+                                                    fn ($record) =>
+                                                        $record?->rejection_reason
+                                                        ?: 'پیامی ثبت نشده است.'
+                                                )
+                                                ->visible(
+                                                    fn ($record) =>
+                                                        $record &&
+                                                        $record->status === NewsStatus::Rejected
+                                                ),
 
 
-                                /*
-                                |--------------------------------------------------------------------------
-                                | Media Name
-                                |--------------------------------------------------------------------------
-                                |
-                                | فقط برای نمایش و جستجو در فرم.
-                                | مقدار اصلی در جدول Media ذخیره می‌شود.
-                                |
-                                */
-
-                                // TextInput::make('featured_media_title')
-                                //     ->label('نام رسانه')
-                                //     ->placeholder('نام یا عنوان تصویر را وارد کنید')
-                                //     ->maxLength(255)
-                                //     ->live()
-                                //     ->visible(fn ($get) => filled($get('featured_media_id'))),
 
 
-                                /*
-                                |--------------------------------------------------------------------------
-                                | Select Image
-                                |--------------------------------------------------------------------------
-                                */
+                                                
+                                                    Hidden::make('gallery_media')
+                                                        ->default([])
+                                                        ->live()
+                                                        ->dehydrated(true),
 
-                                Actions::make([
+                                                    Actions::make([
 
-                                    Action::make('selectFeatured')
-                                        ->label('انتخاب تصویر')
-                                        ->icon('heroicon-o-photo')
-                                        ->modalHeading('انتخاب تصویر شاخص')
-                                        ->modalWidth('7xl')
-                                        ->modalSubmitAction(false)
-                                        ->modalCancelActionLabel('بستن')
+                                                        Action::make('selectGallery')
+                                                            ->label('انتخاب تصاویر گزارش تصویری')
+                                                            ->icon('heroicon-o-photo')
+                                                            ->color('primary')
+                                                            ->modalHeading('انتخاب تصاویر گزارش تصویری')
+                                                            ->modalDescription(
+                                                                'حداکثر ۱۵ تصویر انتخاب کنید. تصاویر جدید نیز می‌توانید آپلود و پردازش کنید.'
+                                                            )
+                                                            ->modalWidth('7xl')
+                                                            ->modalSubmitAction(false)
+                                                            ->modalCancelActionLabel('بستن')
+                                                            ->modalContent(
+                                                                fn () => view(
+                                                                    'filament.media.gallery-picker-wrapper'
+                                                                )
+                                                            ),
 
-                                        ->modalContent(
-                                            fn () => view(
-                                                'filament.media.featured-picker-wrapper'
-                                            )
-                                        ),
+                                                    ])
+                                                        ->visible(
+                                                            fn ($get) =>
+                                                                filled($get('report_type')) &&
+                                                                ReportType::whereKey($get('report_type'))
+                                                                    ->where('name', 'گزارش تصویری')
+                                                                    ->exists()
+                                                        ),
+
+
+                                                        Placeholder::make('gallery_preview')
+                                                            ->hiddenLabel()
+                                                            ->content(function ($get) {
+
+                                                                $gallery = $get('gallery_media');
+
+                                                                if (is_string($gallery)) {
+
+                                                                    $gallery =
+                                                                        json_decode(
+                                                                            $gallery,
+                                                                            true
+                                                                        ) ?: [];
+                                                                }
+
+                                                                if (! is_array($gallery) || empty($gallery)) {
+
+                                                                    return 'هنوز تصویری برای گزارش تصویری انتخاب نشده است.';
+                                                                }
+
+                                                                return view(
+                                                                    'filament.media.news-gallery-preview',
+                                                                    [
+                                                                        'items' => $gallery,
+                                                                    ]
+                                                                );
+                                                            })
+                                                            ->visible(
+                                                                fn ($get) =>
+                                                                    filled($get('report_type')) &&
+                                                                    \App\Models\ReportType::whereKey($get('report_type'))
+                                                                        ->where('name', 'گزارش تصویری')
+                                                                        ->exists()
+                                                            ),
+
+                                                            View::make('filament.forms.field-errors.gallery-media')
+                                                                ->columnSpanFull(),
+
+                                        ]),
+
+                                    Section::make('تنظیمات فنی')
+                                        ->collapsed()
+                                        ->schema([
+
+                                            TextInput::make('slug')
+                                                ->label('اسلاگ')
+                                                ->required()
+                                                ->unique(ignoreRecord: true)
+                                                ->maxLength(255),
+
+                                        ]),
 
                                 ]),
 
+                                                        /*
+                            |--------------------------------------------------------------------------
+                            | ستون کناری
+                            |--------------------------------------------------------------------------
+                            */
 
-                                /*
-                                |--------------------------------------------------------------------------
-                                | Preview
-                                |--------------------------------------------------------------------------
-                                */
+                            Grid::make()
+                                ->columnSpan([
+                                    'lg' => 4,
+                                ])
+                                ->schema([
 
-                                Placeholder::make('featured_preview')
-                                    ->hiddenLabel()
+                            Section::make('تصویر شاخص')
+                                ->schema([
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Featured Media ID
+                                    |--------------------------------------------------------------------------
+                                    */
 
-                                    ->content(function ($get) {
+                                    Hidden::make('featured_media_id')
+                                        ->default(null)
+                                        ->live()
+                                        ->dehydrated(true),
 
-                                        $id = $get('featured_media_id');
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Featured Media Variant
+                                    |--------------------------------------------------------------------------
+                                    */
 
-                                        $variant = $get('featured_media_variant');
+                                    Hidden::make('featured_media_variant')
+                                        ->default(null)
+                                        ->live()
+                                        ->dehydrated(true),
 
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | No media selected
-                                        |--------------------------------------------------------------------------
-                                        */
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Select Featured Image
+                                    |--------------------------------------------------------------------------
+                                    */
 
-                                        if (! $id) {
+                                    Actions::make([
+                                        Action::make('selectFeatured')
+                                            ->label('انتخاب تصویر')
+                                            ->icon('heroicon-o-photo')
+                                            ->modalHeading('انتخاب تصویر شاخص')
+                                            ->modalWidth('7xl')
+                                            ->modalSubmitAction(false)
+                                            ->modalCancelActionLabel('بستن')
+                                            ->modalContent(
+                                                fn () => view(
+                                                    'filament.media.featured-picker-wrapper'
+                                                )
+                                            ),
+                                    ]),
 
-                                            return 'هنوز تصویری انتخاب نشده است.';
+                                    /*
+                                    |--------------------------------------------------------------------------
+                                    | Featured Image Preview
+                                    |--------------------------------------------------------------------------
+                                    */
 
-                                        }
+                                    Placeholder::make('featured_preview')
+                                        ->hiddenLabel()
+                                        ->content(function ($get) {
 
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | Variant must exist
-                                        |--------------------------------------------------------------------------
-                                        */
+                                            $id = $get('featured_media_id');
 
-                                        if (! $variant) {
+                                            $variant = $get('featured_media_variant');
 
-                                            return 'نسخه تصویر انتخاب نشده است.';
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | No media selected
+                                            |--------------------------------------------------------------------------
+                                            */
 
-                                        }
+                                            if (! $id) {
+                                                return 'هنوز تصویری انتخاب نشده است.';
+                                            }
 
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | Find media
-                                        |--------------------------------------------------------------------------
-                                        */
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Variant missing
+                                            |--------------------------------------------------------------------------
+                                            */
 
-                                        $media = \App\Models\Media::find($id);
+                                            if (! $variant) {
+                                                return 'نسخه تصویر انتخاب نشده است.';
+                                            }
 
-                                        if (! $media) {
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Find media
+                                            |--------------------------------------------------------------------------
+                                            */
 
-                                            return 'تصویر پیدا نشد.';
+                                            $media = \App\Models\Media::find($id);
 
-                                        }
+                                            if (! $media) {
+                                                return 'تصویر پیدا نشد.';
+                                            }
 
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | EXACT selected variant
-                                        |--------------------------------------------------------------------------
-                                        */
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Get exact selected variant
+                                            |--------------------------------------------------------------------------
+                                            */
 
-                                        $url = $media->variantUrl(
-                                            $variant
-                                        );
+                                            $url = $media->variantUrl($variant);
 
-                                        /*
-                                        |--------------------------------------------------------------------------
-                                        | Requested variant does not exist
-                                        |--------------------------------------------------------------------------
-                                        */
-
-                                        if (! $url) {
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Render preview
+                                            |--------------------------------------------------------------------------
+                                            */
 
                                             return view(
                                                 'filament.media.featured-preview',
                                                 [
                                                     'media' => $media,
                                                     'variant' => $variant,
-                                                    'url' => null,
+                                                    'url' => $url,
                                                 ]
                                             );
+                                        }),
 
-                                        }
+                                        View::make('filament.forms.field-errors.featured-media')
+                                            ->columnSpanFull(),
+                                ]),
 
-                                        return view(
-                                            'filament.media.featured-preview',
-                                            [
-                                                'media' => $media,
-                                                'variant' => $variant,
-                                                'url' => $url,
-                                            ]
-                                        );
+                                        
+                                    Section::make('انتشار')
+                                        ->schema([
 
-                                    })
+                                            Select::make('status')
+                                                ->label('وضعیت')
+                                                ->options([
+                                                    NewsStatus::Draft->value => 'پیش‌نویس',
+                                                    NewsStatus::Scheduled->value => 'زمان‌بندی انتشار',
+                                                ])
+                                                ->default(NewsStatus::Draft->value)
+                                                ->live(),
 
-                            ]),
+                                            DateTimePicker::make('published_at')
+                                                ->label('زمان انتشار')
+                                                ->seconds(false)
+                                                ->timezone('Asia/Tehran')
+                                                ->disabled(
+                                                    fn () => auth()->user()->hasRole('Reporter')
+                                                )
+                                                ->visible(
+                                                    fn ($get) =>
+                                                        $get('status') === NewsStatus::Scheduled->value
+                                                )
+                                                ->required(
+                                                    fn ($get) =>
+                                                        $get('status') === NewsStatus::Scheduled->value
+                                                ),
 
-                                    
-                                Section::make('انتشار')
-                                    ->schema([
+                                        ]),
 
-                                        Select::make('status')
-                                            ->label('وضعیت')
-                                            ->options([
-                                                NewsStatus::Draft->value => 'پیش‌نویس',
-                                                NewsStatus::Scheduled->value => 'زمان‌بندی انتشار',
-                                            ])
-                                            ->default(NewsStatus::Draft->value)
+
+                                    Section::make('اقدامات')
+                                        ->schema([
+
+                                            Select::make('categories')
+                                                ->label('دسته‌بندی')
+                                                ->relationship('categories', 'name')
+                                                ->multiple()
+                                                ->searchable()
+                                                ->preload()
+                                                ->required(),
+
+                                            Select::make('tags')
+                                                ->label('برچسب‌ها')
+                                                ->relationship('tags', 'name')
+                                                ->multiple()
+                                                ->searchable()
+                                                ->preload()
+                                                ->required(),
+
+                                                
+                                        Select::make('report_type')
+                                            ->label('نوع مطلب')
+                                            ->relationship(
+                                                name: 'reportType',
+                                                titleAttribute: 'name'
+                                            )
+                                            ->searchable()
+                                            ->preload()
+                                            ->required()
                                             ->live(),
 
-                                        DateTimePicker::make('published_at')
-                                            ->label('زمان انتشار')
-                                            ->seconds(false)
-                                            ->timezone('Asia/Tehran')
-                                            ->disabled(
-                                                fn () => auth()->user()->hasRole('Reporter')
-                                            )
-                                            ->visible(
-                                                fn ($get) =>
-                                                    $get('status') === NewsStatus::Scheduled->value
-                                            )
-                                            ->required(
-                                                fn ($get) =>
-                                                    $get('status') === NewsStatus::Scheduled->value
-                                            ),
-
-                                    ]),
-
-
-                                Section::make('اقدامات')
-                                    ->schema([
-
-                                        Select::make('categories')
-                                            ->label('دسته‌بندی')
-                                            ->relationship('categories', 'name')
-                                            ->multiple()
-                                            ->searchable()
-                                            ->preload()
+                                        Select::make('production_method')
+                                            ->label('نحوه تولید')
+                                            ->options([
+                                                'بازنشری' => 'بازنشری',
+                                                'پوششی' => 'پوششی',
+                                                'تولیدی' => 'تولیدی',
+                                                'دریافتی' => 'دریافتی',
+                                            ])
+                                            ->native(false)
                                             ->required(),
 
-                                        Select::make('tags')
-                                            ->label('برچسب‌ها')
-                                            ->relationship('tags', 'name')
-                                            ->multiple()
-                                            ->searchable()
-                                            ->preload()
-                                            ->required(),
 
-                                            
-                                    Select::make('report_type')
-                                        ->label('نوع مطلب')
-                                        ->relationship(
-                                            name: 'reportType',
-                                            titleAttribute: 'name'
-                                        )
-                                        ->searchable()
-                                        ->preload()
-                                        ->required(),
-
-                                    Select::make('production_method')
-                                        ->label('نحوه تولید')
-                                        ->options([
-                                            'بازنشری' => 'بازنشری',
-                                            'پوششی' => 'پوششی',
-                                            'تولیدی' => 'تولیدی',
-                                            'دریافتی' => 'دریافتی',
-                                        ])
-                                        ->native(false)
-                                        ->required(),
-
-
-                                    ]),
+                                        ]),
 
 
 
-                            ]),
+                                ]),
 
-                    ]),
+                        ]),
 
             ]);
     }
