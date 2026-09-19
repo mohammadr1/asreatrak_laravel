@@ -456,11 +456,12 @@
     {{-- ========================================================= --}}
 
     <div
+        x-data="{ isDragging: false, dropFiles(event) { this.isDragging = false; const input = this.$refs.fileInput; const transfer = new DataTransfer(); Array.from(event.dataTransfer.files).filter(file => file.type.startsWith('image/')).forEach(file => transfer.items.add(file)); input.files = transfer.files; input.dispatchEvent(new Event('change', { bubbles: true })); } }"
         class="
-            mb-8 rounded-2xl border-2 border-dashed
+            mb-8 rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-indigo-50/50 p-4 shadow-sm ring-1 ring-slate-900/[0.03]
             border-slate-300 bg-slate-50 p-6
             transition hover:border-indigo-400
-            dark:border-slate-700 dark:bg-slate-950
+            dark:border-slate-700 dark:bg-slate-950 sm:p-6
             dark:hover:border-indigo-500
         "
     >
@@ -515,8 +516,11 @@
 
         <label
             for="media-upload"
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="dropFiles($event)"
             class="
-                flex cursor-pointer
+                group flex min-h-48 cursor-pointer
                 flex-col items-center
                 justify-center
                 rounded-2xl
@@ -525,7 +529,7 @@
                 bg-white
                 px-6 py-8
                 text-center
-                transition
+                transition duration-300
                 hover:border-indigo-500
                 hover:bg-indigo-50/30
                 dark:border-slate-700
@@ -533,7 +537,12 @@
                 dark:hover:border-indigo-500
                 dark:hover:bg-indigo-950/20
             "
+            :class="isDragging ? 'border-indigo-500 bg-indigo-100/70 ring-4 ring-indigo-500/10 dark:bg-indigo-950/40' : ''"
         >
+
+            <div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/25 transition duration-300 group-hover:-translate-y-1" aria-hidden="true">
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0 4 4m-4-4L8 8M5 20h14a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-3l-1.2 2h-5.6L8 15H5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1Z" /></svg>
+            </div>
 
             <div
                 class="
@@ -561,7 +570,8 @@
                 wire:model="uploads"
                 multiple
                 accept="image/*"
-                class="hidden"
+                x-ref="fileInput"
+                class="sr-only"
             >
 
         </label>
@@ -1124,16 +1134,11 @@
 
         <div
             class="
-                fixed
-                inset-0
-                z-[99999]
-                flex
-                items-center
-                justify-center
-                bg-slate-950/80
-                p-2
+                fixed inset-0 z-[99999]
+                overflow-y-auto
+                bg-slate-950/80 p-2
                 backdrop-blur-sm
-                sm:p-4
+                sm:flex sm:items-center sm:justify-center sm:p-4
             "
         >
 
@@ -1417,30 +1422,11 @@
                 x-init="init()"
 
                 x-on:close-cropper.window="destroy()"
-
                 class="
-                    flex
-                    h-[calc(100dvh-1rem)]
-                    max-h-[calc(100dvh-1rem)]
-
-                    w-full
-                    max-w-7xl
-
-                    flex-col
-                    overflow-hidden
-
-                    rounded-2xl
-                    bg-white
-                    shadow-2xl
-
-                    ring-1
-                    ring-black/10
-
-                    dark:bg-slate-900
-
-                    sm:h-[calc(100dvh-2rem)]
-                    sm:max-h-[calc(100dvh-2rem)]
-                    sm:rounded-3xl
+                    mx-auto flex w-full max-w-7xl flex-col
+                    overflow-hidden rounded-2xl bg-white shadow-2xl
+                    ring-1 ring-black/10 dark:bg-slate-900
+                    sm:my-0 sm:rounded-3xl
                 "
             >
 
@@ -1590,38 +1576,28 @@
 
                 <div
                     class="
-                        min-h-0
-                        flex-1
+                        h-[55vh]
+                        min-h-[300px]
+                        w-full
+                        shrink-0
                         overflow-hidden
                         bg-slate-950
+                        sm:h-[60vh]
+                        sm:flex-1
                     "
                 >
-
                     <div
                         id="cropper-container"
-                        class="
-                            relative
-                            h-full
-                            min-h-0
-                            w-full
-                            overflow-hidden
-                        "
+                        class="relative h-full min-h-0 w-full overflow-hidden"
                     >
-
                         <img
                             id="cropper-image"
                             src="{{ $cropImage }}"
                             alt="Crop image"
                             draggable="false"
-                            class="
-                                block
-                                max-w-none
-                                select-none
-                            "
+                            class="block max-w-none select-none"
                         >
-
                     </div>
-
                 </div>
 
 
@@ -1629,346 +1605,74 @@
                 {{-- Tools --}}
                 {{-- ================================================= --}}
 
+                {{-- ================================================= --}}
+                {{-- Tools (نسخه اصلاح‌شده - ارتفاع ثابت، بدون شکستن) --}}
+                {{-- ================================================= --}}
+
                 <div
                     class="
-                        flex
-                        shrink-0
-                        flex-wrap
-                        items-center
-                        justify-center
-                        gap-2
-
-                        border-t
-                        border-slate-200
-                        bg-white
-
-                        px-3
-                        py-3
-
-                        dark:border-slate-800
-                        dark:bg-slate-900
-
-                        sm:gap-2.5
-                        sm:px-5
-                        sm:py-3
+                        flex shrink-0 flex-col gap-3
+                        border-t border-slate-200 bg-white
+                        px-3 py-3
+                        dark:border-slate-800 dark:bg-slate-900
+                        sm:px-5 sm:py-3
                     "
                 >
 
-                    {{-- Rotate Left --}}
-
-                    <button
-                        type="button"
-                        x-on:click="rotateLeft()"
-                        class="
-                            flex
-                            h-10
-                            w-10
-                            items-center
-                            justify-center
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            bg-slate-50
-
-                            text-slate-700
-
-                            transition
-
-                            hover:bg-slate-100
-
-                            focus:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-indigo-400
-
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:hover:bg-slate-700
-                        "
-                        title="چرخش به چپ"
-                    >
-
-                        ↶
-
-                    </button>
-
-
-                    {{-- Rotate Right --}}
-
-                    <button
-                        type="button"
-                        x-on:click="rotateRight()"
-                        class="
-                            flex
-                            h-10
-                            w-10
-                            items-center
-                            justify-center
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            bg-slate-50
-
-                            text-slate-700
-
-                            transition
-
-                            hover:bg-slate-100
-
-                            focus:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-indigo-400
-
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:hover:bg-slate-700
-                        "
-                        title="چرخش به راست"
-                    >
-
-                        ↷
-
-                    </button>
-
-
-                    {{-- Zoom Out --}}
-
-                    <button
-                        type="button"
-                        x-on:click="zoomOut()"
-                        class="
-                            flex
-                            h-10
-                            w-10
-                            items-center
-                            justify-center
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            bg-slate-50
-
-                            text-lg
-                            font-black
-                            text-slate-700
-
-                            transition
-
-                            hover:bg-slate-100
-
-                            focus:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-indigo-400
-
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:hover:bg-slate-700
-                        "
-                        title="کوچک‌نمایی"
-                    >
-
-                        −
-
-                    </button>
-
-
-                    {{-- Zoom In --}}
-
-                    <button
-                        type="button"
-                        x-on:click="zoomIn()"
-                        class="
-                            flex
-                            h-10
-                            w-10
-                            items-center
-                            justify-center
-
-                            rounded-xl
-
-                            border
-                            border-slate-200
-                            bg-slate-50
-
-                            text-lg
-                            font-black
-                            text-slate-700
-
-                            transition
-
-                            hover:bg-slate-100
-
-                            focus:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-indigo-400
-
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:hover:bg-slate-700
-                        "
-                        title="بزرگ‌نمایی"
-                    >
-
-                        +
-
-                    </button>
-
-
-                    {{-- Reset --}}
-
-                    <button
-                        type="button"
-                        x-on:click="reset()"
-                        class="
-                            rounded-xl
-                            border
-                            border-slate-200
-                            bg-slate-50
-
-                            px-4
-                            py-2.5
-
-                            text-xs
-                            font-black
-                            text-slate-700
-
-                            transition
-
-                            hover:bg-slate-100
-
-                            focus:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-indigo-400
-
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:hover:bg-slate-700
-                        "
-                    >
-                        بازنشانی
-                    </button>
-
-
-                    {{-- Spacer --}}
-
-                    <div class="hidden flex-1 sm:block"></div>
-
-
-                    {{-- Cancel --}}
-
-                    <button
-                        type="button"
-                        wire:click="$set('showCropModal', false)"
-                        x-on:click="destroy()"
-                        class="
-                            order-2
-                            w-full
-
-                            rounded-xl
-
-                            border
-                            border-slate-300
-                            bg-white
-
-                            px-5
-                            py-2.5
-
-                            text-sm
-                            font-bold
-                            text-slate-700
-
-                            transition
-
-                            hover:bg-slate-50
-
-                            focus:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-indigo-400
-
-                            dark:border-slate-700
-                            dark:bg-slate-800
-                            dark:text-slate-200
-                            dark:hover:bg-slate-700
-
-                            sm:order-none
-                            sm:w-auto
-                        "
-                    >
-                        لغو
-                    </button>
-
-
-                    {{-- Save --}}
-
-                    <button
-                        type="button"
-                        x-on:click="save()"
-                        wire:loading.attr="disabled"
-                        wire:target="saveCrop"
-                        class="
-                            order-1
-                            flex
-                            w-full
-                            items-center
-                            justify-center
-                            gap-2
-
-                            rounded-xl
-
-                            bg-indigo-600
-
-                            px-6
-                            py-2.5
-
-                            text-sm
-                            font-black
-                            text-white
-
-                            shadow-lg
-                            shadow-indigo-600/20
-
-                            transition
-
-                            hover:bg-indigo-700
-
-                            focus:outline-none
-                            focus-visible:ring-2
-                            focus-visible:ring-indigo-400
-
-                            active:scale-[0.98]
-
-                            disabled:cursor-not-allowed
-                            disabled:opacity-50
-
-                            sm:order-none
-                            sm:w-auto
-                        "
-                    >
-
-                        <span
-                            wire:loading.remove
-                            wire:target="saveCrop"
+                    {{-- ردیف ۱: ابزارها - افقی و اسکرول‌پذیر، هرگز نمی‌شکنه --}}
+                        <div
+                            class="
+                                flex items-center justify-center gap-2
+                                overflow-x-auto pb-1
+                                [scrollbar-width:none]
+                                [-ms-overflow-style:none]
+                                [&::-webkit-scrollbar]:hidden
+                            "
                         >
-                            تأیید و ادامه
-                        </span>
+                            <button type="button" x-on:click="rotateLeft()"
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                title="چرخش به چپ">↶</button>
 
-                        <span
-                            wire:loading
-                            wire:target="saveCrop"
-                        >
-                            در حال پردازش...
-                        </span>
+                            <button type="button" x-on:click="rotateRight()"
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                title="چرخش به راست">↷</button>
 
-                    </button>
+                            <button type="button" x-on:click="zoomOut()"
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-lg font-black text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                title="کوچک‌نمایی">−</button>
+
+                            <button type="button" x-on:click="zoomIn()"
+                                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-lg font-black text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+                                title="بزرگ‌نمایی">+</button>
+
+                            <button type="button" x-on:click="reset()"
+                                class="h-10 shrink-0 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-4 text-xs font-black text-slate-700 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                                بازنشانی
+                            </button>
+                        </div>
+
+                    {{-- ردیف ۲: لغو / تأیید - همیشه کنار هم، هرگز زیر هم --}}
+                        <div class="flex flex-col gap-2 sm:flex-row sm:justify-end">
+
+                            <button type="button"
+                                wire:click="$set('showCropModal', false)"
+                                x-on:click="destroy()"
+                                class="h-11 rounded-xl border border-slate-300 bg-white px-6 text-sm font-bold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 sm:w-auto"
+                            >
+                                لغو
+                            </button>
+
+                            <button type="button"
+                                x-on:click="save()"
+                                wire:loading.attr="disabled"
+                                wire:target="saveCrop"
+                                class="flex h-11 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 text-sm font-black shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                            >
+                                <span wire:loading.remove wire:target="saveCrop">تأیید و ادامه</span>
+                                <span wire:loading wire:target="saveCrop">در حال پردازش...</span>
+                            </button>
+
+                        </div>
 
                 </div>
 

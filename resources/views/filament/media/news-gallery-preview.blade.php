@@ -1,12 +1,7 @@
 <div
     dir="rtl"
-    class="
-        mt-4
-        overflow-hidden
-        rounded-2xl
-        border border-slate-200
-        bg-white
-        shadow-sm
+        class="
+        mt-4 overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm ring-1 ring-slate-900/[0.03]
         dark:border-slate-700
         dark:bg-slate-900
     "
@@ -21,8 +16,7 @@
             justify-between
             border-b
             border-slate-200
-            px-4
-            py-3
+                px-4 py-4
             dark:border-slate-700
         "
     >
@@ -58,13 +52,10 @@
 
     {{-- Images --}}
 
-    <div
-        class="
-            grid
-            grid-cols-2
-            gap-3
-            p-4
-            sm:grid-cols-3
+            <div
+                class="
+                    grid grid-cols-2 gap-3 bg-slate-50/70 p-4 sm:grid-cols-3
+                    lg:grid-cols-4 dark:bg-slate-950/30
         "
     >
 
@@ -87,14 +78,11 @@
             @if($url)
 
                 <div
-                    class="
-                        group
-                        relative
-                        overflow-hidden
-                        rounded-xl
+                        class="
+                        group relative overflow-hidden rounded-2xl
                         border
                         border-slate-200
-                        bg-slate-100
+                        bg-slate-100 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg
                         dark:border-slate-700
                         dark:bg-slate-800
                     "
@@ -104,13 +92,11 @@
                         src="{{ $url }}"
                         alt="تصویر گزارش تصویری {{ $index + 1 }}"
                         loading="lazy"
-                        class="
+                            class="
                             aspect-[4/3]
                             w-full
                             object-cover
-                            transition
-                            duration-300
-                            group-hover:scale-105
+                            transition duration-500 group-hover:scale-105
                         "
                     >
 

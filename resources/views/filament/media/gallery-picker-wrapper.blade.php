@@ -1,19 +1,11 @@
 <div
-    x-data="{
-        syncGallery(event) {
+    x-data='{
+        isSyncing: false,
 
-            console.log('GALLERY EVENT RECEIVED:', event);
+        async syncGallery(event, wire, element) {
+            const detail = event.detail ?? {};
 
-            const detail = event.detail || {};
-
-            console.log('GALLERY EVENT DETAIL:', detail);
-
-            if (detail.context !== 'gallery') {
-                console.log(
-                    'IGNORED EVENT - CONTEXT:',
-                    detail.context
-                );
-
+            if (detail.context !== "gallery" || this.isSyncing) {
                 return;
             }
 
@@ -21,135 +13,38 @@
                 ? detail.items
                 : [];
 
-            console.log('GALLERY ITEMS:', items);
-
-            if (!items.length) {
-
-                console.warn(
-                    'GALLERY EVENT HAS NO ITEMS'
-                );
-
+            if (items.length === 0) {
                 return;
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | Find Filament hidden input
-            |--------------------------------------------------------------------------
-            */
+            const modal = element.closest("[data-fi-modal-id]");
+            const modalId = modal?.getAttribute("data-fi-modal-id");
 
-            let input =
-                document.querySelector(
-                    '#data\\.gallery_media'
-                );
+            this.isSyncing = true;
 
-            /*
-            |--------------------------------------------------------------------------
-            | Fallback
-            |--------------------------------------------------------------------------
-            */
+            try {
+                await wire.set("data.gallery_media", items);
 
-            if (!input) {
-
-                input =
-                    document.querySelector(
-                        'input[name=\"data[gallery_media]\"]'
-                    );
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Input not found
-            |--------------------------------------------------------------------------
-            */
-
-            if (!input) {
-
-                console.error(
-                    'GALLERY MEDIA INPUT NOT FOUND'
-                );
-
-                console.log(
-                    'AVAILABLE INPUTS:',
-                    document.querySelectorAll('input')
-                );
-
-                return;
-            }
-
-            console.log(
-                'GALLERY MEDIA INPUT FOUND:',
-                input
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Save selected images
-            |--------------------------------------------------------------------------
-            */
-
-            const value =
-                JSON.stringify(items);
-
-            input.value = value;
-
-            /*
-            |--------------------------------------------------------------------------
-            | Notify Filament
-            |--------------------------------------------------------------------------
-            */
-
-            input.dispatchEvent(
-                new Event('input', {
-                    bubbles: true,
-                })
-            );
-
-            input.dispatchEvent(
-                new Event('change', {
-                    bubbles: true,
-                })
-            );
-
-            input.dispatchEvent(
-                new Event('blur', {
-                    bubbles: true,
-                })
-            );
-
-            console.log(
-                'GALLERY MEDIA SYNCED:',
-                items
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | Close modal
-            |--------------------------------------------------------------------------
-            */
-
-            setTimeout(() => {
-
-                const closeButton =
-                    document.querySelector(
-                        '[x-on\\:click*=\"close\"]'
+                if (modalId) {
+                    window.dispatchEvent(
+                        new CustomEvent("close-modal", {
+                            detail: { id: modalId },
+                        }),
                     );
 
-                if (closeButton) {
-                    closeButton.click();
+                    return;
                 }
 
-            }, 300);
-        }
-    }"
-
-    x-on:media-multiple-selected.window="syncGallery($event)"
-
+                modal
+                    ?.querySelector(".fi-modal-close-btn")
+                    ?.click();
+            } finally {
+                this.isSyncing = false;
+            }
+        },
+    }'
+    x-on:media-multiple-selected.window="syncGallery($event, $wire, $el)"
     class="w-full"
 >
-
-    <livewire:media.featured-picker
-        context="gallery"
-    />
-
+    <livewire:media.featured-picker context="gallery" />
 </div>
