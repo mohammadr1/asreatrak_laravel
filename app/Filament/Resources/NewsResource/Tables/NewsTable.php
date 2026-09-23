@@ -70,6 +70,8 @@ class NewsTable
 
             ])
 
+            ->defaultSort('created_at', 'desc')
+
             ->actions([
 
             

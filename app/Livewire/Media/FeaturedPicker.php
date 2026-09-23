@@ -1763,8 +1763,8 @@ class FeaturedPicker extends Component
                     watermark: $watermark,
                     outputPath: $watermarkedAbsolutePath,
                     position: 'bottom-left',
-                    scale: 22,
-                    padding: 30,
+                    scale: 17,
+                    padding: 2,
                 );
             } catch (\Throwable $e) {
                 report($e);
