@@ -93,7 +93,7 @@
                         alt="تصویر گزارش تصویری {{ $index + 1 }}"
                         loading="lazy"
                             class="
-                            aspect-[4/3]
+                            aspect-[16/9]
                             w-full
                             object-cover
                             transition duration-500 group-hover:scale-105

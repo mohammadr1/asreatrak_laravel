@@ -2,6 +2,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>عصراترک | Asreatrak.ir</title>
 
+<script>
+    (() => {
+        const savedTheme = localStorage.getItem('theme');
+        document.documentElement.classList.toggle('dark', savedTheme !== 'light');
+    })();
+</script>
+
 <!-- Bootstrap 5 RTL -->
 <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.rtl.min.css') }}">
 <!-- <link rel="stylesheet" href="{{ asset('assets/css/bootstrap-icons.css') }}"> -->

@@ -57,8 +57,8 @@
 
 
 <!-- Scroll to Top -->
-<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
-  <i class="bi bi-chevron-up"></i>
+<button id="scrollTop" type="button" aria-label="بازگشت به ابتدای صفحه" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <i class="bi bi-chevron-up" aria-hidden="true"></i>
 </button>
 
 

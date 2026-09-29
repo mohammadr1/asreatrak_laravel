@@ -70,10 +70,14 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::BODY_END,
                 fn (): string => Vite::useHotFile(storage_path('vite.hot'))
-                    ->withEntryPoints([
-                        'resources/js/app.js',
-                    ])
-                    ->toHtml()
+                        ->withEntryPoints([
+                            'resources/js/app.js',
+                        ])
+                        ->toHtml()
+            )
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => view('filament.partials.admin-assets')->render()
             );
     }
 }

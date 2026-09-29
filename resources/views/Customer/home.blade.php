@@ -1,8 +1,8 @@
 @extends('customer.layouts.master-one-col')
 
-<link rel="stylesheet" href="{{ asset('assets/css/media_card_home_gallery.css') }}">
 @section('head-tag')
-<title>{{ env('APP_NAME') }}</title>
+<link rel="stylesheet" href="{{ asset('assets/css/media_card_home_gallery.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
 @endsection
 
 @section('content')
@@ -19,7 +19,7 @@
             <!-- Slide 1 -->
             <div class="hero-slide active">
               <div class="hero-slide-img">
-                <img src="{{ asset('assets/images/header.png') }}" alt="خبر ویژه ۱"/>
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه ۱"/>
                 <span class="category-badge">سیاسی</span>
               </div>
               <div class="hero-slide-body">
@@ -44,7 +44,7 @@
             <!-- Slide 2 -->
             <div class="hero-slide">
               <div class="hero-slide-img">
-                <img src="{{ asset('assets/images/header.png') }}" alt="خبر ویژه ۲"/>
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه ۲"/>
                 <span class="category-badge" >فناوری</span>
               </div>
               <div class="hero-slide-body">
@@ -69,13 +69,13 @@
           </div><!-- /.hero-slider -->
 
           <!-- Slider Controls -->
-          <div class="slider-controls">
+          <div class="slider-controls" role="group" aria-label="کنترل اخبار اسلایدر">
+            <button class="slider-btn" id="prevSlide" type="button" aria-label="خبر قبلی"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
             <div class="slider-dots">
-              <button class="slider-dot active" onclick="goToSlide(0)"></button>
-              <button class="slider-dot" onclick="goToSlide(1)"></button>
+              <button class="slider-dot active" type="button" onclick="goToSlide(0)" aria-label="نمایش خبر ویژه اول"></button>
+              <button class="slider-dot" type="button" onclick="goToSlide(1)" aria-label="نمایش خبر ویژه دوم"></button>
             </div>
-            <button class="slider-btn" id="prevSlide"><i class="bi bi-chevron-right"></i></button>
-            <button class="slider-btn" id="nextSlide"><i class="bi bi-chevron-left"></i></button>
+            <button class="slider-btn" id="nextSlide" type="button" aria-label="خبر بعدی"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
           </div>
         </div>
         <!-- /HERO SLIDER -->
@@ -91,7 +91,7 @@
             <div class="col-md-3 col-sm-6">
               <div class="news-card">
                 <div class="news-card-img">
-                  <img src="{{ asset('assets/images/header.png') }}" alt="خبر ویژه"/>
+                  <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه"/>
                   <span class="news-card-badge badge-red">سیاسی</span>
                   <div class="overlay-title">
                     <h5><a href="#">سفر هیئت دولت به استان خراسان شمالی و افتتاح پروژه‌ها</a></h5>
@@ -103,7 +103,7 @@
             <div class="col-md-3 col-sm-6">
               <div class="news-card">
                 <div class="news-card-img">
-                  <img src="{{ asset('assets/images/header.png') }}" alt="خبر ویژه"/>
+                  <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه"/>
                   <span class="news-card-badge badge-blue">اقتصادی</span>
                   <div class="overlay-title">
                     <h5><a href="#">رشد ۲۵ درصدی تولیدات صنعتی بجنورد در سال جاری</a></h5>
@@ -115,7 +115,7 @@
             <div class="col-md-3 col-sm-6">
               <div class="news-card">
                 <div class="news-card-img">
-                  <img src="{{ asset('assets/images/header.png') }}" alt="خبر ویژه"/>
+                  <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه"/>
                   <span class="news-card-badge badge-green">اجتماعی</span>
                   <div class="overlay-title">
                     <h5><a href="#">بهره‌برداری از مجتمع درمانی جدید در شیروان</a></h5>
@@ -127,7 +127,7 @@
             <div class="col-md-3 col-sm-6">
               <div class="news-card">
                 <div class="news-card-img">
-                  <img src="{{ asset('assets/images/header.png') }}" alt="خبر ویژه"/>
+                  <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه"/>
                   <span class="news-card-badge badge-orange">فرهنگی</span>
                   <div class="overlay-title">
                     <h5><a href="#">جشنواره فرهنگی آینه‌خانه در بجنورد برگزار می‌شود</a></h5>
@@ -148,7 +148,7 @@
             <div class="news-list-section fade-in">
               <!-- Item 1 -->
               <div class="news-row-item">
-                <div class="news-r{{ asset('assets/images/header.png') }}>
+                <div class="news-row-img"><img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="تصویر خبر" loading="lazy" decoding="async" /></div>
                 <div class="news-row-body">
                   <div class="news-row-overtitle">سیاسی — داخلی</div>
                   <a href="#" class="news-row-title">استاندار خراسان شمالی: توسعه زیرساخت‌های استان در اولویت برنامه‌های دولت قرار دارد</a>
@@ -162,7 +162,7 @@
               </div>
               <!-- Item 2 -->
               <div class="news-row-item">
-                <div class="news-r{{ asset('assets/images/header.png') }}>
+                <div class="news-row-img"><img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="تصویر خبر" loading="lazy" decoding="async" /></div>
                 <div class="news-row-body">
                   <div class="news-row-overtitle">اقتصادی</div>
                   <a href="#" class="news-row-title">نرخ بیکاری استان به پایین‌ترین رقم در ۵ سال اخیر رسید</a>
@@ -176,7 +176,7 @@
               </div>
               <!-- Item 3 -->
               <div class="news-row-item">
-                <div class="news-row-img"><img src="{{ asset('assets/images/header.png') }}" alt=""/></div>
+                <div class="news-row-img"><img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt=""/></div>
                 <div class="news-row-body">
                   <div class="news-row-overtitle">فرهنگی — هنری</div>
                   <a href="#" class="news-row-title">نمایشگاه بین‌المللی صنایع دستی خراسان شمالی در بجنورد گشایش یافت</a>
@@ -190,7 +190,7 @@
               </div>
               <!-- Item 4 -->
               <div class="news-row-item">
-                <div class="news-row-img"><img src="{{ asset('assets/images/header.png') }}" alt=""/></div>
+                <div class="news-row-img"><img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt=""/></div>
                 <div class="news-row-body">
                   <div class="news-row-overtitle">فناوری</div>
                   <a href="#" class="news-row-title">راه‌اندازی شبکه فیبر نوری پرسرعت در ۳۰ روستای استان</a>
@@ -204,7 +204,7 @@
               </div>
               <!-- Item 5 -->
               <div class="news-row-item">
-                <div class="news-row-img"><img src="{{ asset('assets/images/header.png') }}" alt=""/></div>
+                <div class="news-row-img"><img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt=""/></div>
                 <div class="news-row-body">
                   <div class="news-row-overtitle">ورزشی</div>
                   <a href="#" class="news-row-title">تیم فوتبال شاهین بجنورد به لیگ دسته اول صعود کرد</a>
@@ -218,7 +218,7 @@
               </div>
               <!-- Item 6 -->
               <div class="news-row-item">
-                <div class="news-row-img"><img src="{{ asset('assets/images/header.png') }}" alt=""/></div>
+                <div class="news-row-img"><img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt=""/></div>
                 <div class="news-row-body">
                   <div class="news-row-overtitle">اجتماعی</div>
                   <a href="#" class="news-row-title">اجرای طرح آب‌رسانی به ۱۵ روستای محروم شمال استان</a>
@@ -244,7 +244,7 @@
                 <span class="section-title"><i class="bi bi-file-earmark-text-fill me-1"></i>گزارش</span>
               </div>
               <div class="sidebar-news-card">
-                <img src="{{ asset('assets/images/header.png') }}" alt="گزارش"/>
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="گزارش"/>
                 <div class="card-overlay">
                   <h5><a href="#" >گزارش ویژه: وضعیت کشاورزی خراسان شمالی در سال آبی جدید</a></h5>
                   <div class="meta"><i class="bi bi-calendar3"></i> ۱۴۰۳/۰۲/۱۵ &nbsp;|&nbsp; <i class="bi bi-clock"></i> ۱۳:۰۰</div>
@@ -262,7 +262,7 @@
                 <span class="section-title"><i class="bi bi-chat-quote-fill me-1"></i>گفتگو</span>
               </div>
               <div class="sidebar-news-card">
-                <img src="{{ asset('assets/images/header.png') }}" alt="گفتگو"/>
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="گفتگو"/>
                 <div class="card-overlay">
                   <h5><a href="#" >گفتگو با رئیس اتاق بازرگانی استان درباره آینده تجارت منطقه</a></h5>
                   <div class="meta"><i class="bi bi-calendar3"></i> ۱۴۰۳/۰۲/۱۴ &nbsp;|&nbsp; <i class="bi bi-clock"></i> ۱۱:۳۰</div>
@@ -280,7 +280,7 @@
                 <span class="section-title"><i class="bi bi-pencil-square me-1"></i>یادداشت</span>
               </div>
               <div class="sidebar-news-card">
-                <img src="{{ asset('assets/images/header.png') }}" alt="یادداشت"/>
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="یادداشت"/>
                 <div class="card-overlay">
                   <h5><a href="#">ضرورت توجه به توسعه پایدار در استان‌های مرزی</a></h5>
                   <div class="meta"><i class="bi bi-calendar3"></i> ۱۴۰۳/۰۲/۱۳ &nbsp;|&nbsp; <i class="bi bi-clock"></i> ۰۸:۰۰</div>
@@ -312,8 +312,8 @@
             <!-- Photo Card -->
             <div class="col-md-6" data-type="photo">
               <div class="media-card"
-                onclick="openMedia('{{ asset('assets/images/header.png') }}','image')">
-                <img src="{{ asset('assets/images/header.png') }}" alt="تصویر"/>
+                onclick="openMedia('{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}','image')">
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="تصویر"/>
                 <div class="media-overlay">
                   <div class="media-meta"><i class="bi bi-image"></i> تصویر &nbsp;|&nbsp; <i class="bi bi-eye"></i> ۲,۱۰۰</div>
                   <div class="media-title">تصویری از جشنواره فرهنگی بجنورد — بهار ۱۴۰۳</div>
@@ -325,7 +325,7 @@
             <div class="col-md-6" data-type="video">
               <div class="media-card video-card"
                 onclick="openMedia('{{ asset('assets/videos/test.mp4') }}','video')">
-                <img src="{{ asset('assets/images/header.png') }}" alt="ویدیو"/>
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="ویدیو"/>
                 <div class="media-overlay">
                   <div class="media-meta"><i class="bi bi-play-circle"></i> ویدیو &nbsp;|&nbsp; <i class="bi bi-clock"></i> ۰۳:۴۲</div>
                   <div class="media-title">گزارش ویدیویی: افتتاح مرکز نوآوری بجنورد</div>
@@ -405,7 +405,7 @@
             <div class="weather-main">
               <div>
                 <div class="weather-city">بجنورد</div>
-                <div class="weather-icon">🌤️</div>
+                <div class="weather-icon" aria-hidden="true"><i class="bi bi-cloud-sun-fill"></i></div>
                 <div class="weather-desc">کمی ابری، خوشگذران</div>
               </div>
               <div class="text-end">
@@ -446,17 +446,17 @@
             <div class="weather-forecast">
               <div class="forecast-item">
                 <div class="forecast-day">دوشنبه</div>
-                <div class="forecast-icon">☁️</div>
+                <div class="forecast-icon" aria-hidden="true"><i class="bi bi-cloud-fill"></i></div>
                 <div class="forecast-temp">۱۹°</div>
               </div>
               <div class="forecast-item">
                 <div class="forecast-day">سه‌شنبه</div>
-                <div class="forecast-icon">🌦️</div>
+                <div class="forecast-icon" aria-hidden="true"><i class="bi bi-cloud-sun-fill"></i></div>
                 <div class="forecast-temp">۱۵°</div>
               </div>
               <div class="forecast-item">
                 <div class="forecast-day">چهارشنبه</div>
-                <div class="forecast-icon">🌧️</div>
+                <div class="forecast-icon" aria-hidden="true"><i class="bi bi-cloud-rain-fill"></i></div>
                 <div class="forecast-temp">۱۳°</div>
               </div>
               <div class="forecast-item">
@@ -466,7 +466,7 @@
               </div>
               <div class="forecast-item">
                 <div class="forecast-day">جمعه</div>
-                <div class="forecast-icon">☀️</div>
+                <div class="forecast-icon" aria-hidden="true"><i class="bi bi-sun-fill"></i></div>
                 <div class="forecast-temp">۲۵°</div>
               </div>
             </div>

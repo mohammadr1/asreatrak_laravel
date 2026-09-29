@@ -2,8 +2,8 @@
   <div class="container-xl">
     <div class="nav-inner">
       <!-- Hamburger -->
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation">
-        <i class="bi bi-list"></i>
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="باز کردن منوی اصلی" aria-controls="navLinks" aria-expanded="false">
+        <i class="bi bi-list" aria-hidden="true"></i>
       </button>
 
       <!-- Nav Links -->
@@ -37,8 +37,8 @@
       <div class="nav-right">
         <div class="nav-datetime">
           
-          <button onclick="toggleTheme()" class="theme-btn">
-            <i class="bi bi-moon"></i>
+          <button onclick="toggleTheme()" class="theme-btn" type="button" aria-label="تغییر حالت روشن و تیره">
+            <i class="bi bi-moon" aria-hidden="true"></i>
           </button>
           
         </div>

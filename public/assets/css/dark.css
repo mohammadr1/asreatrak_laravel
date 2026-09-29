@@ -16,9 +16,9 @@
 .dark .news-card,
 .dark .sidebar-widget,
 .dark .news-list-section,
-.dark .special-news-section, 
-.hero-slide-body, .sidebar-news-section, 
-.multimedia-section, .slider-btn {
+.dark .special-news-section,
+.dark .hero-slide-body, .dark .sidebar-news-section,
+.dark .multimedia-section, .dark .slider-btn {
   background: var(--bg-white);
 }
 
@@ -30,4 +30,8 @@
 /* ticker */
 .dark .breaking-bar {
   background: var(--bg-white);
+}
+
+.dark .ticker-inner {
+  color: #fff;
 }

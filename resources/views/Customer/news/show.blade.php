@@ -33,7 +33,7 @@
 
             <!-- Featured Image / Hero -->
             <div class="article-featured-image">
-                <img src="{{ asset('assets/images/header.png') }}" alt="نشست فوق‌العاده =شورای عالی استان‌ها" />
+                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="نشست فوق‌العاده =شورای عالی استان‌ها" />
                 <div class="fi-gradient"></div>
                 <span class="article-category-badge">سیاسی</span>
             </div>

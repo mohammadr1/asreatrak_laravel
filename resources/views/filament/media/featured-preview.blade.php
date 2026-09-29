@@ -5,7 +5,7 @@
         <img
             src="{{ $url }}"
             alt="{{ $media->alt ?: $media->title ?: 'تصویر شاخص' }}"
-            class="block aspect-[4/3] h-auto max-h-[420px] w-full object-contain transition duration-500 hover:scale-[1.02]"
+            class="block aspect-[16/9] h-auto max-h-[420px] w-full object-cover transition duration-500 hover:scale-[1.02]"
         >
 
     </div>

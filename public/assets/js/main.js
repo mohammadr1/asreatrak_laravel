@@ -145,18 +145,21 @@ function toggleTheme() {
 
   // آپدیت آیکون
   const icon = document.querySelector(".theme-btn i");
-  icon.className = isDark ? "bi bi-sun" : "bi bi-moon";
+  if (icon) icon.className = isDark ? "bi bi-sun" : "bi bi-moon";
 }
 
-// هنگام لود صفحه هم آیکون رو درست کن
+// هنگام لود صفحه هم آیکون و تم پیش‌فرض را درست کن
 const themeIcon = document.querySelector(".theme-btn i");
+const savedTheme = localStorage.getItem("theme");
 
-if (localStorage.getItem("theme") === "dark") {
+if (savedTheme !== "light") {
   document.documentElement.classList.add("dark");
 
   if (themeIcon) {
     themeIcon.className = "bi bi-sun";
   }
+} else if (themeIcon) {
+  themeIcon.className = "bi bi-moon";
 }
 
 // document.addEventListener("DOMContentLoaded", () => {

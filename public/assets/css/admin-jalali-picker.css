@@ -1,0 +1,54 @@
+.admin-jalali-picker {
+    --jp-surface: #ffffff;
+    --jp-muted-surface: #f8fafc;
+    --jp-text: #172033;
+    --jp-muted: #536176;
+    --jp-border: #cbd5e1;
+    --jp-accent: #92400e;
+    --jp-tint: #fffbeb;
+    position: fixed;
+    z-index: 10000;
+    display: none;
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 16px));
+    max-height: calc(100dvh - 16px);
+    overflow-y: auto;
+    padding: 12px;
+    direction: rtl;
+    font-family: inherit;
+    border: 1px solid var(--jp-border);
+    border-radius: 18px;
+    background: var(--jp-surface);
+    color: var(--jp-text);
+    box-shadow: 0 12px 40px rgb(15 23 42 / 20%);
+    overscroll-behavior: contain;
+}
+.dark .admin-jalali-picker { --jp-surface: #18181b; --jp-muted-surface: #27272a; --jp-text: #fafafa; --jp-muted: #cbd5e1; --jp-border: #52525b; --jp-accent: #fcd34d; --jp-tint: #302819; }
+.admin-jalali-picker.is-open { display: block; }
+.admin-jalali-picker button, .admin-jalali-picker select { font: inherit; font-size: 14px; color: inherit; min-height: 44px; border-radius: 10px; cursor: pointer; }
+.admin-jalali-picker button { border: 1px solid transparent; background: transparent; padding: 6px 8px; }
+.admin-jalali-picker button:hover:not(:disabled) { background: var(--jp-tint); color: var(--jp-accent); }
+.admin-jalali-picker button:focus-visible, .admin-jalali-picker select:focus-visible, .admin-jalali-picker input:focus-visible { outline: 2px solid var(--jp-accent); outline-offset: 2px; }
+.admin-jalali-picker button:disabled, .admin-jalali-picker option:disabled { color: var(--jp-muted); opacity: .4; cursor: not-allowed; }
+.admin-jalali-picker__caption, .admin-jalali-picker__head, .admin-jalali-picker__title, .admin-jalali-picker__foot { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.admin-jalali-picker__caption { font-size: 12px; color: var(--jp-muted); border-bottom: 1px solid var(--jp-border); margin-bottom: 8px; }
+.admin-jalali-picker__caption button, .admin-jalali-picker__head > button { width: 44px; font-size: 24px; }
+.admin-jalali-picker__head { margin-bottom: 10px; }
+.admin-jalali-picker__title button { font-weight: 700; background: var(--jp-muted-surface); }
+.admin-jalali-picker__week, .admin-jalali-picker__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; text-align: center; }
+.admin-jalali-picker__week { color: var(--jp-muted); font-size: 12px; padding: 6px 0; }
+.admin-jalali-picker__days button { padding: 0; min-width: 0; }
+.admin-jalali-picker__options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.admin-jalali-picker__options button { border-color: var(--jp-border); }
+.admin-jalali-picker button.is-selected, .admin-jalali-picker .admin-jalali-picker__confirm { background: #92400e; color: #fff; font-weight: 700; }
+.admin-jalali-picker button.is-selected:hover:not(:disabled), .admin-jalali-picker .admin-jalali-picker__confirm:hover:not(:disabled) { background: #78350f; color: #fff; }
+.admin-jalali-picker__hint { color: var(--jp-muted); font-size: 12px; line-height: 1.9; margin: 8px 0; }
+.admin-jalali-picker__time { margin-top: 12px; padding: 10px; background: var(--jp-muted-surface); border: 1px solid var(--jp-border); border-radius: 12px; }
+.admin-jalali-picker__time > label { display: flex; align-items: center; gap: 8px; font-size: 13px; min-height: 44px; cursor: pointer; }
+.admin-jalali-picker__time input { width: 18px; height: 18px; accent-color: #92400e; }
+.admin-jalali-picker__clock { display: flex; align-items: end; justify-content: center; gap: 12px; }
+.admin-jalali-picker__clock label { display: grid; gap: 4px; text-align: center; font-size: 12px; color: var(--jp-muted); }
+.admin-jalali-picker__clock select { min-width: 90px; color: var(--jp-text); background: var(--jp-surface); border: 1px solid var(--jp-border); padding: 6px 12px; }
+.admin-jalali-picker__clock > span { line-height: 44px; }
+.admin-jalali-picker__foot { border-top: 1px solid var(--jp-border); margin-top: 12px; padding-top: 10px; flex-wrap: wrap; }
+.admin-jalali-picker__notice { background: var(--jp-tint); color: var(--jp-accent); border-radius: 8px; padding: 8px; font-size: 12px; line-height: 1.9; }

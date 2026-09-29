@@ -6,7 +6,7 @@
     <div class="logo-block">
       <div class="logo-icon">
         <!-- <i class="bi bi-newspaper"></i> -->
-        <img src="assets/images/logo.png" alt="">
+        <img src="{{ asset('assets/images/logo.png') }}" alt="لوگوی عصر اترک">
       </div>
       <div>
         <div class="logo-text-fa">عصراترک</div>
@@ -16,8 +16,8 @@
 
     <!-- Search Center -->
     <div class="header-search d-none d-lg-block">
-      <input type="text" placeholder="جستجو در اخبار..." />
-      <i class="bi bi-search"></i>
+      <input type="search" placeholder="جستجو در اخبار..." aria-label="جستجو در اخبار" />
+      <i class="bi bi-search" aria-hidden="true"></i>
     </div>
 
     <!-- Logo Left (English) -->
@@ -27,4 +27,3 @@
     </div>
   </div>
 </header>
-

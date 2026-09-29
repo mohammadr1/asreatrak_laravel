@@ -14,7 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
+use App\Forms\Components\JalaliDateTimePicker;
 use Filament\Forms\Components\Hidden;
 use App\Models\ReportType;
 use Filament\Forms\Components\View;
@@ -453,10 +453,8 @@ class NewsForm
                                                 ->default(NewsStatus::Draft->value)
                                                 ->live(),
 
-                                            DateTimePicker::make('published_at')
+                                            JalaliDateTimePicker::make('published_at')
                                                 ->label('زمان انتشار')
-                                                ->seconds(false)
-                                                ->timezone('Asia/Tehran')
                                                 ->disabled(
                                                     fn () => auth()->user()->hasRole('Reporter')
                                                 )
@@ -483,12 +481,8 @@ class NewsForm
                                                 ->preload()
                                                 ->required(),
 
-                                            Select::make('tags')
+                                            \App\Forms\Components\NewsTagsSelect::make('tags')
                                                 ->label('برچسب‌ها')
-                                                ->relationship('tags', 'name')
-                                                ->multiple()
-                                                ->searchable()
-                                                ->preload()
                                                 ->required(),
 
                                                 

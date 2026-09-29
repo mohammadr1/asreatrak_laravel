@@ -779,7 +779,7 @@
             >
 
                 <div class="
-                    relative aspect-[16/10] overflow-hidden
+                    relative aspect-[16/9] overflow-hidden
                     rounded-xl bg-slate-100
                     dark:bg-slate-800
                 ">

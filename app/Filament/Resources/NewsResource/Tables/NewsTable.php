@@ -21,6 +21,7 @@ class NewsTable
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('title')
+                    ->label('عنوان')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('categories.name')
@@ -31,7 +32,7 @@ class NewsTable
                     
                 Tables\Columns\TextColumn::make('reporter.name')
                     ->label('خبرنگار')
-                    ->searchable(),
+                    ->searchable(['first_name', 'last_name']),
                     
                 Tables\Columns\TextColumn::make('status')
                     ->label('وضعیت')
@@ -49,12 +50,20 @@ class NewsTable
                         NewsStatus::Pending => 'warning',
                         NewsStatus::Approved => 'success',
                         NewsStatus::Rejected => 'danger',
-                        NewsStatus::Published => 'primary',
+                        NewsStatus::Published => 'success',
+                        // NewsStatus::Published => 'primary',
                         NewsStatus::Scheduled => 'info',
                     }),
 
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime(),
+                    ->label('تاریخ ثبت خبر')
+                    ->formatStateUsing(fn ($state) => 
+                        $state 
+                            ? Jalalian::fromDateTime($state)->format('Y/m/d H:i') 
+                            : '-'
+                    )
+                    ->sortable()
+                    ->toggleable(),
 
                 Tables\Columns\TextColumn::make('published_at')
                     ->label('زمان انتشار')
@@ -71,6 +80,17 @@ class NewsTable
             ])
 
             ->defaultSort('created_at', 'desc')
+            ->filters(NewsFilters::make(), layout: Tables\Enums\FiltersLayout::AboveContentCollapsible)
+            ->filtersTriggerAction(fn (Tables\Actions\Action $action) => $action
+                ->label('باز و بسته کردن فیلترها')->button()
+                ->extraAttributes([
+                    'class' => 'news-section-toggle',
+                    'x-bind:aria-expanded' => 'areFiltersOpen.toString()',
+                ]))
+            ->filtersFormColumns(['default' => 1, 'md' => 2, 'xl' => 3])
+            ->deferFilters()
+            ->filtersApplyAction(fn (Tables\Actions\Action $action) => $action
+                ->label('اعمال فیلترها')->icon('heroicon-o-funnel')->button())
 
             ->actions([
 
