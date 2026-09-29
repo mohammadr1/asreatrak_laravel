@@ -33,10 +33,39 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('backroom-entry')
-            ->login()
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => [
+                    50  => '#eef8fc',
+                    100 => '#d6f0f9',
+                    200 => '#b0e1f3',
+                    300 => '#78cbea',
+                    400 => '#3baedd',
+                    500 => '#0d5b87', // رنگ لایت مدنظر شما
+                    600 => '#0a496f', // رنگ اصلی مدنظر شما
+                    700 => '#083c5c',
+                    800 => '#0a324b',
+                    900 => '#0f2233', // سرمه‌ای تیره مدنظر شما
+                    950 => '#08141f',
+                ],
+                'gray' => [
+                    50  => '#f5f7f9',
+                    100 => '#e8ecf0',
+                    200 => '#d4dce3',
+                    300 => '#b3c3d1',
+                    400 => '#8ba3b9',
+                    500 => '#6d869f',
+                    600 => '#556d85',
+                    700 => '#44566a',
+                    800 => '#3a4756',
+                    900 => '#0f2233',
+                    950 => '#08141f',
+                ],
             ])
+            ->login()
+            // ->colors([
+            //     'primary' => Color::Amber,
+            // ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
