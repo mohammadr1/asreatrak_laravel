@@ -38,6 +38,7 @@ class MediaTable
                     ->since(),
 
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('type')
                     ->options([

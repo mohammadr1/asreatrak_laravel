@@ -14,9 +14,12 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Concerns\HasRoleBasedNavigation;
 
 class WatermarkResource extends Resource
 {
+    use HasRoleBasedNavigation;
+
     protected static ?string $model = Watermark::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -29,6 +32,26 @@ class WatermarkResource extends Resource
 
     protected static ?string $pluralModelLabel = 'واترمارک‌ها';
 
+    protected static ?int $navigationSort = 4;
+
+    protected static function allowedNavigationRoles(): array
+    {
+        return [
+            'Super Admin',
+            'Admin',
+            'Editor',
+        ];
+    }
+
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasAnyRole([
+            'Super Admin',
+            'Admin',
+            'Editor',
+        ]) ?? false;
+    }
 
     public static function form(Form $form): Form
     {

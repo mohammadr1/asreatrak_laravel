@@ -73,7 +73,7 @@ class UserTable
 
             ])
 
-
+            ->defaultSort('created_at', 'desc')
 
             ->filters([
 

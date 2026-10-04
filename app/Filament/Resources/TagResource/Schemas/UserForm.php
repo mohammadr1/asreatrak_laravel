@@ -64,7 +64,7 @@ return $form
                             }),
 
                         TextInput::make('slug')
-                            ->label('اسلاگ')
+                            ->label('نام مستار')
                             ->required()
                             ->unique(ignoreRecord: true),
 

@@ -36,6 +36,7 @@ class WatermarkTable
             ])
 
 
+            ->defaultSort('created_at', 'desc')
 
             ->filters([
 

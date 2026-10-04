@@ -53,11 +53,25 @@ class NewsTagsSelect extends Select
                             }
                             $tag = Tag::where('name', $name)->first();
                             if (! $tag) {
-                                // A stable, unique slug also prevents concurrent duplicate creation.
-                                $slug = 'tag-'.hash('sha256', mb_strtolower($name));
-                                $slugOwner = Tag::withTrashed()->where('slug', $slug)->first();
-                                if ($slugOwner?->trashed()) $slug .= '-'.Str::lower(Str::random(8));
-                                $tag = Tag::firstOrCreate(['slug' => $slug], ['name' => $name, 'is_active' => true]);
+                                // ساخت اسلاگ فارسی با جایگزینی فاصله‌ها با خط تیره
+                                $slug = Str::slug($name, '-', null);
+                                if (empty($slug)) {
+                                    $slug = $name;
+                                }
+
+                                // جلوگیری از تکراری شدن اسلاگ در دیتابیس
+                                $originalSlug = $slug;
+                                $count = 1;
+                                while (Tag::withTrashed()->where('slug', $slug)->exists()) {
+                                    $slug = "{$originalSlug}-{$count}";
+                                    $count++;
+                                }
+
+                                $tag = Tag::create([
+                                    'name'      => $name,
+                                    'slug'      => $slug,
+                                    'is_active' => true,
+                                ]);
                             }
                             $ids[] = $tag->id;
                         } else {

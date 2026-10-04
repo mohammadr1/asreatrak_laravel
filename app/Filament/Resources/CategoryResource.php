@@ -12,13 +12,35 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Concerns\HasRoleBasedNavigation;
 
 class CategoryResource extends Resource
 {
+
+    use HasRoleBasedNavigation;
+
     protected static ?string $model = Category::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationLabel = 'دسته‌بندی‌ها';
+
+    protected static ?string $modelLabel = 'دسته‌بندی';
+
+    protected static ?string $pluralModelLabel = 'دسته‌بندی‌ها';
+
+    protected static ?string $navigationGroup = 'مدیریت محتوا';
+
+    protected static ?int $navigationSort = 3;
+
+
+    protected static function allowedNavigationRoles(): array
+    {
+        return [
+            'Admin',
+            'Editor',
+        ];
+    }
     public static function form(Form $form): Form
     {
     return $form
@@ -81,6 +103,7 @@ class CategoryResource extends Resource
                     ->label('ایجاد')
                     ->dateTime(),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])

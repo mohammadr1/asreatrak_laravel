@@ -10,27 +10,45 @@ use App\Filament\Resources\UserResource\Tables\UserTable;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
+use App\Filament\Concerns\HasRoleBasedNavigation;
 
 class UserResource extends Resource
 {
-
+    use HasRoleBasedNavigation;
+    
     protected static ?string $model = User::class;
 
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
 
+    protected static ?string $navigationGroup = 'مدیریت کاربران';
 
     protected static ?string $navigationLabel = 'کاربران';
 
-
     protected static ?string $modelLabel = 'کاربر';
-
 
     protected static ?string $pluralModelLabel = 'کاربران';
 
+    protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'مدیریت سیستم';
+    protected static ?int $navigationSort = 2;
 
+
+    protected static function allowedNavigationRoles(): array
+    {
+        return [
+            'Admin',
+            'Editor',
+        ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasAnyRole([
+            'Super Admin',
+            'Admin',
+            'Editor',
+        ]) ?? false;
+    }
 
 
     public static function form(Form $form): Form

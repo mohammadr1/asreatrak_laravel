@@ -35,15 +35,14 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Illuminate\Support\Str;
 
-
+use App\Filament\Concerns\HasRoleBasedNavigation;
+use Morilog\Jalali\Jalalian;
 
 class NewsResource extends Resource
 {
     use HasPermissionChecks;
 
     protected static ?string $model = News::class;
-
-
 
     protected static ?string $navigationGroup = 'اخبار';
 
@@ -53,12 +52,57 @@ class NewsResource extends Resource
 
     protected static ?string $pluralModelLabel = 'اخبار';
 
-
-
+    protected static ?int $navigationSort = 1;
 
     protected static string $permissionBase = 'news';
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
+
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyRole([
+            'Admin',
+            'Editor',
+            'Reporter',
+        ]);
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyRole([
+            'Admin',
+            'Editor',
+            'Reporter',
+        ]);
+    }
+
+    public static function canCreate(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyRole([
+            'Admin',
+            'Editor',
+            'Reporter',
+        ]);
+    }
 
     public static function form(Form $form): Form
     {
@@ -93,10 +137,73 @@ class NewsResource extends Resource
     }
 
 
+    public static function getNavigationItems(): array
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return [];
+        }
+
+        $items = [
+            \Filament\Navigation\NavigationItem::make('اخبار')
+                ->icon('heroicon-o-newspaper')
+                ->group('اخبار')
+                ->url(static::getUrl('index'))
+                ->sort(1)
+                ->isActiveWhen(
+                    fn (): bool => request()->routeIs(
+                        static::getRouteBaseName() . '.index'
+                    )
+                ),
+
+            \Filament\Navigation\NavigationItem::make('ایجاد خبر')
+                ->icon('heroicon-o-plus-circle')
+                ->group('اخبار')
+                ->url(static::getUrl('create'))
+                ->sort(2)
+                ->isActiveWhen(
+                    fn (): bool => request()->routeIs(
+                        static::getRouteBaseName() . '.create'
+                    )
+                ),
+        ];
+
+        if ($user->hasAnyRole([
+            'Admin',
+            'Editor',
+        ])) {
+            $pendingCount = \App\Models\News::query()
+                ->where('status', \App\Enums\NewsStatus::Pending)
+                ->count();
+
+            $items[] = \Filament\Navigation\NavigationItem::make(
+                'در انتظار تأیید'
+            )
+                ->icon('heroicon-o-clock')
+                ->group('اخبار')
+                ->url(static::getUrl('pending'))
+                ->sort(3)
+                ->badge(
+                    $pendingCount > 0
+                        ? (string) $pendingCount
+                        : null
+                )
+                ->isActiveWhen(
+                    fn (): bool => request()->routeIs(
+                        static::getRouteBaseName() . '.pending'
+                    )
+                );
+        }
+
+        return $items;
+    }
+
     public static function getPages(): array
     {
         return [
             'index' => Pages\ListNews::route('/'),
+            'pending' => Pages\PendingNews::route('/pending'),
             'create' => Pages\CreateNews::route('/create'),
             'edit' => Pages\EditNews::route('/{record}/edit'),
         ];
