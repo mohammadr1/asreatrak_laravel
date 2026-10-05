@@ -15,6 +15,10 @@ class News extends Model
 
     protected $fillable = [
         'title',
+        'post_type',
+        'aparat_video_id',
+        'featured',
+        'slider',
         'lead',
         'uptitle',
         'slug',
@@ -44,6 +48,8 @@ class News extends Model
             'approved_at' => 'datetime',
             'published_at' => 'datetime',
             'featured_media_id' => 'integer',
+            'featured' => 'boolean',
+            'slider' => 'boolean',
         ];
     }
 
@@ -85,7 +91,17 @@ class News extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class, 'news_category');
+        return $this->belongsToMany(Category::class, 'news_category')->withPivot('is_top');
+    }
+
+    public function syncTopCategory(?int $categoryId): void
+    {
+        if ($categoryId !== null && Category::whereKey($categoryId)->exists()) {
+            $this->categories()->syncWithoutDetaching([$categoryId]);
+        }
+        foreach ($this->categories()->pluck('categories.id') as $id) {
+            $this->categories()->updateExistingPivot($id, ['is_top' => (int) $id === $categoryId]);
+        }
     }
 
     public function tags()

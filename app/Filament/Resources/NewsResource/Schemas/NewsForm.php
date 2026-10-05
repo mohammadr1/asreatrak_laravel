@@ -26,6 +26,25 @@ class NewsForm
         return $form
             ->schema([
 
+            Section::make('ویدیوی آپارات')
+                ->description('ویدیو را در آپارات بارگذاری کنید و لینک یا شناسه آن را اینجا وارد کنید.')
+                ->visible(fn ($livewire, $record): bool => $livewire instanceof \App\Filament\Resources\NewsResource\Pages\CreateVideoNews || $record?->post_type === 'video')
+                ->schema([
+                    TextInput::make('aparat_video_id')
+                        ->label('لینک یا شناسه ویدیوی آپارات')
+                        ->placeholder('https://www.aparat.com/v/k93yms3')
+                        ->helperText('مثال: k93yms3 — تنها شناسه ذخیره می‌شود؛ کد iframe یا HTML وارد نکنید.')
+                        ->extraInputAttributes(['dir' => 'ltr', 'autocapitalize' => 'none', 'spellcheck' => 'false'])
+                        ->required()
+                        ->maxLength(2048)
+                        ->rules([fn () => function (string $attribute, $value, \Closure $fail): void {
+                            if (\App\Support\AparatVideo::id($value) === null) {
+                                $fail('لینک معتبر آپارات یا شناسه ویدیو را وارد کنید.');
+                            }
+                        }])
+                        ->dehydrateStateUsing(fn ($state) => \App\Support\AparatVideo::id($state)),
+                ]),
+
             View::make('filament.forms.validation-summary')
                 ->columnSpanFull(),
                     Grid::make(12)
@@ -187,7 +206,30 @@ class NewsForm
                                                 ->columnSpanFull(),
 
                                             RichEditor::make('content')
+                                                ->id('news-content')
                                                 ->label('متن خبر')
+                                                ->helperText('ابتدا محل درج را در متن انتخاب کنید، سپس «درج تصویر» یا «درج ویدیوی آپارات» را بزنید. ویدیو در ویرایشگر به شکل لینک و در سایت به شکل پخش‌کننده نمایش داده می‌شود.')
+                                                ->hintActions([
+                                                    Action::make('insertImage')
+                                                        ->label('درج تصویر')->icon('heroicon-o-photo')->button()
+                                                        ->modalHeading('درج تصویر در متن خبر')->modalWidth('7xl')
+                                                        ->modalSubmitAction(false)->modalCancelActionLabel('بستن')
+                                                        ->modalContent(fn () => view('filament.media.editor-picker-wrapper')),
+                                                    Action::make('insertAparat')
+                                                        ->label('درج ویدیوی آپارات')->icon('heroicon-o-video-camera')->button()
+                                                        ->modalHeading('درج ویدیو در محل نشانگر')->modalSubmitActionLabel('درج ویدیو')
+                                                        ->form([
+                                                            TextInput::make('video')->label('لینک یا شناسه آپارات')->required()->maxLength(2048)
+                                                                ->placeholder('https://www.aparat.com/v/k93yms3')
+                                                                ->extraInputAttributes(['dir' => 'ltr'])
+                                                                ->rules([fn () => function (string $attribute, $value, \Closure $fail): void {
+                                                                    if (\App\Support\AparatVideo::id($value) === null) $fail('لینک یا شناسه آپارات معتبر نیست.');
+                                                                }]),
+                                                        ])
+                                                        ->action(function (array $data, $livewire): void {
+                                                            $livewire->dispatch('news-editor-video', id: \App\Support\AparatVideo::id($data['video']));
+                                                        }),
+                                                ])
                                                 ->required()
                                                 ->columnSpanFull()
                                                 ->toolbarButtons([
@@ -202,6 +244,8 @@ class NewsForm
                                                     'codeBlock',
                                                     'h2',
                                                     'h3',
+                                                    'undo',
+                                                    'redo',
                                                 ]),
 
                                             Placeholder::make('editor_comment')
@@ -475,6 +519,7 @@ class NewsForm
 
                                             Select::make('categories')
                                                 ->label('دسته‌بندی')
+                                                ->live()
                                                 ->relationship('categories', 'name')
                                                 ->multiple()
                                                 ->searchable()
@@ -507,6 +552,38 @@ class NewsForm
                                             ])
                                             ->native(false)
                                             ->required(),
+
+                                        \Filament\Forms\Components\Checkbox::make('featured')
+                                            ->label('اضافه کردن به خبرهای ویژه')
+                                            ->default(false),
+
+                                        \Filament\Forms\Components\Checkbox::make('slider')
+                                            ->label('اضافه کردن به اسلایدر صفحه اصلی')
+                                            ->default(false),
+
+                                        \Filament\Forms\Components\Checkbox::make('mark_as_top')
+                                            ->label('در نظر گرفتن به عنوان خبر تاپ در دسته‌بندی')
+                                            ->default(false)
+                                            ->dehydrated(false)
+                                            ->live()
+                                            ->afterStateUpdated(function ($state, \Filament\Forms\Set $set): void {
+                                                if (! $state) $set('top_category_id', null);
+                                            }),
+
+                                        Select::make('top_category_id')
+                                            ->label('دسته‌بندی خبر تاپ')
+                                            ->helperText('همه دسته‌بندی‌ها قابل انتخاب‌اند؛ دسته انتخابی به دسته‌بندی‌های خبر نیز اضافه می‌شود.')
+                                            ->options(fn () => \App\Models\Category::query()
+                                                ->orderBy('name')->pluck('name', 'id'))
+                                            ->searchable()
+                                            ->preload()
+                                            ->native(false)
+                                            ->visible(fn (\Filament\Forms\Get $get): bool => (bool) $get('mark_as_top'))
+                                            ->required(fn (\Filament\Forms\Get $get): bool => (bool) $get('mark_as_top'))
+                                            ->rules([
+                                                \Illuminate\Validation\Rule::exists('categories', 'id')->whereNull('deleted_at'),
+                                            ])
+                                            ->dehydrated(false),
 
 
                                         ]),

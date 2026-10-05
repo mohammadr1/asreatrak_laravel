@@ -14,9 +14,16 @@ class NewsController extends Controller
     //     return view('Customer.news.index');
     // }
 
-    public function show(){
+    public function show(News $news){
 
-        return view('Customer.news.show');
+        abort_unless($news->status === \App\Enums\NewsStatus::Published
+            && (! $news->published_at || $news->published_at->lte(now())), 404);
+
+            $news->load(['reporter', 'categories', 'tags', 'featuredMedia', 'media']);
+            return view('Customer.news.video', [
+                'news' => $news,
+                'embedUrl' => $news->post_type === 'video' ? \App\Support\AparatVideo::embedUrl($news->aparat_video_id) : null,
+            ]);
 
     }
     public function archive(){

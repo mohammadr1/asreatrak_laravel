@@ -31,7 +31,13 @@ return new class extends Migration
             $table->string('slug')->unique(); 
             $table->longText('content')->nullable();
 
+            $table->enum('post_type', [
+                'article',
+                'video'
+            ])->default('article');
                 
+            $table->string('aparat_video_id', 100)->nullable();
+
             $table->string('news_code')->unique(); // BN-140315-0042
 
             // خبرنگار
@@ -82,9 +88,15 @@ return new class extends Migration
             // زمان انتشار
             $table->timestamp('published_at')->nullable();
 
+            $table->boolean('featured')
+                ->default(false);
+
+            $table->boolean('slider')
+                ->default(false);
+
 
             $table->boolean('is_breaking')->default(false);
-            $table->boolean('is_featured')->default(false);
+            // $table->boolean('is_featured')->default(false);
 
             $table->softDeletes();
             $table->timestamps();

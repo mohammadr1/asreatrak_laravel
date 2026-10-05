@@ -24,6 +24,12 @@ class NewsTable
                     ->label('عنوان')
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('post_type')
+                    ->label('قالب خبر')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state === 'video' ? 'ویدیویی' : 'متنی')
+                    ->color(fn ($state) => $state === 'video' ? 'primary' : 'gray'),
+
                 Tables\Columns\TextColumn::make('categories.name')
                     ->label('دسته‌ها')
                     ->badge()

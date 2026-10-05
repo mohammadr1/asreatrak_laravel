@@ -21,6 +21,10 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+
+            $table->boolean('is_top')
+                ->default(false);
+
             $table->timestamps();
             
             $table->unique(['news_id', 'category_id']);

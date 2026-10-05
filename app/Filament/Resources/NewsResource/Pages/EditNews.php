@@ -24,6 +24,9 @@ class EditNews extends EditRecord {
     
     /* |-------------------------------------------------------------------------- | Load Form Data |-------------------------------------------------------------------------- */
     protected function mutateFormDataBeforeFill(array $data): array {
+        $topCategory = $this->record->categories()->wherePivot('is_top', true)->first();
+        $data['mark_as_top'] = $topCategory !== null;
+        $data['top_category_id'] = $topCategory?->id;
         /* |-------------------------------------------------------------------------- | Gallery |-------------------------------------------------------------------------- | | تصاویر گالری را از جدول news_media می‌خوانیم | و برای Hidden field فرم آماده می‌کنیم. | */
         $gallery=$this->record ->media() ->orderByPivot('sort_order') ->get();
         $this->galleryMedia=[];
@@ -63,6 +66,9 @@ class EditNews extends EditRecord {
 
     /* |-------------------------------------------------------------------------- | Save Gallery |-------------------------------------------------------------------------- */
     protected function afterSave(): void {
+        $this->record->syncTopCategory(
+            ! empty($this->data['mark_as_top']) ? (int) ($this->data['top_category_id'] ?? 0) : null
+        );
         /* |-------------------------------------------------------------------------- | Read gallery from form |-------------------------------------------------------------------------- */
         $gallery=$this->data['gallery_media'] ?? [];
 

@@ -196,6 +196,15 @@ class NewsResource extends Resource
                 );
         }
 
+        if (static::canCreate()) {
+            $items[] = \Filament\Navigation\NavigationItem::make('افزودن خبر ویدیویی')
+                ->icon('heroicon-o-video-camera')
+                ->group(static::$navigationGroup)
+                ->url(static::getUrl('create-video'))
+                ->sort(3)
+                ->isActiveWhen(fn (): bool => request()->routeIs(static::getRouteBaseName() . '.create-video'));
+        }
+
         return $items;
     }
 
@@ -205,6 +214,7 @@ class NewsResource extends Resource
             'index' => Pages\ListNews::route('/'),
             'pending' => Pages\PendingNews::route('/pending'),
             'create' => Pages\CreateNews::route('/create'),
+            'create-video' => Pages\CreateVideoNews::route('/create-video'),
             'edit' => Pages\EditNews::route('/{record}/edit'),
         ];
     }

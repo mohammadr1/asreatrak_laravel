@@ -1,4 +1,4 @@
-<div dir="rtl" class="w-full"
+<div dir="rtl" class="w-full media-picker"
     x-data="{
         notifications: [],
 
@@ -28,6 +28,7 @@
     >
 
 
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-media-picker.css') }}?v={{ filemtime(public_path('assets/css/admin-media-picker.css')) }}">
     {{-- ========================================================= --}}
 {{-- Notifications / Toasts --}}
 {{-- ========================================================= --}}
@@ -1134,7 +1135,7 @@
 
         <div
             class="
-                fixed inset-0 z-[99999]
+                media-crop-overlay fixed inset-0 z-[99999]
                 overflow-y-auto
                 bg-slate-950/80 p-2
                 backdrop-blur-sm
@@ -1423,7 +1424,7 @@
 
                 x-on:close-cropper.window="destroy()"
                 class="
-                    mx-auto flex w-full max-w-7xl flex-col
+                    media-crop-dialog mx-auto flex w-full max-w-7xl flex-col
                     overflow-hidden rounded-2xl bg-white shadow-2xl
                     ring-1 ring-black/10 dark:bg-slate-900
                     sm:my-0 sm:rounded-3xl
@@ -1576,7 +1577,7 @@
 
                 <div
                     class="
-                        h-[55vh]
+                        media-crop-stage h-[55vh]
                         min-h-[300px]
                         w-full
                         shrink-0
@@ -1595,7 +1596,7 @@
                             src="{{ $cropImage }}"
                             alt="Crop image"
                             draggable="false"
-                            class="block max-w-none select-none"
+                            class="block select-none"
                         >
                     </div>
                 </div>

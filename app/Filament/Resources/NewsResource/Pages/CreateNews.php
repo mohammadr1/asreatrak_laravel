@@ -21,6 +21,10 @@ class CreateNews extends CreateRecord {
 
 
     protected function mutateFormDataBeforeCreate(array $data): array {
+        $data['post_type'] = $this instanceof CreateVideoNews ? 'video' : 'article';
+        if ($data['post_type'] === 'article') {
+            $data['aparat_video_id'] = null;
+        }
         /* |-------------------------------------------------------------------------- | تصویر شاخص |-------------------------------------------------------------------------- */
         $featuredMediaId=$data['featured_media_id'] ?? null;
 
@@ -76,6 +80,9 @@ class CreateNews extends CreateRecord {
     }
 
     protected function afterCreate(): void {
+        $this->record->syncTopCategory(
+            ! empty($this->data['mark_as_top']) ? (int) ($this->data['top_category_id'] ?? 0) : null
+        );
         if (empty($this->galleryMedia)) {
             return;
         }
