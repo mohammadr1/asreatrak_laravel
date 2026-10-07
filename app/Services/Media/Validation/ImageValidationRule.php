@@ -26,7 +26,7 @@ class ImageValidationRule
 
         $this->maxHeight = config('media.image.max_height', 8000);
 
-        $this->maxSize = config('media.image.max_size', 15 * 1024 * 1024);
+        $this->maxSize = config('media.image.max_size', 2 * 1024 * 1024);
 
         $this->extensions = config(
             'media.image.extensions',

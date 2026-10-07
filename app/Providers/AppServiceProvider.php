@@ -34,7 +34,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
+        // Keep Livewire's temporary upload ceiling large enough for the configured image limit.
+        // The image picker and media service enforce the actual per-image limit.
+        if (config('livewire.temporary_file_upload.rules') === null) {
+            config(['livewire.temporary_file_upload.rules' => [
+                'required', 'file', 'max:'.max(12288, (int) ceil(config('media.image.max_size') / 1024)),
+            ]]);
+        }
         
         News::observe(NewsObserver::class);
         Media::observe(MediaObserver::class);

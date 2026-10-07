@@ -17,9 +17,11 @@ class ThumbnailGenerator
 
         $generated = [];
 
-        foreach ($sizes as $name => [$width,$height]) {
+        foreach ($sizes as $name => $size) {
+            $width = $size['width'];
+            $height = $size['height'];
 
-            $file = "{$directory}/{$name}.jpg";
+            $file = "{$directory}/{$name}.webp";
 
             $this->processor->resize(
                 $source,

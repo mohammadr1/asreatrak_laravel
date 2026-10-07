@@ -17,22 +17,28 @@ class MediaService implements MediaServiceInterface
 
         $directory = now()->format('Y/m');
 
+        \Illuminate\Support\Facades\Validator::make(['image' => $file], [
+            'image' => ['required', 'image', 'max:'.(int) floor(config('media.image.max_size', 2097152) / 1024)],
+        ])->validate();
+
+        $image = app(ImageProcessor::class)->read($file->getRealPath());
+        $encoded = (string) $image->toWebp(max(1, min(100, (int) config('media.quality', 90))));
+
         $filename =
             Str::uuid().
             '.'.
-            $file->getClientOriginalExtension();
+            'webp';
 
-        $path = $file->storeAs(
-            "media/{$directory}",
-            $filename,
-            'public'
-        );
+        $path = "media/{$directory}/{$filename}";
+        if (! Storage::disk('public')->put($path, $encoded)) {
+            throw new \RuntimeException('ذخیره تصویر WebP انجام نشد.');
+        }
 
-        [$width, $height] = getimagesize(
-            $file->getRealPath()
-        );
+        $width = $image->width();
+        $height = $image->height();
 
-        return Media::create([
+        try {
+            return Media::create([
 
             'uuid' => (string) Str::uuid(),
 
@@ -44,11 +50,11 @@ class MediaService implements MediaServiceInterface
 
             'original_path' => $path,
 
-            'extension' => $file->getClientOriginalExtension(),
+            'extension' => 'webp',
 
-            'mime_type' => $file->getMimeType(),
+            'mime_type' => 'image/webp',
 
-            'size' => $file->getSize(),
+            'size' => strlen($encoded),
 
             'width' => $width,
 
@@ -75,9 +81,7 @@ class MediaService implements MediaServiceInterface
 
             'is_active' => true,
 
-            'hash' => md5_file(
-                Storage::disk('public')->path($path)
-            ),
+            'hash' => md5($encoded),
 
             'metadata' => json_encode([]),
 
@@ -86,7 +90,11 @@ class MediaService implements MediaServiceInterface
             'watermark_type' => null,
 
             'watermark_id' => null,
-        ]);
+            ]);
+        } catch (\Throwable $exception) {
+            Storage::disk('public')->delete($path);
+            throw $exception;
+        }
     }
 
     public function delete(

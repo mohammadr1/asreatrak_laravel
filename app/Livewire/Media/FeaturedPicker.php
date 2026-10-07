@@ -148,12 +148,19 @@ class FeaturedPicker extends Component
     |--------------------------------------------------------------------------
     */
 
-    protected $rules = [
-        'uploads.*' => [
-            'image',
-            'max:10240',
-        ],
-    ];
+    protected function rules(): array
+    {
+        return ['uploads.*' => ['image', 'max:'.(int) floor(config('media.image.max_size') / 1024)]];
+    }
+
+    protected function messages(): array
+    {
+        $maximum = config('media.image.max_size') / 1024 / 1024;
+        return [
+            'uploads.*.image' => 'فایل انتخاب‌شده باید یک تصویر معتبر باشد.',
+            'uploads.*.max' => "حجم هر تصویر نباید بیشتر از {$maximum} مگابایت باشد.",
+        ];
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -1053,7 +1060,7 @@ class FeaturedPicker extends Component
 
             /*
             |--------------------------------------------------------------------------
-            | Crop source is always a lightweight JPEG
+            | Crop source is a lightweight WebP
             |--------------------------------------------------------------------------
             */
 
@@ -1062,7 +1069,7 @@ class FeaturedPicker extends Component
                     $media->filename,
                     PATHINFO_FILENAME
                 )
-                . '_crop-source.jpg';
+                . '_crop-source.webp';
 
             $temporaryRelativePath =
                 $temporaryDirectory
@@ -1075,7 +1082,7 @@ class FeaturedPicker extends Component
                 );
 
             try {
-                $processor->prepareForCrop(
+                $cropSourceInfo = $processor->prepareForCrop(
                     input: $sourcePath,
                     output: $temporaryAbsolutePath,
                     maxWidth: 1600,
@@ -1102,6 +1109,10 @@ class FeaturedPicker extends Component
 
             $media->update([
                 'original_path' => $temporaryRelativePath,
+                'width' => $cropSourceInfo['width'],
+                'height' => $cropSourceInfo['height'],
+                'size' => $cropSourceInfo['size'],
+                'hash' => md5_file($temporaryAbsolutePath),
             ]);
 
             $this->queue[] = $media->id;

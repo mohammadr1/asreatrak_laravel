@@ -563,6 +563,7 @@
                 "
             >
                 یک یا چند تصویر انتخاب کنید.
+                حداکثر حجم هر تصویر {{ config('media.image.max_size') / 1024 / 1024 }} مگابایت؛ نسبت برش ۴:۳ افقی است.
             </div>
 
             <input
@@ -780,7 +781,7 @@
             >
 
                 <div class="
-                    relative aspect-[16/9] overflow-hidden
+                    relative aspect-[4/3] overflow-hidden
                     rounded-xl bg-slate-100
                     dark:bg-slate-800
                 ">
@@ -1213,7 +1214,7 @@
                                         image,
                                         {
 
-                                            aspectRatio: 16 / 9,
+                                            aspectRatio: 4 / 3,
 
                                             /*
                                             |--------------------------------------------------------------------------

@@ -876,7 +876,7 @@ class ImageProcessor
 
         /*
         |--------------------------------------------------------------------------
-        | Always create a lightweight JPEG for Cropper
+        | Create a lightweight WebP for Cropper
         |--------------------------------------------------------------------------
         |
         | این قسمت مهم است.
@@ -900,11 +900,11 @@ class ImageProcessor
 
         /*
         |--------------------------------------------------------------------------
-        | Convert temporary crop source to JPEG
+        | Convert temporary crop source to WebP
         |--------------------------------------------------------------------------
         */
 
-        $encoded = $image->toJpeg(
+        $encoded = $image->toWebp(
             max(
                 1,
                 min(

@@ -34,7 +34,7 @@ class MediaPipeline
         $directory = $options['directory']
             ?? now()->format('Y/m');
 
-        $filename = str()->uuid().'.'.$file->extension();
+        $filename = str()->uuid().'.webp';
 
         $path = storage_path(
             "app/public/media/{$directory}/{$filename}"
@@ -64,7 +64,7 @@ class MediaPipeline
         $this->processor->compress(
             $path,
             $path,
-            config('media.image.quality')
+            (int) config('media.quality', 90)
         );
 
         /*
