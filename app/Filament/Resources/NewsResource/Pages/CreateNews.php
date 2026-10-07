@@ -76,7 +76,7 @@ class CreateNews extends CreateRecord {
 
         /* |-------------------------------------------------------------------------- | Temporary field |-------------------------------------------------------------------------- */
         unset($data['gallery_media']);
-        return $data;
+        return \App\Support\NewsFormPublication::prepare($data, auth()->user());
     }
 
     protected function afterCreate(): void {

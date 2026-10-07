@@ -28,7 +28,7 @@
 
         <div class="space-y-2">
 
-            @foreach ($errors->all() as $message)
+            @foreach (array_unique($errors->all()) as $message)
 
                 <div class="flex items-center gap-3 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-700 shadow-sm dark:border-red-900 dark:bg-gray-900 dark:text-red-300">
 

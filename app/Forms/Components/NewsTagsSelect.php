@@ -20,7 +20,7 @@ class NewsTagsSelect extends Select
 
         $this->relationship('tags', 'name')->multiple()->searchable()->preload()
             ->searchDebounce(250)
-            ->helperText('نام برچسب را جستجو کنید؛ برای برچسب جدید، گزینه افزودن را با Enter انتخاب کنید. ثبت نهایی با ذخیره خبر انجام می‌شود.')
+            ->helperText('حداقل ۵ برچسب وارد کنید. برای برچسب جدید، نام را بنویسید و Enter بزنید؛ ثبت نهایی با ذخیره خبر انجام می‌شود.')
             ->getSearchResultsUsing(fn (string $search) => static::search($search))
             ->getOptionLabelsUsing(function (array $values): array {
                 $labels = Tag::whereKey(array_filter($values, fn ($value) => ctype_digit((string) $value)))->pluck('name', 'id')->all();
@@ -31,6 +31,9 @@ class NewsTagsSelect extends Select
                 }
                 return $labels;
             })
+            ->minItems(5)
+            ->validationMessages(['required' => 'حداقل ۵ برچسب برای خبر انتخاب کنید.', 'min' => 'حداقل ۵ برچسب برای خبر انتخاب کنید.', 'array' => 'برچسب‌ها را از فهرست انتخاب یا با Enter اضافه کنید.'])
+            ->rule('bail')
             ->rules([fn (): Closure => function (string $attribute, $value, Closure $fail): void {
                 foreach ((array) $value as $item) {
                     if (! is_scalar($item)) { $fail('برچسب نامعتبر است.'); return; }

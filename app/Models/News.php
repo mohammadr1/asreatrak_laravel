@@ -109,6 +109,17 @@ class News extends Model
         return $this->belongsToMany(Tag::class, 'news_tag');
     }
 
+    public function relatedNews(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'news_related', 'news_id', 'related_news_id')->withTimestamps();
+    }
+
+    public function scopePubliclyVisible(\Illuminate\Database\Eloquent\Builder $query): void
+    {
+        $query->where('news.status', NewsStatus::Published)
+            ->where(fn ($query) => $query->whereNull('news.published_at')->orWhere('news.published_at', '<=', now()));
+    }
+
     public function canTransitionTo(NewsStatus $status, User $user): bool
     {
         return match ($this->status) {

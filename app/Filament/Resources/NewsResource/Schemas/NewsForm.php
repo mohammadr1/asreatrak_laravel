@@ -21,6 +21,14 @@ use Filament\Forms\Components\View;
 
 class NewsForm
 {
+    private static function counter($component, int $maximum, int $recommended, string $guidance)
+    {
+        return view('filament.forms.text-counter', [
+            'id' => $component->getId(), 'maximum' => $maximum,
+            'recommended' => $recommended, 'guidance' => $guidance,
+        ]);
+    }
+
     public static function make(Form $form): Form
     {
         return $form
@@ -31,6 +39,7 @@ class NewsForm
                 ->visible(fn ($livewire, $record): bool => $livewire instanceof \App\Filament\Resources\NewsResource\Pages\CreateVideoNews || $record?->post_type === 'video')
                 ->schema([
                     TextInput::make('aparat_video_id')
+                        ->validationMessages(['required' => 'لینک یا شناسه ویدیوی آپارات را وارد کنید.', 'max' => 'لینک آپارات نباید بیشتر از ۲۰۴۸ کاراکتر باشد.'])
                         ->label('لینک یا شناسه ویدیوی آپارات')
                         ->placeholder('https://www.aparat.com/v/k93yms3')
                         ->helperText('مثال: k93yms3 — تنها شناسه ذخیره می‌شود؛ کد iframe یا HTML وارد نکنید.')
@@ -67,12 +76,18 @@ class NewsForm
                                         ->schema([
 
                                             TextInput::make('uptitle')
+                                                ->validationMessages(['max' => 'روتیتر نباید بیشتر از ۲۵۵ کاراکتر باشد.'])
                                                 ->label('روتیتر')
                                                 ->maxLength(255)
+                                                ->rules([new \App\Rules\NewsText])
+                                                ->helperText(fn (TextInput $component) => self::counter($component, 255, 50,''))
                                                 ->columnSpanFull(),
 
                                             TextInput::make('title')
+                                                ->validationMessages(['required' => 'عنوان خبر را وارد کنید.', 'unique' => 'این عنوان قبلاً ثبت شده است؛ عنوان دیگری انتخاب کنید.', 'max' => 'عنوان خبر نباید بیشتر از ۲۵۵ کاراکتر باشد.'])
                                                 ->label('عنوان خبر')
+                                                ->rules([new \App\Rules\NewsText])
+                                                ->helperText(fn (TextInput $component) => self::counter($component, 255, 80, ''))
                                                 ->required()
                                                 ->unique(ignoreRecord: true)
                                                 ->live(onBlur: true)
@@ -146,6 +161,8 @@ class NewsForm
                                                         '-'
                                                     );
 
+                                                    $newSlug = preg_replace('/[^\p{L}\p{N}\p{M}\x{200C}_-]+/u', '', $newSlug);
+
                                                     /*
                                                     |--------------------------------------------------------------------------
                                                     | تعیین اینکه اسلاگ هنوز خودکار است یا دستی
@@ -174,6 +191,7 @@ class NewsForm
                                                 }),
 
                                             TextInput::make('news_code')
+                                                ->validationMessages(['required' => 'کد خبر ایجاد نشده است؛ صفحه را تازه‌سازی کنید.', 'unique' => 'کد خبر تکراری است؛ صفحه را تازه‌سازی کنید و دوباره ذخیره کنید.'])
                                                 ->label('کد خبر')
                                                 ->default(fn () => now()->format('YmdHis'))
                                                 ->required()
@@ -182,6 +200,7 @@ class NewsForm
                                                 ->dehydrated(),
 
                                             Select::make('reporter_id')
+                                                ->validationMessages(['required' => 'خبرنگار خبر را انتخاب کنید.', 'exists' => 'خبرنگار انتخاب‌شده معتبر نیست؛ دوباره انتخاب کنید.', 'in' => 'خبرنگار انتخاب‌شده معتبر نیست؛ دوباره انتخاب کنید.'])
                                                 ->label('خبرنگار')
                                                 ->relationship(
                                                     name: 'reporter',
@@ -199,14 +218,19 @@ class NewsForm
                                                 ),
 
                                             Textarea::make('lead')
+                                                ->validationMessages(['required' => 'لید خبر را وارد کنید.', 'max' => 'لید خبر نباید بیشتر از ۱۰۰۰ کاراکتر باشد.'])
                                                 ->label('لید خبر')
+                                                ->rules([new \App\Rules\NewsText])
+                                                ->helperText(fn (Textarea $component) => self::counter($component, 255, 300, 'پیشنهاد تحریریه: حدود ۱۲۰ تا ۳۰۰ کاراکتر؛ مهم‌ترین اتفاق و اطلاعات اصلی را خلاصه کنید.'))
                                                 ->required()
                                                 ->rows(4)
                                                 ->maxLength(1000)
                                                 ->columnSpanFull(),
 
                                             RichEditor::make('content')
+                                                ->validationMessages(['required' => 'متن خبر را وارد کنید.'])
                                                 ->id('news-content')
+                                                ->rules([new \App\Rules\NewsText(rich: true)])
                                                 ->label('متن خبر')
                                                 ->helperText('ابتدا محل درج را در متن انتخاب کنید، سپس «درج تصویر» یا «درج ویدیوی آپارات» را بزنید. ویدیو در ویرایشگر به شکل لینک و در سایت به شکل پخش‌کننده نمایش داده می‌شود.')
                                                 ->hintActions([
@@ -220,6 +244,7 @@ class NewsForm
                                                         ->modalHeading('درج ویدیو در محل نشانگر')->modalSubmitActionLabel('درج ویدیو')
                                                         ->form([
                                                             TextInput::make('video')->label('لینک یا شناسه آپارات')->required()->maxLength(2048)
+                                                                ->validationMessages(['required' => 'لینک یا شناسه ویدیوی آپارات را وارد کنید.', 'max' => 'لینک آپارات نباید بیشتر از ۲۰۴۸ کاراکتر باشد.'])
                                                                 ->placeholder('https://www.aparat.com/v/k93yms3')
                                                                 ->extraInputAttributes(['dir' => 'ltr'])
                                                                 ->rules([fn () => function (string $attribute, $value, \Closure $fail): void {
@@ -345,9 +370,25 @@ class NewsForm
 
                                             TextInput::make('slug')
                                                 ->label('اسلاگ')
+                                                ->regex('/\A[\p{L}\p{N}\p{M}\x{200C}_-]+\z/u')
+                                                ->validationMessages(['required' => 'اسلاگ خبر را وارد کنید.', 'unique' => 'این اسلاگ قبلاً استفاده شده است؛ اسلاگ دیگری وارد کنید.', 'max' => 'اسلاگ نباید بیشتر از ۲۵۵ کاراکتر باشد.', 'regex' => 'اسلاگ را بدون فاصله و علامت‌هایی مثل / و ؟ وارد کنید؛ از خط تیره بین کلمات استفاده کنید.'])
                                                 ->required()
                                                 ->unique(ignoreRecord: true)
                                                 ->maxLength(255),
+
+                                            TextInput::make('meta_title')
+                                                ->validationMessages(['max' => 'عنوان سئو نباید بیشتر از ۲۵۵ کاراکتر باشد.'])
+                                                ->label('عنوان سئو (اختیاری)')
+                                                ->maxLength(255)
+                                                ->rules([new \App\Rules\NewsText])
+                                                ->helperText(fn (TextInput $component) => self::counter($component, 255, 60, 'پیشنهاد: حدود ۳۰ تا ۶۰ کاراکتر. اگر خالی باشد عنوان خبر استفاده می‌شود؛ نمایش کامل در گوگل تضمین نمی‌شود.')),
+
+                                            Textarea::make('meta_description')
+                                                ->validationMessages(['max' => 'توضیحات سئو نباید بیشتر از ۱۰۰۰ کاراکتر باشد.'])
+                                                ->label('توضیحات سئو (اختیاری)')
+                                                ->rows(3)->maxLength(1000)
+                                                ->rules([new \App\Rules\NewsText])
+                                                ->helperText(fn (Textarea $component) => self::counter($component, 1000, 160, 'پیشنهاد: حدود ۱۲۰ تا ۱۶۰ کاراکتر؛ خلاصه خاص همین خبر. اگر خالی باشد لید استفاده می‌شود.')),
 
                                         ]),
 
@@ -489,18 +530,20 @@ class NewsForm
                                         ->schema([
 
                                             Select::make('status')
+                                                ->validationMessages(['required' => 'وضعیت خبر را انتخاب کنید.', 'in' => 'اجازه انتخاب این وضعیت انتشار را ندارید.'])
                                                 ->label('وضعیت')
-                                                ->options([
-                                                    NewsStatus::Draft->value => 'پیش‌نویس',
-                                                    NewsStatus::Scheduled->value => 'زمان‌بندی انتشار',
-                                                ])
+                                                ->options(fn ($record) => \App\Support\NewsFormPublication::options(auth()->user(), $record))
+                                                ->rules(fn ($record) => [\Illuminate\Validation\Rule::in(array_keys(\App\Support\NewsFormPublication::options(auth()->user(), $record)))])
+                                                ->required()
+                                                ->helperText('با ثبت یا ذخیره خبر، وضعیت انتخاب‌شده اعمال می‌شود.')
                                                 ->default(NewsStatus::Draft->value)
                                                 ->live(),
 
                                             JalaliDateTimePicker::make('published_at')
+                                                ->validationMessages(['required' => 'برای انتشار زمان‌بندی‌شده، تاریخ و ساعت انتشار را وارد کنید.'])
                                                 ->label('زمان انتشار')
                                                 ->disabled(
-                                                    fn () => auth()->user()->hasRole('Reporter')
+                                                    fn () => ! \App\Support\NewsFormPublication::canPublish(auth()->user())
                                                 )
                                                 ->visible(
                                                     fn ($get) =>
@@ -518,6 +561,7 @@ class NewsForm
                                         ->schema([
 
                                             Select::make('categories')
+                                                ->validationMessages(['required' => 'حداقل یک دسته‌بندی برای خبر انتخاب کنید.', 'exists' => 'دسته‌بندی انتخاب‌شده معتبر نیست؛ دوباره انتخاب کنید.', 'in' => 'دسته‌بندی انتخاب‌شده معتبر نیست؛ دوباره انتخاب کنید.'])
                                                 ->label('دسته‌بندی')
                                                 ->live()
                                                 ->relationship('categories', 'name')
@@ -532,6 +576,7 @@ class NewsForm
 
                                                 
                                         Select::make('report_type')
+                                            ->validationMessages(['required' => 'نوع مطلب را انتخاب کنید.', 'exists' => 'نوع مطلب انتخاب‌شده معتبر نیست.', 'in' => 'نوع مطلب انتخاب‌شده معتبر نیست.'])
                                             ->label('نوع مطلب')
                                             ->relationship(
                                                 name: 'reportType',
@@ -543,6 +588,7 @@ class NewsForm
                                             ->live(),
 
                                         Select::make('production_method')
+                                            ->validationMessages(['required' => 'نحوه تولید خبر را انتخاب کنید.', 'in' => 'نحوه تولید انتخاب‌شده معتبر نیست.'])
                                             ->label('نحوه تولید')
                                             ->options([
                                                 'بازنشری' => 'بازنشری',
@@ -571,6 +617,7 @@ class NewsForm
                                             }),
 
                                         Select::make('top_category_id')
+                                            ->validationMessages(['required' => 'دسته‌بندی موردنظر برای خبر تاپ را انتخاب کنید.', 'exists' => 'دسته‌بندی خبر تاپ دیگر موجود نیست؛ دوباره انتخاب کنید.', 'in' => 'دسته‌بندی خبر تاپ معتبر نیست؛ دوباره انتخاب کنید.'])
                                             ->label('دسته‌بندی خبر تاپ')
                                             ->helperText('همه دسته‌بندی‌ها قابل انتخاب‌اند؛ دسته انتخابی به دسته‌بندی‌های خبر نیز اضافه می‌شود.')
                                             ->options(fn () => \App\Models\Category::query()
@@ -594,6 +641,33 @@ class NewsForm
 
                         ]),
 
+                Section::make('خبرهای مرتبط')
+                    ->description('حداقل ۳ و حداکثر ۱۰ خبر منتشرشده مرتبط با موضوع این خبر انتخاب کنید.')
+                    ->columnSpanFull()
+                    ->schema([
+                        Select::make('relatedNews')
+                            ->label('انتخاب خبرهای مرتبط')
+                            ->relationship('relatedNews', 'title',
+                                modifyQueryUsing: fn (\Illuminate\Database\Eloquent\Builder $query) => $query->publiclyVisible()->orderByDesc('news.published_at')->orderByDesc('news.id'),
+                                ignoreRecord: true)
+                            ->multiple()->searchable(['title', 'news_code'])->preload()->optionsLimit(30)
+                            ->getOptionLabelFromRecordUsing(fn (\App\Models\News $record) => $record->title.' — '.$record->news_code)
+                            ->required()->minItems(3)->maxItems(10)
+                            ->validationMessages([
+                                'required' => 'حداقل ۳ خبر مرتبط انتخاب کنید.',
+                                'min' => 'حداقل ۳ خبر مرتبط انتخاب کنید.',
+                                'max' => 'حداکثر ۱۰ خبر مرتبط قابل انتخاب است.',
+                            ])
+                            ->rules([fn ($record) => function (string $attribute, $value, \Closure $fail) use ($record): void {
+                                $ids = array_map('strval', (array) $value);
+                                if (count(array_unique($ids)) !== count($ids)
+                                    || ($record && in_array((string) $record->id, $ids, true))
+                                    || \App\Models\News::query()->publiclyVisible()->whereKey($ids)->count() !== count($ids)) {
+                                    $fail('خبرهای مرتبط باید متمایز، منتشرشده و غیر از خود این خبر باشند.');
+                                }
+                            }])
+                            ->helperText('با عنوان یا کد خبر جستجو کنید. انتخاب‌ها پس از ذخیره خبر ثبت می‌شوند.'),
+                    ]),
             ]);
     }
 }

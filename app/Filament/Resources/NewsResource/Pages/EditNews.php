@@ -11,6 +11,11 @@ class EditNews extends EditRecord {
     protected static string $resource=NewsResource::class;
     protected array $galleryMedia=[];
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return \App\Support\NewsFormPublication::prepare($data, auth()->user(), $this->record);
+    }
+
 
     #[On('featured-image-selected')]
     public function setFeaturedImage(

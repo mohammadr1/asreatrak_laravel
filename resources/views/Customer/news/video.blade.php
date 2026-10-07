@@ -1,8 +1,10 @@
 @extends('Customer.layouts.master-one-col')
 
+@section('news-seo-title', e(($news->meta_title ?: $news->title) . ' | ' . config('app.name')))
+
 @section('head-tag')
-<title>{{ $news->meta_title ?: $news->title }} | {{ config('app.name') }}</title>
 <meta name="description" content="{{ $news->meta_description ?: $news->lead }}">
+@include('Customer.news.seo', ['news' => $news])
 <link rel="stylesheet" href="{{ asset('assets/css/style_single.css') }}">
 <style>
     .video-news { min-width: 0; overflow-wrap: anywhere; }
@@ -61,5 +63,23 @@
     <nav class="video-news-links" aria-label="برچسب‌های خبر">
         @foreach($news->tags as $tag)<a href="{{ route('tag.show', $tag->slug) }}">{{ $tag->name }}</a>@endforeach
     </nav>
+    @if($news->relatedNews->isNotEmpty())
+        <section class="related-section mt-4" aria-labelledby="related-news-heading">
+            <h2 id="related-news-heading" class="section-title">خبرهای مرتبط</h2>
+            <div class="row g-3 mt-1">
+                @foreach($news->relatedNews as $related)
+                    <div class="col-12 col-md-6">
+                        <a class="related-card" href="{{ route('news.show', $related) }}">
+                            @php($relatedImage = $related->featuredMedia?->variantUrl($related->featured_media_variant ?: 'original'))
+                            @if($relatedImage)
+                                <img class="related-card-img" src="{{ $relatedImage }}" alt="" loading="lazy" style="max-width:100%;aspect-ratio:16/9;object-fit:cover">
+                            @endif
+                            <div class="related-card-body"><h3 class="related-card-title">{{ $related->title }}</h3></div>
+                        </a>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
 </article>
 @endsection
