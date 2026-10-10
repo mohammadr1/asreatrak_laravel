@@ -126,7 +126,7 @@
 
             <!-- Article Hero Image -->
             <div class="article-hero-wrap">
-                <img src="https://images.unsplash.com/photo-1546085020-407431a34851?w=900&q=85"
+                <img src=""
                     alt="نشست فوق‌العاده شورای عالی استان‌ها" />
                 <div class="article-hero-caption">
                     <i class="bi bi-camera me-1"></i>
@@ -231,58 +231,66 @@
         </div>
     </div>
 
+
     <!-- =====================
              Related News
         ===================== -->
     <div class="related-section mt-4">
         <div class="section-header">
-            <span class="section-title"><i class="bi bi-newspaper me-1"></i>اخبار مرتبط</span>
+            <span class="section-title">
+                <i class="bi bi-newspaper me-1"></i>
+                اخبار مرتبط
+            </span>
         </div>
+
         <div>
-            <a href="#" class="related-card">
-                <img src="https://images.unsplash.com/photo-1611244763972-aa9c8368ef14?w=300&q=75" alt="خبر مرتبط ۱"
-                    class="related-card-img" />
-                <div class="related-card-body">
-                    <div class="related-card-cat">سیاسی</div>
-                    <div class="related-card-title">سفر هیئت دولت به استان خراسان شمالی و افتتاح پروژه‌های عمرانی
+            @forelse($news->relatedNews as $related)
+                <a href="{{ route('news.show', $related) }}" class="related-card">
+
+                    @if($related->featuredMedia)
+                        <img
+                            src="{{ asset($related->featuredMedia->watermarked_path) }}"
+                            alt="{{ $related->featuredMedia->alt ?: $related->title }}"
+                            class="related-card-img"
+                        >
+                    @else
+                        <img
+                            src="{{ asset('assets/images/default-news.jpg') }}"
+                            alt="{{ $related->title }}"
+                            class="related-card-img"
+                        >
+                    @endif
+
+                    <div class="related-card-body">
+
+                        <div class="related-card-cat">
+                            {{ $related->categories->first()?->name ?? 'عمومی' }}
+                        </div>
+
+                        <div class="related-card-title">
+                            {{ $related->title }}
+                        </div>
+
+                        <div class="related-card-meta">
+                            @if($related->published_at)
+                                <i class="bi bi-clock me-1"></i>
+                                {{ $related->jalali_published_at }}
+                            @endif
+
+                            @if($related->views_count !== null)
+                                &nbsp;|&nbsp;
+                                <i class="bi bi-eye me-1"></i>
+                                {{ number_format($related->views_count) }} بازدید
+                            @endif
+                        </div>
+
                     </div>
-                    <div class="related-card-meta"><i class="bi bi-clock me-1"></i>۱۴۰۳/۰۲/۱۵ &nbsp;|&nbsp; <i
-                            class="bi bi-eye me-1"></i>۱,۸۰۰ بازدید</div>
+                </a>
+            @empty
+                <div class="text-center py-4">
+                    <span>خبر مرتبطی وجود ندارد.</span>
                 </div>
-            </a>
-            <a href="#" class="related-card">
-                <img src="https://images.unsplash.com/photo-1604646357333-ecb1f24b2d21?w=300&q=75" alt="خبر مرتبط ۲"
-                    class="related-card-img" />
-                <div class="related-card-body">
-                    <div class="related-card-cat">اقتصادی</div>
-                    <div class="related-card-title">رشد ۲۵ درصدی تولیدات صنعتی بجنورد در سال جاری</div>
-                    <div class="related-card-meta"><i class="bi bi-clock me-1"></i>۱۴۰۳/۰۲/۱۴ &nbsp;|&nbsp; <i
-                            class="bi bi-eye me-1"></i>۹۵۰ بازدید</div>
-                </div>
-            </a>
-            <a href="#" class="related-card">
-                <img src="https://images.unsplash.com/photo-1613441589134-3fc7f95a3e16?w=300&q=75" alt="خبر مرتبط ۳"
-                    class="related-card-img" />
-                <div class="related-card-body">
-                    <div class="related-card-cat">استانی</div>
-                    <div class="related-card-title">استاندار خراسان شمالی: توسعه زیرساخت‌ها در اولویت برنامه‌های
-                        دولت قرار
-                        دارد</div>
-                    <div class="related-card-meta"><i class="bi bi-clock me-1"></i>۱۴۰۳/۰۲/۱۳ &nbsp;|&nbsp; <i
-                            class="bi bi-eye me-1"></i>۱,۲۳۰ بازدید</div>
-                </div>
-            </a>
-            <a href="#" class="related-card">
-                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=300&q=75" alt="خبر مرتبط ۴"
-                    class="related-card-img" />
-                <div class="related-card-body">
-                    <div class="related-card-cat">فناوری</div>
-                    <div class="related-card-title">راه‌اندازی مرکز نوآوری و فناوری استان خراسان شمالی در بجنورد
-                    </div>
-                    <div class="related-card-meta"><i class="bi bi-clock me-1"></i>۱۴۰۳/۰۲/۱۲ &nbsp;|&nbsp; <i
-                            class="bi bi-eye me-1"></i>۲,۱۰۰ بازدید</div>
-                </div>
-            </a>
+            @endforelse
         </div>
     </div>
     <!-- /Related News -->

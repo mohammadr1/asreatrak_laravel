@@ -16,7 +16,7 @@ Route::prefix('news')->group(function () {
 
     Route::get('/archive', [NewsController::class, 'archive'])->name('news.archive');
 
-    Route::get('/{news}', [NewsController::class, 'show'])->name('news.show');
+    Route::get('/{news:slug}', [NewsController::class, 'show'])->name('news.show');
 
     });
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');

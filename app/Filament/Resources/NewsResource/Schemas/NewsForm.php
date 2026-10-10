@@ -18,6 +18,7 @@ use App\Forms\Components\JalaliDateTimePicker;
 use Filament\Forms\Components\Hidden;
 use App\Models\ReportType;
 use Filament\Forms\Components\View;
+use Filament\Forms\Get;
 
 class NewsForm
 {
@@ -80,6 +81,11 @@ class NewsForm
                                                 ->label('روتیتر')
                                                 ->maxLength(255)
                                                 ->rules([new \App\Rules\NewsText])
+                                                ->rules([
+                                                    'nullable',
+                                                    'string',
+                                                    'regex:/^[\p{L}\p{M}\p{N}\s\p{P}\p{S}]+$/u',
+                                                ])
                                                 ->helperText(fn (TextInput $component) => self::counter($component, 255, 50,''))
                                                 ->columnSpanFull(),
 
@@ -90,6 +96,17 @@ class NewsForm
                                                 ->helperText(fn (TextInput $component) => self::counter($component, 255, 80, ''))
                                                 ->required()
                                                 ->unique(ignoreRecord: true)
+                                                ->rules([
+                                                    new \App\Rules\NewsText(),
+                                                    'string',
+                                                    'regex:/^[\p{L}\p{M}\p{N}\s\p{P}\p{S}]+$/u',
+                                                ])
+                                                ->validationMessages([
+                                                    'required' => 'عنوان خبر را وارد کنید.',
+                                                    'unique' => 'این عنوان قبلاً ثبت شده است.',
+                                                    'max' => 'عنوان خبر نباید بیشتر از ۲۵۵ کاراکتر باشد.',
+                                                    'regex' => 'عنوان خبر شامل کاراکترهای غیرمجاز است.',
+                                                ])
                                                 ->live(onBlur: true)
                                                 ->maxLength(255)
                                                 ->afterStateUpdated(function (
@@ -221,6 +238,10 @@ class NewsForm
                                                 ->validationMessages(['required' => 'لید خبر را وارد کنید.', 'max' => 'لید خبر نباید بیشتر از ۱۰۰۰ کاراکتر باشد.'])
                                                 ->label('لید خبر')
                                                 ->rules([new \App\Rules\NewsText])
+                                                ->rules([
+                                                    'string',
+                                                    'regex:/^[\p{L}\p{M}\p{N}\s\p{P}\p{S}]+$/u',
+                                                ])
                                                 ->helperText(fn (Textarea $component) => self::counter($component, 255, 300, 'پیشنهاد تحریریه: حدود ۱۲۰ تا ۳۰۰ کاراکتر؛ مهم‌ترین اتفاق و اطلاعات اصلی را خلاصه کنید.'))
                                                 ->required()
                                                 ->rows(4)
@@ -272,6 +293,27 @@ class NewsForm
                                                     'undo',
                                                     'redo',
                                                 ]),
+
+                                            Actions::make([
+                                                Action::make('previewNews')
+                                                    ->label('پیش‌نمایش خبر')
+                                                    ->icon('heroicon-o-eye')
+                                                    ->color('info')
+                                                    ->modalHeading('پیش‌نمایش خبر')
+                                                    ->modalWidth('7xl')
+                                                    ->modalSubmitAction(false)
+                                                    ->modalCancelActionLabel('بستن')
+                                                    ->modalContent(function (Get $get): \Illuminate\View\View {
+                                                        return view('filament.news.preview', [
+                                                            'news' => [
+                                                                'title' => $get('title') ?? '',
+                                                                'uptitle' => $get('uptitle') ?? '',
+                                                                'lead' => $get('lead') ?? '',
+                                                                'content' => $get('content') ?? '',
+                                                            ],
+                                                        ]);
+                                                    }),
+                                            ])->columnSpanFull(),
 
                                             Placeholder::make('editor_comment')
                                                 ->label('پیام سردبیر')

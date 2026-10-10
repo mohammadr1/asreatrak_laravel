@@ -16,64 +16,37 @@
         <div class="hero-slider-wrap fade-in">
           <div class="hero-slider" id="heroSlider">
 
-            <!-- Slide 1 -->
-            <div class="hero-slide active">
+            @forelse($sliderNews as $index => $news)
+            <div class="hero-slide {{ $index === 0 ? 'active' : '' }}">
               <div class="hero-slide-img">
-                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه ۱"/>
-                <span class="category-badge">سیاسی</span>
+                @php($image = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked') ?: $news->featuredMedia?->variantUrl('cropped') ?: asset('assets/images/header.png'))
+                <img src="{{ $image }}" alt="{{ $news->title }}"/>
+                <span class="category-badge">{{ $news->categories->first()?->name ?? 'خبر' }}</span>
               </div>
               <div class="hero-slide-body">
                 <div>
-                  <div class="overtitle">رویداد ویژه</div>
-                  <h2><a href="#">نشست فوق‌العاده شورای عالی استان‌ها برای بررسی مسائل اقتصادی خراسان شمالی برگزار شد</a></h2>
-                  <p class="lead-text">
-                    در این نشست که با حضور استانداران و نمایندگان مجلس برگزار شد، به بررسی چالش‌های اقتصادی
-                    منطقه و راه‌حل‌های پیشنهادی پرداخته شد. تأکید ویژه‌ای بر توسعه زیرساخت‌های استان و
-                    جذب سرمایه‌گذاری خارجی صورت گرفت.
-                  </p>
+                  <div class="overtitle">{{ $news->post_type === 'video' ? 'خبر ویدیویی' : 'خبر' }}</div>
+                  <h2><a href="{{ route('news.show', $news) }}">{{ $news->title }}</a></h2>
+                  <p class="lead-text">{{ $news->lead }}</p>
                 </div>
                 <div class="hero-slide-meta">
-                  <span><i class="bi bi-calendar3"></i> ۱۴۰۳/۰۲/۱۵</span>
-                  <span><i class="bi bi-clock"></i> ۱۴:۳۰</span>
-                  <span><i class="bi bi-eye"></i> ۲,۴۸۵</span>
-                  <a href="#" class="read-more">ادامه خبر ←</a>
+                  @if($news->published_at)<span><i class="bi bi-calendar3"></i> {{ \Morilog\Jalali\Jalalian::fromDateTime($news->published_at)->format('Y/m/d') }}</span>@endif
+                  @if($news->published_at)<span><i class="bi bi-clock"></i> {{ \Morilog\Jalali\Jalalian::fromDateTime($news->published_at)->format('H:i') }}</span>@endif
+                  <span><i class="bi bi-eye"></i> {{ number_format($news->views_count) }}</span>
+                  <a href="{{ route('news.show', $news) }}" class="read-more">ادامه خبر ←</a>
                 </div>
               </div>
             </div>
-
-            <!-- Slide 2 -->
-            <div class="hero-slide">
-              <div class="hero-slide-img">
-                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="خبر ویژه ۲"/>
-                <span class="category-badge" >فناوری</span>
-              </div>
-              <div class="hero-slide-body">
-                <div>
-                  <div class="overtitle">اختصاصی</div>
-                  <h2><a href="#">راه‌اندازی مرکز نوآوری و فناوری استان خراسان شمالی در بجنورد</a></h2>
-                  <p class="lead-text">
-                    مرکز نوآوری بجنورد با ظرفیت پذیرش ۵۰ استارتاپ فعال، به عنوان بزرگترین مرکز
-                    رشد فناوری در شمال شرق کشور آغاز به کار کرد. این مرکز با همکاری دانشگاه آزاد
-                    و وزارت علوم تأسیس شده است.
-                  </p>
-                </div>
-                <div class="hero-slide-meta">
-                  <span><i class="bi bi-calendar3"></i> ۱۴۰۳/۰۲/۱۴</span>
-                  <span><i class="bi bi-clock"></i> ۱۰:۱۵</span>
-                  <span><i class="bi bi-eye"></i> ۱,۸۷۲</span>
-                  <a href="#" class="read-more">ادامه خبر ←</a>
-                </div>
-              </div>
-            </div>
-
+            @empty
+            <div class="hero-slide active"><div class="hero-slide-body"><h2>هنوز خبری برای اسلایدر انتخاب نشده است.</h2></div></div>
+            @endforelse
           </div><!-- /.hero-slider -->
 
           <!-- Slider Controls -->
           <div class="slider-controls" role="group" aria-label="کنترل اخبار اسلایدر">
             <button class="slider-btn" id="prevSlide" type="button" aria-label="خبر قبلی"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
             <div class="slider-dots">
-              <button class="slider-dot active" type="button" onclick="goToSlide(0)" aria-label="نمایش خبر ویژه اول"></button>
-              <button class="slider-dot" type="button" onclick="goToSlide(1)" aria-label="نمایش خبر ویژه دوم"></button>
+              @foreach($sliderNews as $index => $news)<button class="slider-dot {{ $index === 0 ? 'active' : '' }}" type="button" onclick="goToSlide({{ $index }})" aria-label="نمایش اسلاید {{ $index + 1 }}"></button>@endforeach
             </div>
             <button class="slider-btn" id="nextSlide" type="button" aria-label="خبر بعدی"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
           </div>
