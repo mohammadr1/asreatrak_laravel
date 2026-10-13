@@ -305,51 +305,8 @@
     </div>
 
     <!-- اوقات شرعی -->
-    <div class="sidebar-widget">
-        <div class="widget-header">
-            <i class="bi bi-moon-stars-fill"></i>
-            اوقات شرعی
-        </div>
-        <div class="widget-body">
-            <div class="prayer-date-header" id="prayer-date-header">بارگذاری...</div>
-            <div class="prayer-grid">
-                <div class="prayer-item">
-                    <i class="bi bi-sunrise-fill"></i>
-                    <span class="prayer-name">اذان صبح</span>
-                    <span class="prayer-time">۰۴:۴۸</span>
-                </div>
-                <div class="prayer-item">
-                    <i class="bi bi-sun-fill"></i>
-                    <span class="prayer-name">طلوع آفتاب</span>
-                    <span class="prayer-time">۰۶:۱۵</span>
-                </div>
-                <div class="prayer-item highlight">
-                    <i class="bi bi-brightness-high-fill"></i>
-                    <span class="prayer-name">اذان ظهر</span>
-                    <span class="prayer-time">۱۳:۰۲</span>
-                </div>
-                <div class="prayer-item">
-                    <i class="bi bi-sunset-fill"></i>
-                    <span class="prayer-name">اذان عصر</span>
-                    <span class="prayer-time">۱۶:۴۸</span>
-                </div>
-                <div class="prayer-item">
-                    <i class="bi bi-moon-fill"></i>
-                    <span class="prayer-name">اذان مغرب</span>
-                    <span class="prayer-time">۲۰:۲۴</span>
-                </div>
-                <div class="prayer-item">
-                    <i class="bi bi-stars"></i>
-                    <span class="prayer-name">اذان عشا</span>
-                    <span class="prayer-time">۲۱:۳۵</span>
-                </div>
-            </div>
-            <div class="mt-3 p-2 rounded">
-                <i class="bi bi-geo-alt-fill"></i>
-                بجنورد، خراسان شمالی — اوقات شرعی محاسبه‌شده
-            </div>
-        </div>
-    </div>
+    @include('Customer.partials.prayer-times')
+
 
     <!-- آب و هوا -->
     <div class="sidebar-widget">
