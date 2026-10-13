@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\ReportType;
-
+use App\Support\AparatVideo;
 
 class News extends Model
 {
@@ -53,6 +53,52 @@ class News extends Model
         ];
     }
 
+
+
+    public function renderedContent(): string
+    {
+        $html = (string) $this->content;
+
+        $player = function (?string $id): ?string {
+            $embed = AparatVideo::embedUrl($id);
+
+            if (! $embed) {
+                return null;
+            }
+
+            return '<div class="article-video ratio ratio-16x9">'
+                . '<iframe src="' . e($embed) . '" title="ویدیوی آپارات" '
+                . 'allowfullscreen loading="lazy" allow="autoplay; fullscreen" '
+                . 'style="border:0"></iframe></div>';
+        };
+
+        // ۱) حالت لینک: <a href="https://www.aparat.com/v/k93yms1">[ویدیوی آپارات: k93yms1]</a>
+        //    (ویرایشگر معمولاً شورت‌کد را داخل تگ <a> و گاهی <p> می‌گذارد)
+        $html = preg_replace_callback(
+            '~(?:<p[^>]*>\s*)?<a\b[^>]*href=["\']([^"\']*aparat\.com/v/[A-Za-z0-9]+[^"\']*)["\'][^>]*>.*?</a>(?:\s*</p>)?~isu',
+            function ($m) use ($player) {
+                $id = AparatVideo::id(html_entity_decode($m[1]));
+                // اگر لینک query یا چیز اضافه داشت، فقط شناسه را از مسیر می‌گیریم
+                if (! $id && preg_match('~aparat\.com/v/([A-Za-z0-9]+)~', $m[1], $mm)) {
+                    $id = $mm[1];
+                }
+                return $player($id) ?? $m[0];
+            },
+            $html
+        );
+
+        // ۲) حالت متن ساده: [ویدیوی آپارات: k93yms1]
+        $html = preg_replace_callback(
+            '~\[\s*ویدیوی\s*آپارات\s*:\s*([A-Za-z0-9]+)\s*\]~u',
+            fn ($m) => $player($m[1]) ?? $m[0],
+            $html
+        );
+
+        return $html;
+    }
+
+
+
     public function reporter()
     {
         return $this->belongsTo(User::class, 'reporter_id');
@@ -91,7 +137,12 @@ class News extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class, 'news_category')->withPivot('is_top');
+        return $this->belongsToMany(
+            Category::class, 
+            'news_category',
+            'news_id',
+            'category_id'
+        )->withPivot('is_top');
     }
 
     public function syncTopCategory(?int $categoryId): void
@@ -171,6 +222,30 @@ class News extends Model
             'report_type'
         );
     }
+
+
+    public function bodyImages(): array
+    {
+        if (blank($this->content)) {
+            return [];
+        }
+
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $this->content);
+        libxml_clear_errors();
+
+        $images = [];
+        foreach ($dom->getElementsByTagName('img') as $img) {
+            $src = $img->getAttribute('src');
+            if ($src) {
+                $images[] = ['src' => $src, 'alt' => $img->getAttribute('alt')];
+            }
+        }
+
+        return $images;
+    }
+    
 
 
 }

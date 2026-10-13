@@ -5,7 +5,7 @@
   --home-navy: #071d33;
   --home-primary: #116b9c;
   --home-primary-dark: #0a4f77;
-  --home-accent: #f3a712;
+  --home-accent: #486581;
   --home-bg: #eef4f8;
   --home-surface: #ffffff;
   --home-border: #d9e4ec;
@@ -100,7 +100,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, .media-card:focus-vi
 .nav-social a:hover, .theme-btn:hover { background: rgba(255, 255, 255, .22); transform: translateY(-2px); }
 
 .breaking-bar { border-bottom: 1px solid var(--home-border); background: rgba(255, 255, 255, .88); box-shadow: 0 3px 12px rgba(16, 42, 67, .04); }
-.breaking-label { min-height: 40px; padding-inline: 16px; background: var(--home-accent); color: var(--home-navy); }
+.breaking-label { min-height: 40px; padding-inline: 16px; 
+  /* background: var(--home-accent); color: var(--home-navy);  */
+}
 .breaking-label .dot { background: var(--home-navy); }
 .ticker-inner { color: var(--home-ink); font-size: 12.5px; }
 

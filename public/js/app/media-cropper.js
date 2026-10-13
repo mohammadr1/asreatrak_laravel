@@ -15,7 +15,8 @@ window.imageEditor = function () {
                 document.getElementById("cropper-image"),
                 {
                     viewMode: 1,
-                    aspectRatio: 16 / 9,
+                    // aspectRatio: 16 / 9,
+                    aspectRatio: 4 / 3,
                     cropBoxResizable: false,
                     cropBoxMovable: true,
                     autoCropArea: 1,

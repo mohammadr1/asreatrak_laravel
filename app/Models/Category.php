@@ -22,6 +22,11 @@ class Category extends Model
 
     public function news()
     {
-        return $this->belongsToMany(News::class)->withPivot('is_top');
+        return $this->belongsToMany(
+            News::class,
+            'news_category',
+            'category_id',
+            'news_id'
+        )->withPivot('is_top');
     }
 }

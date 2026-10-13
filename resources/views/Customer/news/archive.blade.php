@@ -625,56 +625,8 @@
     </div>
 
     <!-- اخبار پربازدید -->
-    <div class="sidebar-widget fade-in">
-        <div class="widget-header">
-            <i class="bi bi-fire"></i>
-            پربازدیدترین‌ها
-        </div>
-        <div class="widget-body p-0">
-            <ul class="list-unstyled m-0">
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3 hover-bg">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۱</span>
-                        <div>
-                            <div>صعود تیم فوتبال شاهین به لیگ دسته اول</div>
-                            <div><i class="bi bi-eye me-1"></i>۳,۴۵۶ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۲</span>
-                        <div>
-                            <div>افتتاح مرکز نوآوری و فناوری بجنورد</div>
-                            <div><i class="bi bi-eye me-1"></i>۲,۴۸۵ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۳</span>
-                        <div>
-                            <div>جشنواره فرهنگی آینه‌خانه در بجنورد</div>
-                            <div><i class="bi bi-eye me-1"></i>۱,۸۷۲ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۴</span>
-                        <div>
-                            <div>بارش باران بهاره در خراسان شمالی</div>
-                            <div><i class="bi bi-eye me-1"></i>۱,۱۰۳ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
+        @include('Customer.partials.popular-news', ['popularNews' => $popularNews])
+
 
     <!-- Newsletter Subscribe -->
     <div class="sidebar-widget">

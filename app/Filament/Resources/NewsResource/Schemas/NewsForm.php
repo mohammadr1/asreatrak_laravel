@@ -99,7 +99,7 @@ class NewsForm
                                                 ->rules([
                                                     new \App\Rules\NewsText(),
                                                     'string',
-                                                    'regex:/^[\p{L}\p{M}\p{N}\s\p{P}\p{S}]+$/u',
+                                                    'regex:/^[\p{L}\p{M}\p{N}\p{P}\p{S}\s\x{200C}\x{200F}]+$/u',
                                                 ])
                                                 ->validationMessages([
                                                     'required' => 'عنوان خبر را وارد کنید.',
@@ -232,17 +232,27 @@ class NewsForm
                                                 ->default(auth()->id())
                                                 ->visible(
                                                     fn () => auth()->user()?->hasRole('Admin')
-                                                ),
+                                                )
+                                                ->columnSpanFull(),
 
                                             Textarea::make('lead')
-                                                ->validationMessages(['required' => 'لید خبر را وارد کنید.', 'max' => 'لید خبر نباید بیشتر از ۱۰۰۰ کاراکتر باشد.'])
                                                 ->label('لید خبر')
-                                                ->rules([new \App\Rules\NewsText])
-                                                ->rules([
-                                                    'string',
-                                                    'regex:/^[\p{L}\p{M}\p{N}\s\p{P}\p{S}]+$/u',
+                                                ->validationMessages([
+                                                    'required' => 'لید خبر را وارد کنید.',
+                                                    'max' => 'لید خبر نباید بیشتر از ۱۰۰۰ کاراکتر باشد.',
+                                                    'regex' => 'لید خبر شامل کاراکترهای غیرمجاز است.',
                                                 ])
-                                                ->helperText(fn (Textarea $component) => self::counter($component, 255, 300, 'پیشنهاد تحریریه: حدود ۱۲۰ تا ۳۰۰ کاراکتر؛ مهم‌ترین اتفاق و اطلاعات اصلی را خلاصه کنید.'))
+                                                ->rules([
+                                                    new \App\Rules\NewsText,
+                                                    'string',
+                                                    'regex:/^[\p{L}\p{M}\p{N}\s\p{P}\p{S}\x{200C}\x{200D}]+$/u',
+                                                ])
+                                                ->helperText(fn (Textarea $component) => self::counter(
+                                                    $component,
+                                                    255,
+                                                    300,
+                                                    'پیشنهاد تحریریه: حدود ۱۲۰ تا ۳۰۰ کاراکتر؛ مهم‌ترین اتفاق و اطلاعات اصلی را خلاصه کنید.'
+                                                ))
                                                 ->required()
                                                 ->rows(4)
                                                 ->maxLength(1000)
@@ -279,20 +289,24 @@ class NewsForm
                                                 ->required()
                                                 ->columnSpanFull()
                                                 ->toolbarButtons([
-                                                    'bold',
-                                                    'italic',
-                                                    'underline',
-                                                    'strike',
-                                                    'link',
-                                                    'bulletList',
-                                                    'orderedList',
-                                                    'blockquote',
-                                                    'codeBlock',
-                                                    'h2',
-                                                    'h3',
-                                                    'undo',
-                                                    'redo',
-                                                ]),
+                                                        'bold',
+                                                        'italic',
+                                                        'underline',
+                                                        'strike',
+                                                        'link',
+                                                        'alignStart',
+                                                        'alignCenter',
+                                                        'alignEnd',
+                                                        'alignJustify',
+                                                        'bulletList',
+                                                        'orderedList',
+                                                        'blockquote',
+                                                        'codeBlock',
+                                                        'h2',
+                                                        'h3',
+                                                        'undo',
+                                                        'redo',
+                                                    ]),
 
                                             Actions::make([
                                                 Action::make('previewNews')
@@ -611,6 +625,7 @@ class NewsForm
                                                 ->searchable()
                                                 ->preload()
                                                 ->required(),
+
 
                                             \App\Forms\Components\NewsTagsSelect::make('tags')
                                                 ->label('برچسب‌ها')

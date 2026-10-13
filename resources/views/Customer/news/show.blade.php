@@ -8,201 +8,131 @@
 @section('content')
 
 
+@php
+    use Morilog\Jalali\Jalalian;
+    use Morilog\Jalali\CalendarUtils;
+
+    $heroUrl = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked')
+        ?: $news->featuredMedia?->variantUrl('cropped')
+        ?: $news->featuredMedia?->variantUrl('original');
+
+    $shareUrl   = route('news.show', $news);
+    $shareTitle = $news->title;
+    $topCat     = $news->categories->firstWhere('pivot.is_top', true) ?? $news->categories->first();
+
+    $fa = fn ($v) => CalendarUtils::convertNumbers((string) $v);
+    $jDate = $news->published_at ? $fa(Jalalian::fromCarbon($news->published_at)->format('Y/m/d')) : null;
+    $jTime = $news->published_at ? $fa(Jalalian::fromCarbon($news->published_at)->format('H:i')) : null;
+
+    $reporterName = $news->reporter?->name;
+@endphp
+
 <!-- =====================
            COL-8: Article Content
       ===================== -->
 <div class="col-lg-8">
 
     <!-- start print article -->
+    
     <div class="print-area">
 
-        <!-- هدر مخصوص چاپ -->
         <div class="print-header print-only">
             <img src="{{ asset('assets/images/logo.png') }}" alt="خبرگزاری عصر اترک" class="print-logo">
             <div class="print-title">خبرگزاری عصر اترک</div>
             <div class="print-sub">پایگاه خبری تحلیلی خراسان شمالی</div>
         </div>
 
-        <!-- خط جداکننده -->
         <div class="print-divider"></div>
 
-        <!-- شروع خبر -->
         <div class="print-content">
 
-
-
-            <!-- Featured Image / Hero -->
-            <div class="article-featured-image">
-                <img src="{{ asset('assets/images/photo_3_2026-08-21_23-40-30.jpg') }}" alt="نشست فوق‌العاده =شورای عالی استان‌ها" />
-                <div class="fi-gradient"></div>
-                <span class="article-category-badge">سیاسی</span>
-            </div>
-
-
-            <style>
-                .article-featured-image {
-                    position: relative;
-                    width: 100%;
-                }
-
-                .article-kicker {
-                    font-size: .85rem;
-                    font-weight: 700;
-
-                    color: var(--primary);
-
-                    margin-top: 14px;
-                    margin-bottom: 10px;
-
-                    position: relative;
-
-                    padding-right: 14px;
-                }
-
-                .article-kicker::before {
-                    /* content: ''; */
-
-                    position: absolute;
-
-                    right: 0;
-                    top: 50%;
-
-                    transform: translateY(-50%);
-
-                    width: 6px;
-                    height: 6px;
-
-                    border-radius: 50%;
-
-                    background: var(--primary);
-                }
-
-            </style>
-            <!-- Article Header -->
-            <div class="article-header">
-                <span class="article-category-badge">سیاسی</span>
-                <p class="article-kicker">
-                    این یک نمونه لید خبر است
-                </p>
-                <h1 class="article-title">
-                    نشست فوق‌العاده شورای عالی استان‌ها برای بررسی مسائل اقتصادی خراسان شمالی برگزار شد
-                </h1>
-                <p class="article-lead">
-                    در این نشست که با حضور استانداران و نمایندگان مجلس برگزار شد، به بررسی چالش‌های اقتصادی
-                    منطقه و راه‌حل‌های پیشنهادی پرداخته شد. تأکید ویژه‌ای بر توسعه زیرساخت‌های استان و
-                    جذب سرمایه‌گذاری خارجی صورت گرفت.
-                </p>
-
-                <!-- Meta Row -->
-                <div class="article-meta-row">
-                    <div class="author">
-                        <img src="https://ui-avatars.com/api/?name=Ahmad+Karimi&background=c0392b&color=fff&size=64"
-                            alt="احمد کریمی" class="author-avatar" />
-                        <div>
-                            <div style="font-size:.82rem;font-weight:600;color:var(--heading-color,#ddd)">احمد کریمی
-                            </div>
-                            <div style="font-size:.74rem;opacity:.65">خبرنگار سیاسی</div>
-                        </div>
+            {{-- رسانه‌ی اصلی: ویدیو یا تصویر --}}
+            @if ($embedUrl)
+                <div class="article-featured-image">
+                    <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden">
+                        <iframe src="{{ $embedUrl }}" title="{{ $news->title }}"
+                                allowfullscreen loading="lazy"
+                                allow="autoplay; fullscreen" class="border-0"></iframe>
                     </div>
-                    <span><i class="bi bi-calendar3"></i> ۱۴۰۳/۰۲/۱۵</span>
-                    <span><i class="bi bi-clock"></i> ۱۴:۳۰</span>
-                    <span><i class="bi bi-eye"></i> ۲,۴۸۵ بازدید</span>
-                    <span><i class="bi bi-chat-dots"></i> ۱۲ نظر</span>
-                    <span><i class="bi bi-share"></i> ۳۴ اشتراک‌گذاری</span>
+                </div>
+            @elseif ($heroUrl)
+                <div class="article-featured-image">
+                    <img class="w-100 rounded" src="{{ $heroUrl }}" alt="{{ $news->featuredMedia->alt ?: $news->title }}">
+                    <div class="fi-gradient"></div>
+                    @if ($topCat)
+                        <a href="{{ route('category.show', $topCat->slug) }}" class="article-category-badge">{{ $topCat->name }}</a>
+                    @endif
+                </div>
+                @if ($news->featuredMedia->caption || $news->featuredMedia->copyright)
+                    <div class="article-hero-caption">
+                        <i class="bi bi-camera me-1"></i>
+                        {{ $news->featuredMedia->caption }}
+                        @if ($news->featuredMedia->copyright) — {{ $news->featuredMedia->copyright }} @endif
+                    </div>
+                @endif
+            @endif
 
-                    <!-- Share Buttons -->
+            <div class="article-header">
+                @if ($topCat && ($embedUrl || ! $heroUrl))
+                    <a href="{{ route('category.show', $topCat->slug) }}" class="article-category-badge">{{ $topCat->name }}</a>
+                @endif
+
+                @if ($news->uptitle)
+                    <p class="article-kicker">{{ $news->uptitle }}</p>
+                @endif
+
+                <h1 class="article-title">{{ $news->title }}</h1>
+
+                @if ($news->lead)
+                    <p class="article-lead">{{ $news->lead }}</p>
+                @endif
+
+                <div class="article-meta-row">
+                    @if ($reporterName)
+                        <div class="author">
+                            <span class="author-avatar d-inline-flex align-items-center justify-content-center fw-bold">
+                                {{ mb_substr($reporterName, 0, 1) }}
+                            </span>
+                            <div>
+                                <div style="font-size:.82rem;font-weight:600">{{ $reporterName }}</div>
+                                <div style="font-size:.74rem;opacity:.65">خبرنگار</div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if ($jDate)
+                        <span><i class="bi bi-calendar3"></i> {{ $jDate }}</span>
+                        <span><i class="bi bi-clock"></i> {{ $jTime }}</span>
+                    @endif
+                    <span><i class="bi bi-eye"></i> {{ $fa(number_format($news->views_count ?? 0)) }} بازدید</span>
+
                     <div class="article-share ms-auto">
                         <span class="share-label">اشتراک‌گذاری:</span>
-                        <a href="#" class="share-btn telegram" title="تلگرام"><i class="bi bi-telegram"></i></a>
-                        <a href="#" class="share-btn whatsapp" title="واتساپ"><i class="bi bi-whatsapp"></i></a>
-                        <a href="#" class="share-btn twitter" title="توییتر"><i class="bi bi-twitter-x"></i></a>
-                        <a href="#" class="share-btn instagram" title="اینستاگرام"><i class="bi bi-instagram"></i></a>
-                        <button class="share-btn copy" title="کپی لینک" onclick="copyLink()"><i
-                                class="bi bi-link-45deg"></i></button>
+                        <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}"
+                           class="share-btn telegram" title="تلگرام" target="_blank" rel="noopener"><i class="bi bi-telegram"></i></a>
+                        <a href="https://wa.me/?text={{ urlencode($shareTitle . ' ' . $shareUrl) }}"
+                           class="share-btn whatsapp" title="واتساپ" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i></a>
+                        <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}"
+                           class="share-btn twitter" title="ایکس" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
+                        <button type="button" class="share-btn copy" title="کپی لینک" onclick="copyLink()"><i class="bi bi-link-45deg"></i></button>
                     </div>
                 </div>
             </div>
-            <!-- /Article Header -->
 
-            <!-- Article Hero Image -->
-            <div class="article-hero-wrap">
-                <img src=""
-                    alt="نشست فوق‌العاده شورای عالی استان‌ها" />
-                <div class="article-hero-caption">
-                    <i class="bi bi-camera me-1"></i>
-                    نمایی از جلسه شورای عالی استان‌ها — عکس: خبرگزاری بجنورد
-                </div>
-            </div>
-
-            <!-- Article Body -->
+            {{-- متن خبر --}}
             <div class="article-body">
-                <p>
-                    نشست فوق‌العاده شورای عالی استان‌ها با حضور استاندار خراسان شمالی، نمایندگان مجلس شورای اسلامی
-                    و مسئولان ارشد دستگاه‌های اجرایی استان، روز گذشته در محل استانداری بجنورد برگزار شد. در این
-                    نشست به تفصیل درباره چالش‌های اقتصادی پیش‌روی استان و راهکارهای مقابله با آن‌ها بحث و تبادل‌نظر
-                    صورت گرفت.
-                </p>
-
-                <h3>محورهای اصلی نشست</h3>
-                <p>
-                    استاندار خراسان شمالی در ابتدای این نشست با اشاره به ظرفیت‌های بالقوه استان اعلام کرد که توسعه
-                    زیرساخت‌های حمل‌ونقل، انرژی و فناوری اطلاعات در اولویت اول دولت قرار دارد. وی همچنین از
-                    برنامه‌ریزی برای جذب سرمایه‌گذاری خارجی از کشورهای همسایه خبر داد.
-                </p>
-
-                <blockquote>
-                    «توسعه پایدار استان‌های مرزی نیازمند توجه ویژه و سیاست‌گذاری بلندمدت است.
-                    ما آماده‌ایم تا با بهره‌گیری از توان بخش خصوصی و سرمایه‌گذاران داخلی و خارجی،
-                    گام‌های مؤثری در راستای رشد اقتصادی استان برداریم.»
-                    <br /><cite>— استاندار خراسان شمالی</cite>
-                </blockquote>
-
-                <p>
-                    در ادامه این نشست، رئیس سازمان برنامه و بودجه استان گزارش تفصیلی درباره وضعیت پروژه‌های
-                    عمرانی در حال اجرا ارائه داد. بر اساس این گزارش، در حال حاضر ۴۷ پروژه زیرساختی در استان
-                    در مرحله اجراست که بخش قابل توجهی از آن‌ها تا پایان سال جاری به بهره‌برداری خواهد رسید.
-                </p>
-
-                <h3>تأکید بر جذب سرمایه‌گذاری</h3>
-                <p>
-                    نمایندگان مجلس شورای اسلامی در این نشست ضمن ابراز رضایت از روند پیشرفت پروژه‌های استانی،
-                    بر ضرورت تسریع در رفع موانع اداری و بوروکراتیک برای جذب سرمایه‌گذاران تأکید کردند.
-                    در این راستا مقرر شد که کارگروه ویژه‌ای با محوریت اتاق بازرگانی و سازمان سرمایه‌گذاری
-                    استان تشکیل گردد.
-                </p>
-
-                <ul>
-                    <li>تسریع در صدور مجوزهای سرمایه‌گذاری</li>
-                    <li>ایجاد پنجره واحد خدمات سرمایه‌گذاری در استانداری</li>
-                    <li>برگزاری همایش فرصت‌های سرمایه‌گذاری استان تا پایان تابستان</li>
-                    <li>تخصیص اعتبارات ویژه برای توسعه مناطق آزاد</li>
-                </ul>
-
-                <h3>برنامه‌های آینده</h3>
-                <p>
-                    در پایان جلسه، جمع‌بندی نهایی حاکی از این بود که استان خراسان شمالی با داشتن مرز مشترک
-                    با ترکمنستان و قرار گرفتن در مسیر کریدور شمال–جنوب، از موقعیت استراتژیک ویژه‌ای برخوردار
-                    است که می‌تواند به توسعه اقتصادی چشمگیر این منطقه کمک کند.
-                </p>
-                <p>
-                    مقرر شد نتایج این نشست طی یک گزارش رسمی به هیئت دولت ارسال شود و پیگیری مصوبات به
-                    معاون هماهنگی امور عمرانی استانداری سپرده شد.
-                </p>
-            </div>
-            <!-- /Article Body -->
-
-            <!-- Tags -->
-            <div class="article-tags">
-                <span class="tag-label"><i class="bi bi-tags me-1"></i>برچسب‌ها:</span>
-                <a href="#" class="tag-pill">شورای عالی استان‌ها</a>
-                <a href="#" class="tag-pill">خراسان شمالی</a>
-                <a href="#" class="tag-pill">بجنورد</a>
-                <a href="#" class="tag-pill">اقتصادی</a>
-                <a href="#" class="tag-pill">سرمایه‌گذاری</a>
-                <a href="#" class="tag-pill">استانداری</a>
-                <a href="#" class="tag-pill">مجلس</a>
+                {!! $news->renderedContent() !!}
             </div>
 
+
+            @if ($news->tags->isNotEmpty())
+                <div class="article-tags">
+                    <span class="tag-label"><i class="bi bi-tags me-1"></i>برچسب‌ها:</span>
+                    @foreach ($news->tags as $tag)
+                        <a href="{{ route('tag.show', $tag->slug) }}" class="tag-pill">{{ $tag->name }}</a>
+                    @endforeach
+                </div>
+            @endif
 
         </div>
     </div>
@@ -210,24 +140,15 @@
 
     <!-- Actions Bar -->
     <div class="article-actions-bar">
-        <button class="action-btn" onclick="window.print()">
-            <i class="bi bi-printer"></i> چاپ خبر
-        </button>
-        <button class="action-btn" onclick="copyLink()">
-            <i class="bi bi-link-45deg"></i> کپی لینک
-        </button>
-        <a href="#" class="action-btn">
-            <i class="bi bi-flag"></i> گزارش تخلف
-        </a>
-        <a href="#" class="action-btn" id="shareBtn">
-            <i class="bi bi-send"></i> ارسال به دوستان
-        </a>
-        <!-- Share again at bottom -->
+        <a type="button" class="action-btn" onclick="window.print()"><i class="bi bi-printer"></i> چاپ خبر</a>
+        <a type="button" class="action-btn" onclick="copyLink()"><i class="bi bi-link-45deg"></i> کپی لینک</a>
+        <!-- <a href="#" class="action-btn" id="shareBtn"><i class="bi bi-send"></i> ارسال به دوستان</a> -->
+
         <div class="d-flex align-items-center gap-2 ms-auto">
             <span class="share-label" style="font-size:.8rem;opacity:.7">اشتراک‌گذاری:</span>
-            <a href="#" class="share-btn telegram" title="تلگرام"><i class="bi bi-telegram"></i></a>
-            <a href="#" class="share-btn whatsapp" title="واتساپ"><i class="bi bi-whatsapp"></i></a>
-            <a href="#" class="share-btn twitter" title="توییتر"><i class="bi bi-twitter-x"></i></a>
+            <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}" class="share-btn telegram" title="تلگرام" target="_blank" rel="noopener"><i class="bi bi-telegram"></i></a>
+            <a href="https://wa.me/?text={{ urlencode($shareTitle . ' ' . $shareUrl) }}" class="share-btn whatsapp" title="واتساپ" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i></a>
+            <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}" class="share-btn twitter" title="ایکس" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
         </div>
     </div>
 
@@ -237,59 +158,33 @@
         ===================== -->
     <div class="related-section mt-4">
         <div class="section-header">
-            <span class="section-title">
-                <i class="bi bi-newspaper me-1"></i>
-                اخبار مرتبط
-            </span>
+            <span class="section-title"><i class="bi bi-newspaper me-1"></i> اخبار مرتبط</span>
         </div>
 
         <div>
-            @forelse($news->relatedNews as $related)
+            @forelse ($news->relatedNews as $related)
+                @php
+                    $rImg = $related->featuredMedia?->variantUrl($related->featured_media_variant ?: 'watermarked')
+                        ?: $related->featuredMedia?->variantUrl('cropped')
+                        ?: asset('assets/images/header.png');
+                @endphp
                 <a href="{{ route('news.show', $related) }}" class="related-card">
-
-                    @if($related->featuredMedia)
-                        <img
-                            src="{{ asset($related->featuredMedia->watermarked_path) }}"
-                            alt="{{ $related->featuredMedia->alt ?: $related->title }}"
-                            class="related-card-img"
-                        >
-                    @else
-                        <img
-                            src="{{ asset('assets/images/default-news.jpg') }}"
-                            alt="{{ $related->title }}"
-                            class="related-card-img"
-                        >
-                    @endif
-
+                    <img src="{{ $rImg }}" alt="{{ $related->featuredMedia?->alt ?: $related->title }}"
+                         class="related-card-img" loading="lazy">
                     <div class="related-card-body">
-
-                        <div class="related-card-cat">
-                            {{ $related->categories->first()?->name ?? 'عمومی' }}
-                        </div>
-
-                        <div class="related-card-title">
-                            {{ $related->title }}
-                        </div>
-
+                        <div class="related-card-cat">{{ $related->categories->first()?->name ?? 'عمومی' }}</div>
+                        <div class="related-card-title">{{ $related->title }}</div>
                         <div class="related-card-meta">
-                            @if($related->published_at)
-                                <i class="bi bi-clock me-1"></i>
-                                {{ $related->jalali_published_at }}
+                            @if ($related->jalali_published_at)
+                                <i class="bi bi-clock me-1"></i>{{ $fa($related->jalali_published_at) }}
                             @endif
-
-                            @if($related->views_count !== null)
-                                &nbsp;|&nbsp;
-                                <i class="bi bi-eye me-1"></i>
-                                {{ number_format($related->views_count) }} بازدید
-                            @endif
+                            &nbsp;|&nbsp;
+                            <i class="bi bi-eye me-1"></i>{{ $fa(number_format($related->views_count ?? 0)) }} بازدید
                         </div>
-
                     </div>
                 </a>
             @empty
-                <div class="text-center py-4">
-                    <span>خبر مرتبطی وجود ندارد.</span>
-                </div>
+                <div class="text-center py-4"><span>خبر مرتبطی وجود ندارد.</span></div>
             @endforelse
         </div>
     </div>
@@ -387,41 +282,24 @@
 <div class="col-lg-4">
 
     <!-- News Info Box -->
-    <div class="sidebar-widget">
-        <div class="widget-header">
-            <i class="bi bi-info-circle-fill"></i>
-            اطلاعات خبر
-        </div>
+        <div class="sidebar-widget">
+        <div class="widget-header"><i class="bi bi-info-circle-fill"></i> اطلاعات خبر</div>
         <div class="widget-body">
             <div class="news-code-box" style="border:none;border-radius:0;margin:0">
-                <div class="code-row">
-                    <span>کد خبر</span>
-                    <strong>BN-140315-0042</strong>
-                </div>
-                <div class="code-row">
-                    <span>منبع</span>
-                    <strong>خبرگزاری بجنورد</strong>
-                </div>
-                <div class="code-row">
-                    <span>تاریخ انتشار</span>
-                    <strong>۱۴۰۳/۰۲/۱۵</strong>
-                </div>
-                <div class="code-row">
-                    <span>ساعت انتشار</span>
-                    <strong>۱۴:۳۰</strong>
-                </div>
-                <div class="code-row">
-                    <span>دسته‌بندی</span>
-                    <strong>سیاسی — داخلی</strong>
-                </div>
-                <div class="code-row">
-                    <span>تعداد بازدید</span>
-                    <strong>۲,۴۸۵</strong>
-                </div>
-                <div class="code-row">
-                    <span>خبرنگار</span>
-                    <strong>احمد کریمی</strong>
-                </div>
+                @if ($news->news_code)
+                    <div class="code-row"><span>کد خبر</span><strong>{{ $news->news_code }}</strong></div>
+                @endif
+                @if ($jDate)
+                    <div class="code-row"><span>تاریخ انتشار</span><strong>{{ $jDate }}</strong></div>
+                    <div class="code-row"><span>ساعت انتشار</span><strong>{{ $jTime }}</strong></div>
+                @endif
+                @if ($news->categories->isNotEmpty())
+                    <div class="code-row"><span>دسته‌بندی</span><strong>{{ $news->categories->pluck('name')->implode(' — ') }}</strong></div>
+                @endif
+                <div class="code-row"><span>تعداد بازدید</span><strong>{{ $fa(number_format($news->views_count ?? 0)) }}</strong></div>
+                @if ($reporterName)
+                    <div class="code-row"><span>خبرنگار</span><strong>{{ $reporterName }}</strong></div>
+                @endif
             </div>
         </div>
     </div>
@@ -552,56 +430,8 @@
     </div>
 
     <!-- اخبار پربازدید -->
-    <div class="sidebar-widget">
-        <div class="widget-header">
-            <i class="bi bi-fire"></i>
-            پربازدیدترین‌ها
-        </div>
-        <div class="widget-body p-0">
-            <ul class="list-unstyled m-0">
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3 hover-bg">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۱</span>
-                        <div>
-                            <div>صعود تیم فوتبال شاهین به لیگ دسته اول</div>
-                            <div><i class="bi bi-eye me-1"></i>۳,۴۵۶ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۲</span>
-                        <div>
-                            <div>افتتاح مرکز نوآوری و فناوری بجنورد</div>
-                            <div><i class="bi bi-eye me-1"></i>۲,۴۸۵ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۳</span>
-                        <div>
-                            <div>جشنواره فرهنگی آینه‌خانه در بجنورد</div>
-                            <div><i class="bi bi-eye me-1"></i>۱,۸۷۲ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="d-flex align-items-start gap-3 p-3">
-                        <span
-                            class="fw-bold text-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0">۴</span>
-                        <div>
-                            <div>بارش باران بهاره در خراسان شمالی</div>
-                            <div><i class="bi bi-eye me-1"></i>۱,۱۰۳ بازدید</div>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
+    @include('Customer.partials.popular-news', ['popularNews' => $popularNews])
+
 
     <!-- Newsletter Subscribe -->
     <div class="sidebar-widget">
@@ -637,22 +467,33 @@
 
 <!-- کپی لینک کوتاه شده خبر -->
 <script>
-document.getElementById('shareBtn').addEventListener('click', async function (e) {
-    e.preventDefault();
+    const shareData = {
+        title: @json($news->title),
+        url: @json(route('news.show', $news)),
+    };
 
-    // const shortUrl = "@{{ url('/news/' . $news->short_link) }}";
-
-    if (navigator.share) {
-        navigator.share({
-            // title: "@{{ $news->title }}",
-            // text: "@{{ $news->title }}",
-            url: shortUrl
-        });
-    } else {
-        navigator.clipboard.writeText(shortUrl);
+    async function copyLink() {
+        try {
+            await navigator.clipboard.writeText(shareData.url);
+        } catch (e) {
+            const t = document.createElement('textarea');
+            t.value = shareData.url;
+            document.body.appendChild(t);
+            t.select();
+            document.execCommand('copy');
+            t.remove();
+        }
         alert('لینک خبر کپی شد');
     }
-});
+
+    document.getElementById('shareBtn')?.addEventListener('click', async function (e) {
+        e.preventDefault();
+        if (navigator.share) {
+            try { await navigator.share(shareData); } catch (_) {}
+        } else {
+            copyLink();
+        }
+    });
 </script>
 
 @endsection

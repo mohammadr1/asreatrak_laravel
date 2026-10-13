@@ -33,6 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('backroom-entry')
+            ->favicon(asset('assets/images/logo.png'))
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => [
