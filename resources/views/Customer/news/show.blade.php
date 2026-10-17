@@ -1,4 +1,4 @@
-@extends('Customer.layouts.master-one-col')
+@extends('customer.layouts.master-one-col')
 
 @section('head-tag')
 <link rel="stylesheet" href="{{ asset('assets/css/style_single.css') }}">
