@@ -642,3 +642,13 @@
     height: 100%;
 }
 /* end video in content */
+
+/* Reliable single-page print overrides */
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { margin: 0 !important; padding: 0 !important; height: auto !important; min-height: 0 !important; overflow: visible !important; background: #fff !important; }
+  .print-area { position: static !important; width: auto !important; max-width: none !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; page-break-after: auto !important; }
+  .article-hero-wrap img { display: block; width: auto !important; max-width: 100% !important; max-height: 95mm !important; height: auto !important; object-fit: contain; }
+  .action-btn { appearance: none; -webkit-appearance: none; font: inherit; }
+  body::after { display: none !important; content: none !important; }
+}

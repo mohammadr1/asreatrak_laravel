@@ -7,7 +7,7 @@
       </button>
 
       <!-- Nav Links -->
-      <ul class="nav-links" id="navLinks">
+      <!-- <ul class="nav-links" id="navLinks">
         <li class="active"><a href="#"><i class="bi bi-house-fill"></i> خانه</a></li>
         <li>
           <a href="#">سیاسی <i class="bi bi-chevron-down" ></i></a>
@@ -31,6 +31,18 @@
         <li><a href="#">حوادث</a></li>
         <li><a href="#">استانی</a></li>
         <li><a href="#">چندرسانه</a></li>
+      </ul> -->
+
+      <ul class="nav-links" id="navLinks">
+        <li class="{{ request()->routeIs('home') ? 'active' : '' }}">
+          <a href="{{ route('customer.home') }}"><i class="bi bi-house-fill"></i> خانه</a>
+        </li>
+
+        @foreach($navCategories as $category)
+          <li class="{{ request()->is('category/'.$category->id) ? 'active' : '' }}">
+            <a href="{{ route('category.show', $category) }}">{{ $category->name }}</a>
+          </li>
+        @endforeach
       </ul>
 
       <!-- Right section: datetime + social -->

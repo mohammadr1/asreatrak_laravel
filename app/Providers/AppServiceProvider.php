@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
 use Illuminate\Support\ServiceProvider;
 use App\Models\News;
 use App\Observers\NewsObserver;
@@ -11,7 +12,8 @@ use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 
 use App\Support\ViteAsset;
-
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -46,5 +48,13 @@ class AppServiceProvider extends ServiceProvider
         Media::observe(MediaObserver::class);
 
 
+        // اسم فایل را با فایل واقعی نوار بالای خودتان یکی کنید
+        View::composer('*', function ($view) {
+            $view->with('navCategories', Cache::remember(
+                'nav.categories',
+                now()->addHour(),
+                fn () => Category::orderBy('id')->get(['id', 'name', 'slug'])
+            ));
+        });
     }
 }

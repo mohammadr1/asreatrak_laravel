@@ -19,7 +19,7 @@ Route::prefix('news')->group(function () {
     Route::get('/{news:slug}', [NewsController::class, 'show'])->name('news.show');
 
     });
-Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
+Route::get('/category/{category:slug}', [CategoryController::class, 'show'])->name('category.show');
 
 Route::get('/tag/{slug}', [TagController::class, 'show'])->name('tag.show');
 // Route::get('/', function () {

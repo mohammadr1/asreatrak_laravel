@@ -3,6 +3,9 @@
 
 <head>
     @include('customer.layouts.head-tag')
+    {{-- Shared public-site theme: home, article and archive use the same shell. --}}
+    <link rel="stylesheet" href="{{ asset('assets/css/media_card_home_gallery.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
     @yield('head-tag')
 </head>
 

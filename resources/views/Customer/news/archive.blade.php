@@ -501,7 +501,7 @@
     @include('Customer.partials.prayer-times')
 
     <!-- آب و هوا -->
-    <div class="sidebar-widget fade-in">
+    <!-- <div class="sidebar-widget fade-in">
         <div class="widget-header">
             <i class="bi bi-cloud-sun-fill"></i>
             آب‌وهوای بجنورد
@@ -576,7 +576,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- اخبار پربازدید -->
         @include('Customer.partials.popular-news', ['popularNews' => $popularNews])

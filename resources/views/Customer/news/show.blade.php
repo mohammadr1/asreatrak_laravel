@@ -1,8 +1,9 @@
 @extends('customer.layouts.master-one-col')
 
+@section('news-seo-title', e(($news->meta_title ?: $news->title) . ' | ' . config('app.name')))
+
 @section('head-tag')
 <link rel="stylesheet" href="{{ asset('assets/css/style_single.css') }}">
-<title>{{ env('APP_NAME') }}</title>
 @endsection
 
 @section('content')
@@ -140,7 +141,9 @@
 
     <!-- Actions Bar -->
     <div class="article-actions-bar">
-        <a type="button" class="action-btn" onclick="window.print()"><i class="bi bi-printer"></i> چاپ خبر</a>
+        <a type="button" class="action-btn" id="printNewsBtn">
+            <i class="bi bi-printer" aria-hidden="true"></i> چاپ خبر
+        </a>
         <a type="button" class="action-btn" onclick="copyLink()"><i class="bi bi-link-45deg"></i> کپی لینک</a>
         <!-- <a href="#" class="action-btn" id="shareBtn"><i class="bi bi-send"></i> ارسال به دوستان</a> -->
 
@@ -309,7 +312,7 @@
 
 
     <!-- آب و هوا -->
-    <div class="sidebar-widget">
+    <!-- <div class="sidebar-widget">
         <div class="widget-header">
             <i class="bi bi-cloud-sun-fill"></i>
             آب‌وهوای بجنورد
@@ -384,7 +387,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- اخبار پربازدید -->
     @include('Customer.partials.popular-news', ['popularNews' => $popularNews])
@@ -424,6 +427,15 @@
 
 <!-- کپی لینک کوتاه شده خبر -->
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const printButton = document.getElementById('printNewsBtn');
+        if (printButton) {
+            printButton.addEventListener('click', function () {
+                window.print();
+            });
+        }
+    });
+
     const shareData = {
         title: @json($news->title),
         url: @json(route('news.show', $news)),

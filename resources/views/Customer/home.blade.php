@@ -1,8 +1,6 @@
 @extends('customer.layouts.master-one-col')
 
 @section('head-tag')
-<link rel="stylesheet" href="{{ asset('assets/css/media_card_home_gallery.css') }}">
-<link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
 
 <style>
   /* start gallery media */
@@ -261,7 +259,7 @@
                     <img src="{{ $reportNews->featuredMedia->variantUrl('watermarked') ?? asset('assets/images/header.png') }}"
                         alt="{{ $reportNews->title }}">
                     <div class="card-overlay">
-                        <h5><a href="#">{{ $reportNews->title }}</a></h5>
+                        <h5><a href="{{ route('news.show', $reportNews) }}">{{ $reportNews->title }}</a></h5>
                         <div class="meta"><i class="bi bi-calendar3"></i>
                             {{ \Morilog\Jalali\Jalalian::fromDateTime($reportNews->published_at)->format('Y/m/d') }}
                             &nbsp;|&nbsp; <i class="bi bi-clock"></i>
@@ -288,7 +286,7 @@
                     <img src="{{ $conversationNews->featuredMedia->variantUrl('watermarked') ?? asset('assets/images/header.png') }}"
                         alt="{{ $conversationNews->title }}">
                     <div class="card-overlay">
-                        <h5><a href="#">{{ $conversationNews->title }}</a></h5>
+                        <h5><a href="{{ route('news.show', $conversationNews) }}">{{ $conversationNews->title }}</a></h5>
                         <div class="meta"><i class="bi bi-calendar3"></i>
                             {{ \Morilog\Jalali\Jalalian::fromDateTime($conversationNews->published_at)->format('Y/m/d') }}
                             &nbsp;|&nbsp; <i class="bi bi-clock"></i>
@@ -314,7 +312,7 @@
                     <img src="{{ $noteNews->featuredMedia->variantUrl('watermarked') ?? asset('assets/images/header.png') }}"
                         alt="{{ $noteNews->title }}">
                     <div class="card-overlay">
-                        <h5><a href="#">{{ $noteNews->title }}</a></h5>
+                        <h5><a href="{{ route('news.show', $noteNews) }}">{{ $noteNews->title }}</a></h5>
                         <div class="meta"><i class="bi bi-calendar3"></i>
                             {{ \Morilog\Jalali\Jalalian::fromDateTime($noteNews->published_at)->format('Y/m/d') }}
                             &nbsp;|&nbsp; <i class="bi bi-clock"></i>
@@ -451,7 +449,7 @@
     @include('Customer.partials.prayer-times')
 
     <!-- آب و هوا -->
-    <div class="sidebar-widget fade-in">
+    <!-- <div class="sidebar-widget fade-in">
         <div class="widget-header">
             <i class="bi bi-cloud-sun-fill"></i>
             آب‌وهوای بجنورد
@@ -526,7 +524,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- اخبار پربازدید -->
     @include('Customer.partials.popular-news', ['popularNews' => $popularNews])
