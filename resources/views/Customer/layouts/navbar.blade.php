@@ -34,17 +34,31 @@
       </ul> -->
 
       <ul class="nav-links" id="navLinks">
-        <li class="{{ request()->routeIs('home') ? 'active' : '' }}">
+        <li class="{{ request()->routeIs('customer.home') ? 'active' : '' }}">
           <a href="{{ route('customer.home') }}"><i class="bi bi-house-fill"></i> خانه</a>
         </li>
 
         @foreach($navCategories as $category)
-          <li class="{{ request()->is('category/'.$category->id) ? 'active' : '' }}">
+          <li class="{{ request()->routeIs('category.show') && request()->route('category')?->id === $category->id ? 'active' : '' }}">
             <a href="{{ route('category.show', $category) }}">{{ $category->name }}</a>
           </li>
         @endforeach
       </ul>
 
+      <!-- Search -->
+      <form class="nav-search d-none d-lg-block" action="{{ route('news.archive') }}" method="GET" role="search">
+        <input type="hidden" name="sort" value="relevant">
+        <input type="search" name="q" value="{{ request('q') }}"
+              placeholder="جستجو در اخبار..." aria-label="جستجو در اخبار"
+              maxlength="100" autocomplete="off" required>
+        <button type="submit" aria-label="جستجو"><i class="bi bi-search" aria-hidden="true"></i></button>
+      </form>
+
+      <!-- جستجو در موبایل: به صفحه‌ی آرشیف (که فیلتر و جستجو دارد) می‌رود -->
+      <a href="{{ route('news.archive') }}" class="nav-search-link d-lg-none" aria-label="جستجو در اخبار">
+        <i class="bi bi-search" aria-hidden="true"></i>
+      </a>
+      
       <!-- Right section: datetime + social -->
       <div class="nav-right">
         <div class="nav-datetime">
@@ -59,13 +73,13 @@
           <span class="dt-time" id="nav-clock">--:--:--</span>
         </div>
         <div class="nav-social">
-          <a href="https://t.me/" target="_blank" title="تلگرام"><i class="bi bi-telegram"></i></a>
-          <a href="https://instagram.com/" target="_blank" title="اینستاگرام"><i class="bi bi-instagram"></i></a>
-          <a href="https://twitter.com/" target="_blank" title="توییتر/ایکس"><i class="bi bi-twitter-x"></i></a>
-          <a href="https://www.aparat.com/" target="_blank" title="آپارات">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 4.5c4.142 0 7.5 3.358 7.5 7.5S16.142 19.5 12 19.5 4.5 16.142 4.5 12 7.858 4.5 12 4.5zm0 2.25c-2.9 0-5.25 2.35-5.25 5.25S9.1 17.25 12 17.25s5.25-2.35 5.25-5.25S14.9 6.75 12 6.75zm0 2.25a3 3 0 110 6 3 3 0 010-6z"/></svg>
-          </a>
-          <a href="https://wa.me/" target="_blank" title="واتساپ"><i class="bi bi-whatsapp"></i></a>
+          @foreach(config('social.links') as $s)
+            @if(filled($s['url']) && ! empty($s['icon']))
+              <a href="{{ $s['url'] }}" target="_blank" rel="noopener noreferrer" title="{{ $s['title'] }}">
+                <i class="bi {{ $s['icon'] }}"></i>
+              </a>
+            @endif
+          @endforeach
         </div>
       </div>
     </div>

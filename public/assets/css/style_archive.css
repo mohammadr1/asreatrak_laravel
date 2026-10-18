@@ -784,8 +784,8 @@
        DARK MODE
     =========================== */
     :root.dark {
-      --bg-light: #353434;
-      --bg-white: #3a3a3a;
+      --bg-light: #244157;
+      --bg-white: #0f2233;
       --text-dark: #e4e4e4;
       --text-muted: #a0a0a0;
       --border-color: #2a2a2a;
@@ -801,7 +801,7 @@
     .dark .page-btn,
     .dark .sort-select { background: var(--bg-white); }
     .dark .filter-group select,
-    .dark .filter-group input { background: #2a2a2a; color: var(--text-dark); border-color: #444; }
+    .dark .filter-group input { background: var(--bg-white); color: var(--text-dark); border-color: #444; }
     .dark .view-btn.active { background: var(--primary); }
     /* .dark .cat-pill { background: #2a2a2a; color: var(--text-muted); } */
     .dark .cat-pill > .active { 
@@ -974,3 +974,4 @@
     .dark .jdp-day { color: var(--text-dark); }
     .dark .jdp-title { color: var(--text-dark); }
     .dark .jdp-day.other { color: #555; }
+    .cat-pill.is-empty { opacity: .5; }

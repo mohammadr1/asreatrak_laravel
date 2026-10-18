@@ -14,11 +14,6 @@
       </div>
     </div>
 
-    <!-- Search Center -->
-    <div class="header-search d-none d-lg-block">
-      <input type="search" placeholder="جستجو در اخبار..." aria-label="جستجو در اخبار" />
-      <i class="bi bi-search" aria-hidden="true"></i>
-    </div>
 
     <!-- Logo Left (English) -->
     <div class="logo-text-en" dir="ltr">

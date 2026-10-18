@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\ReportType;
 use App\Support\AparatVideo;
+use Illuminate\Support\Facades\DB;
+
 
 class News extends Model
 {
@@ -247,5 +249,56 @@ class News extends Model
     }
     
 
+    public function getCoverUrlAttribute(): string
+    {
+        return $this->featuredMedia?->variantUrl($this->featured_media_variant ?: 'watermarked')
+            ?: $this->featuredMedia?->variantUrl('cropped')
+            ?: $this->featuredMedia?->variantUrl('original')
+            ?: asset('assets/images/header.png');
+    }
+    
+    public function getJalaliPublishedAtAttribute(): ?string
+    {
+        $date = $this->published_at ?? $this->created_at;
 
+        return $date
+            ? \Morilog\Jalali\Jalalian::fromCarbon($date)->format('Y/m/d H:i')
+            : null;
+    }
+
+
+
+    /** وضعیت‌هایی که خبرنگار هنوز می‌تواند خبر خودش را ویرایش کند */
+    public const REPORTER_EDITABLE_STATUSES = [
+        NewsStatus::Draft,
+        // NewsStatus::Pending,
+        NewsStatus::Rejected,
+    ];
+
+    public function canBeEditedBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        // ادمین همیشه
+        if ($user->hasRole('Admin')) {
+            return true;
+        }
+
+        // خبرنگار: فقط خبر خودش، تا قبل از تأیید سردبیر
+        if ($user->hasRole('Reporter')) {
+            $isOwner = (int) $this->reporter_id === (int) $user->id
+                || (int) $this->created_by === (int) $user->id;
+
+            return $isOwner && in_array($this->status, self::REPORTER_EDITABLE_STATUSES, true);
+        }
+
+        // اگر می‌خواهید سردبیر هم خبرِ «در انتظار بررسی» را ویرایش کند، این را باز کنید:
+        if ($user->can('news.approve')) {
+            return $this->status === NewsStatus::Pending;
+        }
+
+        return false;
+    }
 }

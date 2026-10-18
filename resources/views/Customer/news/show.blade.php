@@ -38,8 +38,8 @@
     <div class="print-area">
 
         <div class="print-header print-only">
-            <img src="{{ asset('assets/images/logo.png') }}" alt="خبرگزاری عصر اترک" class="print-logo">
-            <div class="print-title">خبرگزاری عصر اترک</div>
+            <img src="{{ asset('assets/images/logo.png') }}" alt="پایگاه‌خبری عصر اترک" class="print-logo">
+            <div class="print-title">پایگاه‌خبری عصر اترک</div>
             <div class="print-sub">پایگاه خبری تحلیلی خراسان شمالی</div>
         </div>
 
@@ -394,25 +394,7 @@
 
 
     <!-- Newsletter Subscribe -->
-    <div class="sidebar-widget">
-        <div class="p-4 rounded shadow-lg">
-            <div class="text-center mb-3">
-                <i class="bi bi-envelope-paper-heart-fill fs-1 text-warning"></i>
-                <h6 class="fw-bold mt-2">خبرنامه رایگان</h6>
-                <p class="">آخرین اخبار را در ایمیل خود دریافت کنید</p>
-            </div>
-            <div class="input-group mb-3" dir="rtl">
-                <input type="email" class="form-control form-control-sm rounded-start" placeholder="ایمیل شما..."
-                    aria-label="ایمیل شما..." required />
-                <button class="btn btn-sm btn-primary rounded-end px-4">
-                    عضویت
-                </button>
-            </div>
-            <!-- پیغام خطا یا موفقیت -->
-            <div id="successMessage" class="text-success d-none">شما با موفقیت عضو شدید!</div>
-            <div id="errorMessage" class="text-danger d-none">لطفاً یک ایمیل معتبر وارد کنید!</div>
-        </div>
-    </div>
+    @include('Customer.partials.social-join')
 
 </div>
 <!-- /COL-4 -->

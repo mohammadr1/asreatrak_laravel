@@ -40,7 +40,7 @@
                 بجنورد، خراسان شمالی
             </div>
         @else
-            <p class="text-center text-muted py-3 mb-0">
+            <p class="text-center py-3 mb-0">
                 در حال حاضر امکان دریافت اوقات شرعی نیست.
             </p>
         @endif

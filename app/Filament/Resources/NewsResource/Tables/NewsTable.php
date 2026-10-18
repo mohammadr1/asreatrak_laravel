@@ -100,6 +100,15 @@ class NewsTable
 
             ->actions([
 
+                Tables\Actions\EditAction::make()
+                    ->label('ویرایش')
+                    ->icon('heroicon-o-pencil-square')
+                    ->visible(fn ($record) => $record->canBeEditedBy(auth()->user())),
+
+                Tables\Actions\DeleteAction::make()
+                    ->label('حذف')
+                    ->visible(fn ($record) => $record->canBeEditedBy(auth()->user())),
+
             
                 Tables\Actions\Action::make('submit')
                     ->label('ارسال برای بررسی')

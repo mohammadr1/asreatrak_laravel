@@ -38,6 +38,8 @@ use Illuminate\Support\Str;
 use App\Filament\Concerns\HasRoleBasedNavigation;
 use Morilog\Jalali\Jalalian;
 
+use Illuminate\Database\Eloquent\Model;
+
 class NewsResource extends Resource
 {
     use HasPermissionChecks;
@@ -219,4 +221,13 @@ class NewsResource extends Resource
         ];
     }
     
+
+    public static function canEdit(Model $record): bool
+    {
+        return parent::canEdit($record) && $record->canBeEditedBy(auth()->user());
+    }
+    public static function canDelete(Model $record): bool
+    {
+        return parent::canDelete($record) && $record->canBeEditedBy(auth()->user());
+    }
 }
