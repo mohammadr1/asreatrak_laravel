@@ -197,81 +197,10 @@
              Comments Section
         ===================== -->
     <div class="comments-section">
-        <div class="section-header">
-            <span class="section-title"><i class="bi bi-chat-left-text-fill me-1"></i>نظرات کاربران <span>(3 نظر)
-                </span></span>
-        </div>
-
-        <!-- Comment 1 -->
-        <div class="comment-box">
-            <div class="comment-header">
-                <div class="comment-avatar">م</div>
-                <div class="comment-name">محمد رضایی</div>
-                <div class="comment-date"><i class="bi bi-clock me-1"></i>۱۴۰۳/۰۲/۱۵ — ۱۶:۱۰</div>
-            </div>
-            <div class="comment-text">
-                امیدوارم این نشست‌ها نتیجه عملی داشته باشد. استان ما نیاز جدی به توسعه دارد
-                و مردم منتظر اقدامات ملموس هستند.
-            </div>
-        </div>
-
-        <!-- Comment 2 -->
-        <div class="comment-box">
-            <div class="comment-header">
-                <div class="comment-avatar">ز</div>
-                <div class="comment-name">زهرا احمدی</div>
-                <div class="comment-date"><i class="bi bi-clock me-1"></i>۱۴۰۳/۰۲/۱۵ — ۱۷:۳۵</div>
-            </div>
-            <div class="comment-text">
-                خوشحال می‌شوم که پیگیری این مصوبات به صورت منظم اطلاع‌رسانی شود.
-                شفافیت در اجرای تصمیمات بسیار مهم است.
-            </div>
-        </div>
-
-        <!-- Comment 3 -->
-        <div class="comment-box">
-            <div class="comment-header">
-                <div class="comment-avatar">ع</div>
-                <div class="comment-name">علی نوری</div>
-                <div class="comment-date"><i class="bi bi-clock me-1"></i>۱۴۰۳/۰۲/۱۵ — ۱۹:۰۰</div>
-            </div>
-            <div class="comment-text">
-                موقعیت استراتژیک استان در مسیر کریدور شمال–جنوب واقعاً فرصت بزرگی است.
-                باید از این ظرفیت به درستی استفاده شود.
-            </div>
-        </div>
-
+        
         <!-- Comment Form -->
-        <div class="comment-form-section mt-3">
-            <h6>
-                <i class="bi bi-pencil-square me-2"></i>ثبت نظر
-            </h6>
-            <p>
-                <i class="bi bi-info-circle me-1"></i>
-                نظرات پس از تأیید توسط مدیریت سایت منتشر می‌شوند. لطفاً نظرات خود را با ادب و احترام بیان فرمایید.
-            </p>
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <input type="text" class="form-control form-control-sm" placeholder="نام و نام‌خانوادگی *" />
-                </div>
-                <div class="col-md-6">
-                    <input type="email" class="form-control form-control-sm" placeholder="ایمیل (منتشر نمی‌شود)" />
-                </div>
-                <div class="col-12">
-                    <textarea class="form-control form-control-sm" rows="4"
-                        placeholder="متن نظر خود را بنویسید..."></textarea>
-                </div>
-                <div class="col-12 d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="checkbox" id="notifyMe" class="form-check-input" />
-                        <label for="notifyMe">در صورت پاسخ به من اطلاع بده</label>
-                    </div>
-                    <button class="btn-submit-comment">
-                        <i class="bi bi-send me-1"></i> ارسال نظر
-                    </button>
-                </div>
-            </div>
-        </div>
+        <x-news-comments :news="$news" />
+
     </div>
     <!-- /Comments Section -->
 

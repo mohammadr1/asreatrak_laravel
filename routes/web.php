@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\NewsController;
 use App\Http\Controllers\Customer\CategoryController;
+use App\Http\Controllers\customer\CommentController;
 use App\Http\Controllers\Customer\TagController;
 
 
@@ -25,3 +26,8 @@ Route::get('/tag/{slug}', [TagController::class, 'show'])->name('tag.show');
 // Route::get('/', function () {
 //     return view('welcome');
 // });
+
+
+Route::post('/news/{news:slug}/comments', [CommentController::class, 'store'])
+    ->middleware('throttle:5,10')   // هر IP حداکثر ۵ نظر در ۱۰ دقیقه
+    ->name('comments.store');

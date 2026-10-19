@@ -652,3 +652,42 @@
   .action-btn { appearance: none; -webkit-appearance: none; font: inherit; }
   body::after { display: none !important; content: none !important; }
 }
+
+
+
+
+
+
+/* start comments */
+/* فیلدهای فرم نظر: مستقل از تم (رنگ متن از صفحه ارث‌بری می‌شود) */
+.comment-form-section .form-control.form-control-sm{
+  color:inherit;
+  background-color:rgba(128,128,128,.14);
+  border:1px solid rgba(128,128,128,.4);
+  caret-color:currentColor;
+}
+.comment-form-section .form-control.form-control-sm::placeholder{
+  color:inherit;
+  opacity:.6;
+}
+.comment-form-section .form-control.form-control-sm:focus{
+  color:inherit;
+  background-color:rgba(128,128,128,.22);
+  border-color:var(--bs-primary,#0d6efd);
+  box-shadow:0 0 0 .2rem rgba(var(--bs-primary-rgb,13,110,253),.25);
+}
+.comment-form-section .form-control.form-control-sm.is-invalid{
+  border-color:#dc3545;
+}
+.comment-form-section label{
+  color:inherit;
+}
+    
+.comment-reply{margin-top:12px;margin-inline-start:24px;padding:12px 14px;
+  border-inline-start:3px solid var(--bs-primary,#0d6efd);
+  border-radius:8px;background:rgba(128,128,128,.12);}
+.comment-reply .comment-avatar{background:var(--bs-primary,#0d6efd);color:#fff}
+.comment-badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;
+  background:var(--bs-primary,#0d6efd);color:#fff;margin-inline-start:6px}
+.comment-hp{position:absolute;inset-inline-start:-9999px;width:1px;height:1px;overflow:hidden}
+/* end comments */
