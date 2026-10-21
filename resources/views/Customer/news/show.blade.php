@@ -169,7 +169,7 @@
                 @php
                     $rImg = $related->featuredMedia?->variantUrl($related->featured_media_variant ?: 'watermarked')
                         ?: $related->featuredMedia?->variantUrl('cropped')
-                        ?: asset('assets/images/header.png');
+                        ?: asset('assets/images/default.png');
                 @endphp
                 <a href="{{ route('news.show', $related) }}" class="related-card">
                     <img src="{{ $rImg }}" alt="{{ $related->featuredMedia?->alt ?: $related->title }}"

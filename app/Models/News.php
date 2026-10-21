@@ -254,7 +254,7 @@ class News extends Model
         return $this->featuredMedia?->variantUrl($this->featured_media_variant ?: 'watermarked')
             ?: $this->featuredMedia?->variantUrl('cropped')
             ?: $this->featuredMedia?->variantUrl('original')
-            ?: asset('assets/images/header.png');
+            ?: asset('assets/images/default.png');
     }
     
     public function getJalaliPublishedAtAttribute(): ?string

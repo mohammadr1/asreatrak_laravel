@@ -83,7 +83,7 @@
                     @php
                     $image = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked')
                     ?: $news->featuredMedia?->variantUrl('cropped')
-                    ?: asset('assets/images/header.png');
+                    ?: asset('assets/images/default.png');
                     @endphp
                     <img src="{{ $image }}" alt="{{ $news->title }}" />
                     <span class="category-badge">{{ $news->categories->first()?->name ?? 'خبر' }}</span>
@@ -142,7 +142,7 @@
                     <div class="news-card-img">
 
                         <a href="{{ route('news.show', $news) }}">
-                            <img src="{{ $news->featuredMedia->variantUrl('watermarked') ?? asset('assets/images/header.png') }}"
+                            <img src="{{ $news->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
                                 alt="{{ $news->title }}">
                         </a>
 
@@ -187,7 +187,7 @@
                 @php
                     $newsImage = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked')
                         ?: $news->featuredMedia?->variantUrl('cropped')
-                        ?: asset('assets/images/header.png');
+                        ?: asset('assets/images/default.png');
 
                     $rowCategories = $news->categories->take(2);
                 @endphp
@@ -256,7 +256,7 @@
                     <span class="section-title"><i class="bi bi-file-earmark-text-fill me-1"></i>گزارش</span>
                 </div>
                 <div class="sidebar-news-card">
-                    <img src="{{ $reportNews->featuredMedia->variantUrl('watermarked') ?? asset('assets/images/header.png') }}"
+                    <img src="{{ $reportNews->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
                         alt="{{ $reportNews->title }}">
                     <div class="card-overlay">
                         <h5><a href="{{ route('news.show', $reportNews) }}">{{ $reportNews->title }}</a></h5>
@@ -283,7 +283,7 @@
                     <span class="section-title"><i class="bi bi-chat-quote-fill me-1"></i>گفتگو</span>
                 </div>
                 <div class="sidebar-news-card">
-                    <img src="{{ $conversationNews->featuredMedia->variantUrl('watermarked') ?? asset('assets/images/header.png') }}"
+                    <img src="{{ $conversationNews->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
                         alt="{{ $conversationNews->title }}">
                     <div class="card-overlay">
                         <h5><a href="{{ route('news.show', $conversationNews) }}">{{ $conversationNews->title }}</a></h5>
@@ -309,7 +309,7 @@
                     <span class="section-title"><i class="bi bi-pencil-square me-1"></i>یادداشت</span>
                 </div>
                 <div class="sidebar-news-card">
-                    <img src="{{ $noteNews->featuredMedia->variantUrl('watermarked') ?? asset('assets/images/header.png') }}"
+                    <img src="{{ $noteNews->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
                         alt="{{ $noteNews->title }}">
                     <div class="card-overlay">
                         <h5><a href="{{ route('news.show', $noteNews) }}">{{ $noteNews->title }}</a></h5>
