@@ -94,7 +94,7 @@
                         <h2><a href="{{ route('news.show', $news) }}">{{ $news->title }}</a></h2>
                         <p class="lead-text">{{ $news->lead }}</p>
                     </div>
-                    <div class="hero-slide-meta">
+                    <div class="hero-slide-meta w-100">
                         @if($news->published_at)<span><i class="bi bi-calendar3"></i>
                             {{ \Morilog\Jalali\Jalalian::fromDateTime($news->published_at)->format('Y/m/d') }}</span>@endif
                         @if($news->published_at)<span><i class="bi bi-clock"></i>
@@ -128,54 +128,8 @@
     </div>
     <!-- /HERO SLIDER -->
 
-    <!-- =====================
-             اخبار ویژه — Full Width
-        ===================== -->
-    <div class="special-news-section fade-in">
-        <div class="section-header">
-            <span class="section-title"><i class="bi bi-star-fill me-1"></i>اخبار ویژه</span>
-        </div>
-        <div class="row g-3">
-            @forelse($featuredNews as $news)
-            <div class="col-md-3 col-sm-6">
-                <div class="news-card">
-                    <div class="news-card-img">
+    
 
-                        <a href="{{ route('news.show', $news) }}">
-                            <img src="{{ $news->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
-                                alt="{{ $news->title }}">
-                        </a>
-
-                        <span class="news-card-badge badge-red">
-                            {{ $news->categories->first()?->name ?? 'خبر ویژه' }}
-                        </span>
-                        <div class="overlay-title">
-                            <h5>
-                                <a href="{{ route('news.show', $news) }}">
-                                    {{ $news->title }}
-                                </a>
-                            </h5>
-                            <div class="news-meta">
-                                @if($news->published_at)
-                                <i class="bi bi-calendar3"></i>
-                                {{ \Morilog\Jalali\Jalalian::fromDateTime($news->published_at)->format('Y/m/d') }}
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            @empty
-            <div class="col-12">
-                <p class="text-center py-3">
-                    هنوز خبری به‌عنوان خبر ویژه انتخاب نشده است.
-                </p>
-            </div>
-            @endforelse
-
-        </div>
-    </div>
-    <!-- /اخبار ویژه -->
 
     <!-- =====================
              NEWS LIST (بدنه خبر)
@@ -444,6 +398,10 @@
            COL-4: Sidebar
       ===================== -->
 <div class="col-lg-4">
+
+    <!-- اخبار ویژه -->
+    @include('Customer.partials.featured-news')
+
 
     <!-- اوقات شرعی -->
     @include('Customer.partials.prayer-times')

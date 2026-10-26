@@ -17,8 +17,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function showSlide(idx) {
+    const nextSlide = (idx + slides.length) % slides.length;
+    const previousSlide = currentSlide;
+    const direction = nextSlide >= previousSlide ? 'next' : 'previous';
+
     slides.forEach((slide) => {
-      slide.classList.remove('active');
+      slide.classList.remove('active', 'slide-enter-next', 'slide-enter-previous');
       slide.setAttribute('aria-hidden', 'true');
     });
     dots.forEach((dot) => {
@@ -26,9 +30,13 @@ document.addEventListener('DOMContentLoaded', function () {
       dot.removeAttribute('aria-current');
     });
 
-    currentSlide = (idx + slides.length) % slides.length;
-    slides[currentSlide].classList.add('active');
-    slides[currentSlide].setAttribute('aria-hidden', 'false');
+    currentSlide = nextSlide;
+    const activeSlide = slides[currentSlide];
+    if (previousSlide !== currentSlide && !prefersReducedMotion.matches) {
+      activeSlide.classList.add(direction === 'next' ? 'slide-enter-next' : 'slide-enter-previous');
+    }
+    activeSlide.classList.add('active');
+    activeSlide.setAttribute('aria-hidden', 'false');
 
     if (dots[currentSlide]) {
       dots[currentSlide].classList.add('active');

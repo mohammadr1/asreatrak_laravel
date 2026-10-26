@@ -38,11 +38,7 @@
           <a href="{{ route('customer.home') }}"><i class="bi bi-house-fill"></i> خانه</a>
         </li>
 
-        @foreach($navCategories as $category)
-          <li class="{{ request()->routeIs('category.show') && request()->route('category')?->id === $category->id ? 'active' : '' }}">
-            <a href="{{ route('category.show', $category) }}">{{ $category->name }}</a>
-          </li>
-        @endforeach
+        @include('Customer.layouts.partials.menu-items', ['items' => $navMenus])
       </ul>
 
       <!-- Search -->

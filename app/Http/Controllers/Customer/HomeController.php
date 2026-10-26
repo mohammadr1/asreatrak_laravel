@@ -29,14 +29,23 @@ class HomeController extends Controller
             ->limit(2)
             ->get();
 
+        $breakingNews = News::query()
+            ->publiclyVisible()
+            ->where('is_breaking', true)
+            ->with('categories')
+            ->latest('published_at')
+            ->latest('id')
+            ->limit(10)
+            ->get();
+
         /*
-         * اخبار ویژه: حداکثر ۴ خبر آخر
+         * اخبار ویژه: حداکثر 2 خبر آخر
          */
         $featuredNews = $publicNews()
             ->where('featured', true)
             ->orderByDesc('published_at')
             ->orderByDesc('id')
-            ->limit(4)
+            ->limit(2)
             ->get();
 
         /*
@@ -139,6 +148,7 @@ class HomeController extends Controller
         $multimediaItems = $multimediaItems->unique('src')->values()->take(60);
 
         return view('customer.home', compact(
+            'breakingNews',
             'sliderNews',
             'featuredNews',
             'latestNews',

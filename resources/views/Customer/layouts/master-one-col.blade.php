@@ -2,7 +2,7 @@
 <html lang="fa" dir="rtl">
 
 <head>
-    @include('customer.layouts.head-tag')
+    @include('Customer.layouts.head-tag')
     {{-- Shared public-site theme: home, article and archive use the same shell. --}}
     <link rel="stylesheet" href="{{ asset('assets/css/media_card_home_gallery.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/home.css') }}">
@@ -15,25 +15,25 @@
      TOP BAR
 ========================= -->
 
-@include('customer.layouts.top_bar')
+@include('Customer.layouts.top_bar')
 
 <!-- ========================
      HEADER
 ========================= -->
 
-@include('customer.layouts.header')
+@include('Customer.layouts.header')
+
 
 <!-- ========================
      MAIN NAVIGATION
 ========================= -->
 
-@include('customer.layouts.navbar')
+@include('Customer.layouts.navbar')
 
-<!-- ========================
-     BREAKING NEWS TICKER
-========================= -->
 
-@include('customer.layouts.breaking_bar')
+
+@include('Customer.layouts.breaking_bar', ['news' => $news])
+
 
 <!-- ========================
      MAIN CONTENT
@@ -55,7 +55,7 @@
   <div class="container-xl">
     <div class="row g-4"> -->
 
-@include('customer.layouts.footer')
+@include('Customer.layouts.footer')
 
 
 
@@ -79,7 +79,7 @@
 
 
 <script src="{{ asset('assets/js/main_mobile_nav_toggle.js') }}"></script>
-@include('customer.layouts.scripts')
+@include('Customer.layouts.scripts')
 
 @yield('scripts')
 

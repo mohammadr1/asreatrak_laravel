@@ -127,13 +127,48 @@ document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 // }
 
 
-/* ========================
-   TICKER CLONE (seamless)
-======================== */
+/* Breaking news typewriter */
 const ticker = document.getElementById('ticker');
 if (ticker) {
-  const clone = ticker.innerHTML;
-  ticker.innerHTML += clone;
+  const headlines = Array.from(ticker.querySelectorAll('.ticker-item'));
+  if (headlines.length) {
+    let headlineIndex = 0;
+    let characterIndex = 0;
+    let deleting = false;
+    const typingSpeed = 65;
+    const deletingSpeed = 32;
+    const holdAfterTyping = 2200;
+    const holdAfterDeleting = 450;
+
+    ticker.textContent = '';
+    const link = document.createElement('a');
+    link.className = 'ticker-item';
+    link.href = headlines[0].href;
+    ticker.appendChild(link);
+
+    const animateHeadline = () => {
+      const headline = headlines[headlineIndex];
+      const title = headline.textContent.trim();
+      link.href = headline.href;
+      link.textContent = title.slice(0, characterIndex);
+
+      let delay = deleting ? deletingSpeed : typingSpeed;
+      if (!deleting && characterIndex >= title.length) {
+        deleting = true;
+        delay = holdAfterTyping;
+      } else if (deleting && characterIndex <= 0) {
+        deleting = false;
+        headlineIndex = (headlineIndex + 1) % headlines.length;
+        delay = holdAfterDeleting;
+      } else {
+        characterIndex += deleting ? -1 : 1;
+      }
+
+      window.setTimeout(animateHeadline, delay);
+    };
+
+    animateHeadline();
+  }
 }
 
 // themes dark / light

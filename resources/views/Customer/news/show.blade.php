@@ -157,8 +157,9 @@
 
 
     <!-- =====================
-             Related News
-        ===================== -->
+            Related News
+    ===================== -->
+    @if ($news->relatedNews->isNotEmpty())
     <div class="related-section mt-4">
         <div class="section-header">
             <span class="section-title"><i class="bi bi-newspaper me-1"></i> اخبار مرتبط</span>
@@ -191,6 +192,8 @@
             @endforelse
         </div>
     </div>
+    @endif
+
     <!-- /Related News -->
 
     <!-- =====================
