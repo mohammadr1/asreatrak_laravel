@@ -46,11 +46,22 @@ class VideoNewsTest extends TestCase
 
     public function test_aparat_input_accepts_only_ids_and_trusted_video_urls(): void
     {
-        foreach (['k93yms3', ' https://www.aparat.com/v/k93yms3 ', 'https://aparat.com/v/k93yms3?source=share'] as $input) {
-            $this->assertSame('k93yms3', AparatVideo::id($input));
+        foreach ([
+            'k93yms3' => 'k93yms3',
+            ' https://www.aparat.com/v/k93yms3 ' => 'k93yms3',
+            'https://aparat.com/v/k93yms3?source=share' => 'k93yms3',
+            'https://www.aparat.com/v/bmm22pw?refererRef=channel_page' => 'bmm22pw',
+            'https://aparat.com/v/bmm22pw/?refererRef=channel_page#t=10' => 'bmm22pw',
+            'aparat.com/v/bmm22pw' => 'bmm22pw',
+            'www.aparat.com/v/bmm22pw' => 'bmm22pw',
+            'https://www.aparat.com/video/video/embed/videohash/bmm22pw/vt/frame' => 'bmm22pw',
+            'https://www.aparat.com/iframe/bmm22pw' => 'bmm22pw',
+            '<iframe width="560" height="315" src="https://www.aparat.com/video/video/embed/videohash/bmm22pw/vt/frame" frameborder="0" allowfullscreen></iframe>' => 'bmm22pw',
+        ] as $input => $id) {
+            $this->assertSame($id, AparatVideo::id($input), $input);
         }
-        foreach (['', '<iframe src="x">', 'javascript:alert(1)', 'https://aparat.com.evil.test/v/id', 'https://evil.test/v/id', 'https://user@aparat.com/v/id', 'https://aparat.com/v/a%22b', 'https://aparat.com:8888/v/id', '../secret'] as $input) {
-            $this->assertNull(AparatVideo::id($input));
+        foreach (['', '<iframe src="x">', 'javascript:alert(1)', 'https://aparat.com.evil.test/v/id', 'https://evil.test/v/id', 'https://user@aparat.com/v/id', 'https://aparat.com/v/a%22b', 'https://aparat.com:8888/v/id', '../secret', 'https://www.aparat.com/asreatrak', 'https://www.aparat.com/v/', '<iframe src="https://evil.test/v/id"></iframe>', 'aprt.ir/bmm22pw'] as $input) {
+            $this->assertNull(AparatVideo::id($input), $input);
             $this->assertNull(AparatVideo::embedUrl($input));
         }
     }
@@ -220,7 +231,7 @@ class VideoNewsTest extends TestCase
             ->call('create')->assertHasFormErrors(['aparat_video_id' => 'required']);
         $page->set('data.aparat_video_id', 'https://evil.test/v/id')->call('create')
             ->assertHasFormErrors(['aparat_video_id']);
-        $page->set('data.aparat_video_id', 'https://www.aparat.com/v/k93yms3')
+        $page->set('data.aparat_video_id', 'https://www.aparat.com/v/k93yms3?refererRef=channel_page')
             ->call('create')->assertHasNoFormErrors();
         $news = News::where('slug', 'video-test')->firstOrFail();
         $this->assertSame('video', $news->post_type);
@@ -287,8 +298,11 @@ class VideoNewsTest extends TestCase
     public function test_inline_video_action_validates_input_and_dispatches_normalized_id(): void
     {
         Livewire::test(CreateNews::class)
-            ->callFormComponentAction('content', 'insertAparat', data: ['video' => 'https://www.aparat.com/v/k93yms3'])
-            ->assertDispatched('news-editor-video', id: 'k93yms3');
+            ->callFormComponentAction('content', 'insertAparat', data: ['video' => 'https://www.aparat.com/v/bmm22pw?refererRef=channel_page'])
+            ->assertDispatched('news-editor-video', id: 'bmm22pw');
+        Livewire::test(CreateNews::class)
+            ->callFormComponentAction('content', 'insertAparat', data: ['video' => 'https://www.aparat.com/video/video/embed/videohash/bmm22pw/vt/frame'])
+            ->assertDispatched('news-editor-video', id: 'bmm22pw');
         Livewire::test(CreateNews::class)
             ->callFormComponentAction('content', 'insertAparat', data: ['video' => 'https://evil.test/v/abc'])
             ->assertNotDispatched('news-editor-video');

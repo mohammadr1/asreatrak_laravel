@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\HomeController;
 use App\Http\Controllers\Customer\NewsController;
+use App\Http\Controllers\Customer\ShortLinkController;
 use App\Http\Controllers\Customer\CategoryController;
 use App\Http\Controllers\customer\CommentController;
 use App\Http\Controllers\Customer\TagController;
@@ -10,6 +11,11 @@ use App\Http\Controllers\Customer\TagController;
 
 // صفحه اصلی سایت
 Route::get('/', [HomeController::class, 'home'])->name('customer.home');
+
+// لینک کوتاه خبر: /short/{کد خبر یا کد ۵ کاراکتری خبرهای قدیمی}
+Route::get('/short/{code}', ShortLinkController::class)
+    ->where('code', '[A-Za-z0-9_-]{1,64}')
+    ->name('short.show');
 
 Route::prefix('news')->group(function () {
 

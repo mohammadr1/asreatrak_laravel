@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\ReportType;
 use App\Support\AparatVideo;
+use App\Support\ShortLink;
 use Illuminate\Support\Facades\DB;
 
 
@@ -75,9 +76,10 @@ class News extends Model
         };
 
         // ۱) حالت لینک: <a href="https://www.aparat.com/v/k93yms1">[ویدیوی آپارات: k93yms1]</a>
-        //    (ویرایشگر معمولاً شورت‌کد را داخل تگ <a> و گاهی <p> می‌گذارد)
+        //    (ویرایشگر معمولاً شورت‌کد را داخل تگ <a> و گاهی <p> می‌گذارد؛ لینک‌های
+        //    جاسازی/آی‌فریم آپارات هم پشتیبانی می‌شوند)
         $html = preg_replace_callback(
-            '~(?:<p[^>]*>\s*)?<a\b[^>]*href=["\']([^"\']*aparat\.com/v/[A-Za-z0-9]+[^"\']*)["\'][^>]*>.*?</a>(?:\s*</p>)?~isu',
+            '~(?:<p[^>]*>\s*)?<a\b[^>]*href=["\']([^"\']*aparat\.com/(?:v/|iframe/|video/)[^"\']*)["\'][^>]*>.*?</a>(?:\s*</p>)?~isu',
             function ($m) use ($player) {
                 $id = AparatVideo::id(html_entity_decode($m[1]));
                 // اگر لینک query یا چیز اضافه داشت، فقط شناسه را از مسیر می‌گیریم
@@ -264,6 +266,18 @@ class News extends Model
         return $date
             ? \Morilog\Jalali\Jalalian::fromCarbon($date)->format('Y/m/d H:i')
             : null;
+    }
+
+    /** لینک کوتاه خبر؛ مثل https://asreatrak.ir/short/20261031124151 */
+    public function getShortUrlAttribute(): ?string
+    {
+        return ShortLink::canonicalFor($this) ?? $this->short_link;
+    }
+
+    /** کد لینک کوتاه خبر (بخش آخر مسیر) */
+    public function getShortCodeAttribute(): ?string
+    {
+        return ShortLink::codeFor($this);
     }
 
 

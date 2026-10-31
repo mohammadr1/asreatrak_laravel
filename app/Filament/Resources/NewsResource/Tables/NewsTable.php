@@ -24,6 +24,16 @@ class NewsTable
                     ->label('عنوان')
                     ->searchable(),
 
+                Tables\Columns\TextColumn::make('short_url')
+                    ->label('لینک کوتاه')
+                    ->icon('heroicon-m-link')
+                    ->url(fn ($record) => $record->short_url, shouldOpenInNewTab: true)
+                    ->copyable()
+                    ->copyMessage('لینک کوتاه کپی شد')
+                    ->limit(45)
+                    ->tooltip(fn ($record) => $record->short_url)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\TextColumn::make('post_type')
                     ->label('قالب خبر')
                     ->badge()

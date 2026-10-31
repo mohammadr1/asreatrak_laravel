@@ -43,7 +43,7 @@ class NewsForm
                         ->validationMessages(['required' => 'لینک یا شناسه ویدیوی آپارات را وارد کنید.', 'max' => 'لینک آپارات نباید بیشتر از ۲۰۴۸ کاراکتر باشد.'])
                         ->label('لینک یا شناسه ویدیوی آپارات')
                         ->placeholder('https://www.aparat.com/v/k93yms3')
-                        ->helperText('مثال: k93yms3 — تنها شناسه ذخیره می‌شود؛ کد iframe یا HTML وارد نکنید.')
+                        ->helperText('هر یک از این شکل‌ها پذیرفته می‌شود: شناسه (k93yms3)، لینک صفحه (https://www.aparat.com/v/k93yms3)، لینک همراه با پارامتر (https://www.aparat.com/v/k93yms3?refererRef=channel_page) یا لینک جاسازی آپارات. فقط شناسه ویدیو ذخیره می‌شود.')
                         ->extraInputAttributes(['dir' => 'ltr', 'autocapitalize' => 'none', 'spellcheck' => 'false'])
                         ->required()
                         ->maxLength(2048)
@@ -216,6 +216,32 @@ class NewsForm
                                                 ->disabled()
                                                 ->dehydrated(),
 
+                                            Placeholder::make('short_link_preview')
+                                                ->label('لینک کوتاه خبر')
+                                                ->content(function (?\App\Models\News $record): \Illuminate\Support\HtmlString {
+                                                    $url = $record?->short_url;
+
+                                                    if (blank($url)) {
+                                                        return new \Illuminate\Support\HtmlString(
+                                                            '<span style="font-size:.8rem;color:#6b7280">پس از ذخیرهٔ خبر، لینک کوتاه به‌صورت خودکار ساخته می‌شود.</span>'
+                                                        );
+                                                    }
+
+                                                    $safeUrl = e($url);
+
+                                                    return new \Illuminate\Support\HtmlString(
+                                                        '<div dir="ltr" style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
+                                                        . '<a href="' . $safeUrl . '" target="_blank" rel="noopener" '
+                                                        . 'style="font-family:monospace;font-size:.8rem;color:#2563eb;word-break:break-all">'
+                                                        . $safeUrl . '</a>'
+                                                        . '<button type="button" x-data x-on:click="navigator.clipboard.writeText($el.dataset.url)" '
+                                                        . 'data-url="' . $safeUrl . '" title="کپی لینک کوتاه" '
+                                                        . 'style="cursor:pointer;border:1px solid #d1d5db;border-radius:.375rem;padding:.125rem .5rem;'
+                                                        . 'font-size:.75rem;background:#f9fafb;color:#374151">کپی</button>'
+                                                        . '</div>'
+                                                    );
+                                                }),
+
                                             Select::make('reporter_id')
                                                 ->validationMessages(['required' => 'خبرنگار خبر را انتخاب کنید.', 'exists' => 'خبرنگار انتخاب‌شده معتبر نیست؛ دوباره انتخاب کنید.', 'in' => 'خبرنگار انتخاب‌شده معتبر نیست؛ دوباره انتخاب کنید.'])
                                                 ->label('خبرنگار')
@@ -277,6 +303,7 @@ class NewsForm
                                                             TextInput::make('video')->label('لینک یا شناسه آپارات')->required()->maxLength(2048)
                                                                 ->validationMessages(['required' => 'لینک یا شناسه ویدیوی آپارات را وارد کنید.', 'max' => 'لینک آپارات نباید بیشتر از ۲۰۴۸ کاراکتر باشد.'])
                                                                 ->placeholder('https://www.aparat.com/v/k93yms3')
+                                                                ->helperText('لینک همراه با پارامتر (مثل ?refererRef=channel_page)، لینک جاسازی آپارات یا کد iframe هم پذیرفته می‌شود.')
                                                                 ->extraInputAttributes(['dir' => 'ltr'])
                                                                 ->rules([fn () => function (string $attribute, $value, \Closure $fail): void {
                                                                     if (\App\Support\AparatVideo::id($value) === null) $fail('لینک یا شناسه آپارات معتبر نیست.');

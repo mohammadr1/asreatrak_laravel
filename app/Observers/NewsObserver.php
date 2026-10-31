@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\News;
+use App\Support\ShortLink;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -24,6 +25,29 @@ class NewsObserver
 
         if (blank($news->reporter_id) && Auth::check()) {
             $news->reporter_id = Auth::id();
+        }
+
+        $this->syncShortLink($news);
+    }
+
+    public function updating(News $news): void
+    {
+        $this->syncShortLink($news);
+    }
+
+    /**
+     * هر خبر همیشه یک لینک کوتاه هم‌خوان با کد خبر خود دارد:
+     * https://asreatrak.ir/short/20261031124151
+     *
+     * برای خبرهای قدیمی (کد ۵ کاراکتری) فقط دامنه/قالب اصلاح می‌شود و
+     * کد قبلی دست‌نخورده می‌ماند تا لینک‌های منتشرشده از کار نیفتند.
+     */
+    private function syncShortLink(News $news): void
+    {
+        $shortLink = ShortLink::canonicalFor($news);
+
+        if ($shortLink !== null) {
+            $news->short_link = $shortLink;
         }
     }
 
