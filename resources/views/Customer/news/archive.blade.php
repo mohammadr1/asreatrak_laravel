@@ -1,6 +1,6 @@
-@extends('Customer.layouts.master-one-col')
+@extends('customer.layouts.master-one-col')
 
-@section('news-seo-title', e('آرشیف اخبار | ' . config('app.name')))
+@section('news-seo-title', e('آرشیو اخبار | ' . config('app.name')))
 
 @section('head-tag')
 <link rel="stylesheet" href="{{ asset('assets/css/style_archive.css') }}">

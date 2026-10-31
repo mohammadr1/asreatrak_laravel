@@ -21,6 +21,15 @@ class NewsController extends Controller
             404
         );
 
+        /*
+         * کوئری پایه:
+         * فقط خبرهای قابل نمایش عمومی، همراه با تصویر و دسته‌بندی.
+         */
+        $publicNews = fn () => News::query()
+            ->publiclyVisible()
+            ->with(['featuredMedia', 'categories']);
+
+
             // شمارنده‌ی بازدید (بدون تغییر updated_at)
         // $viewKey = 'viewed_news_' . $news->id;
         // if (! session()->has($viewKey)) {
@@ -64,13 +73,14 @@ class NewsController extends Controller
                 : null;
         });
 
-        $popularNews = News::query()
-            ->publiclyVisible()
-            ->whereKeyNot($news->id)
+         $popularNews = $publicNews()
+            ->where('published_at', '>=', now()->subDays(3))
+            ->where('published_at', '<=', now())
             ->orderByDesc('views_count')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
             ->limit(4)
             ->get();
-
 
 
         return view('Customer.news.show', [

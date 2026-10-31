@@ -78,9 +78,20 @@
             @endforeach
         </div>
 
-        <div class="mt-5 d-flex justify-content-center">
-            {{ $news->links() }}
-        </div>
+        @if ($news->hasPages())
+            <div class="cat-pagination mt-5" aria-label="صفحه‌بندی اخبار دسته‌بندی">
+                <p class="cat-pagination__summary" role="status" aria-live="polite">
+                    نمایش
+                    <strong>{{ $fa(number_format($news->firstItem())) }}</strong>
+                    تا
+                    <strong>{{ $fa(number_format($news->lastItem())) }}</strong>
+                    از
+                    <strong>{{ $fa(number_format($news->total())) }}</strong>
+                    خبر
+                </p>
+                {{ $news->onEachSide(1)->links('Customer.vendor.pagination.archive') }}
+            </div>
+        @endif
     @endif
 
 </div>

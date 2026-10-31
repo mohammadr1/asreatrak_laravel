@@ -7,9 +7,15 @@
 
     {{-- قبلی (در راست‌به‌چپ، فلش راست) --}}
     @if ($paginator->onFirstPage())
-        <button class="page-btn" disabled aria-label="صفحه‌ی قبل"><i class="bi bi-chevron-right"></i></button>
+        <span class="page-btn page-btn--direction is-disabled" aria-disabled="true" aria-label="صفحه‌ی قبلی">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <span>قبلی</span>
+        </span>
     @else
-        <a class="page-btn" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="صفحه‌ی قبل"><i class="bi bi-chevron-right"></i></a>
+        <a class="page-btn page-btn--direction" href="{{ $paginator->previousPageUrl() }}" rel="prev" aria-label="صفحه‌ی قبلی">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+            <span>قبلی</span>
+        </a>
     @endif
 
     @foreach ($elements as $element)
@@ -30,9 +36,15 @@
 
     {{-- بعدی --}}
     @if ($paginator->hasMorePages())
-        <a class="page-btn" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="صفحه‌ی بعد"><i class="bi bi-chevron-left"></i></a>
+        <a class="page-btn page-btn--direction" href="{{ $paginator->nextPageUrl() }}" rel="next" aria-label="صفحه‌ی بعدی">
+            <span>بعدی</span>
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </a>
     @else
-        <button class="page-btn" disabled aria-label="صفحه‌ی بعد"><i class="bi bi-chevron-left"></i></button>
+        <span class="page-btn page-btn--direction is-disabled" aria-disabled="true" aria-label="صفحه‌ی بعدی">
+            <span>بعدی</span>
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </span>
     @endif
 
 </nav>

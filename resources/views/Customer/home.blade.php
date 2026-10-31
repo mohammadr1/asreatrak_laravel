@@ -135,8 +135,8 @@
              NEWS LIST (بدنه خبر)
         ===================== -->
     <div class="row g-4">
-    <div class="col-lg-8">
-        <div class="news-list-section fade-in">
+        <div class="col-lg-8">
+        <div class="news-list-section fade-in" style="margin-bottom: 25px; ">
             @forelse ($latestNews as $news)
                 @php
                     $newsImage = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked')
@@ -201,88 +201,139 @@
         <!-- =====================
                COL-4 SIDE SECTIONS (گزارش/گفتگو/یادداشت)
           ===================== -->
+            
         <div class="col-lg-4">
 
-            <!-- گزارش -->
-            @if (!empty($reportNews))
-            <div class="sidebar-news-section fade-in">
-                <div class="section-header">
-                    <span class="section-title"><i class="bi bi-file-earmark-text-fill me-1"></i>گزارش</span>
-                </div>
-                <div class="sidebar-news-card">
-                    <img src="{{ $reportNews->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
-                        alt="{{ $reportNews->title }}">
-                    <div class="card-overlay">
-                        <h5><a href="{{ route('news.show', $reportNews) }}">{{ $reportNews->title }}</a></h5>
-                        <div class="meta"><i class="bi bi-calendar3"></i>
-                            {{ \Morilog\Jalali\Jalalian::fromDateTime($reportNews->published_at)->format('Y/m/d') }}
-                            &nbsp;|&nbsp; <i class="bi bi-clock"></i>
-                            {{ \Morilog\Jalali\Jalalian::fromDateTime($reportNews->published_at)->format('H:i') }}</div>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-justify">
-                        {{ \Illuminate\Support\Str::limit(strip_tags($reportNews->lead), 100, '...') }}
-                    </p>
-                    <a class="w-100" href="{{ route('news.show', $reportNews) }}">ادامه ←</a>
-                </div>
-            </div>
-            @endif
+            @php
+                $sidebarNewsGroups = [
+                    [
+                        'title' => 'گزارش',
+                        'icon' => 'bi-file-earmark-text-fill',
+                        'items' => $reportNewsItems ?? collect(),
+                    ],
+                    [
+                        'title' => 'گفتگو',
+                        'icon' => 'bi-chat-quote-fill',
+                        'items' => $conversationNewsItems ?? collect(),
+                    ],
+                    [
+                        'title' => 'یادداشت',
+                        'icon' => 'bi-pencil-square',
+                        'items' => $noteNewsItems ?? collect(),
+                    ],
+                ];
+            @endphp
 
+            @foreach ($sidebarNewsGroups as $group)
+                @php
+                    $items = $group['items'];
+                    $featured = $items->first();
+                    $otherNews = $items->skip(1)->take(3);
+                @endphp
 
-            <!-- گفتگو -->
-            @if (!empty($conversationNews))
-            <div class="sidebar-news-section fade-in">
-                <div class="section-header">
-                    <span class="section-title"><i class="bi bi-chat-quote-fill me-1"></i>گفتگو</span>
-                </div>
-                <div class="sidebar-news-card">
-                    <img src="{{ $conversationNews->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
-                        alt="{{ $conversationNews->title }}">
-                    <div class="card-overlay">
-                        <h5><a href="{{ route('news.show', $conversationNews) }}">{{ $conversationNews->title }}</a></h5>
-                        <div class="meta"><i class="bi bi-calendar3"></i>
-                            {{ \Morilog\Jalali\Jalalian::fromDateTime($conversationNews->published_at)->format('Y/m/d') }}
-                            &nbsp;|&nbsp; <i class="bi bi-clock"></i>
-                            {{ \Morilog\Jalali\Jalalian::fromDateTime($conversationNews->published_at)->format('H:i') }}
+                @if ($featured)
+                    <section class="sidebar-news-section sidebar-news-modern fade-in">
+
+                        <div class="sidebar-news-modern-header">
+                            <div class="sidebar-news-modern-heading">
+                                <span class="sidebar-news-modern-icon">
+                                    <i class="bi {{ $group['icon'] }}" aria-hidden="true"></i>
+                                </span>
+
+                                <h2>{{ $group['title'] }}</h2>
+                            </div>
+
+                            <span class="sidebar-news-modern-label">آخرین مطالب</span>
                         </div>
-                    </div>
-                </div>
-                <div>
-                    <p style="text-align: justify;">
-                        {{ \Illuminate\Support\Str::limit(strip_tags($conversationNews->lead), 100, '...') }}
-                    </p>
-                    <a class="w-100" href="{{ route('news.show', $conversationNews) }}">ادامه ←</a>
-                </div>
-            </div>
-            @endif
-            <!-- یادداشت -->
-            @if (!empty($noteNews))
-            <div class="sidebar-news-section fade-in">
-                <div class="section-header">
-                    <span class="section-title"><i class="bi bi-pencil-square me-1"></i>یادداشت</span>
-                </div>
-                <div class="sidebar-news-card">
-                    <img src="{{ $noteNews->featuredMedia?->variantUrl('watermarked') ?? asset('assets/images/default.png') }}"
-                        alt="{{ $noteNews->title }}">
-                    <div class="card-overlay">
-                        <h5><a href="{{ route('news.show', $noteNews) }}">{{ $noteNews->title }}</a></h5>
-                        <div class="meta"><i class="bi bi-calendar3"></i>
-                            {{ \Morilog\Jalali\Jalalian::fromDateTime($noteNews->published_at)->format('Y/m/d') }}
-                            &nbsp;|&nbsp; <i class="bi bi-clock"></i>
-                            {{ \Morilog\Jalali\Jalalian::fromDateTime($noteNews->published_at)->format('H:i') }}</div>
-                    </div>
-                </div>
-                <div>
-                    <p style="text-align: justify;">
-                        {{ \Illuminate\Support\Str::limit(strip_tags($noteNews->lead), 100, '...') }}
-                    </p>
-                    <a class="w-100" href="{{ route('news.show', $noteNews) }}">ادامه ←</a>
-                </div>
-            </div>
-            @endif
+
+                        {{-- خبر اصلی --}}
+                        <article class="sidebar-featured-news">
+
+                            @php
+                                $featuredImage =
+                                    $featured->featuredMedia?->variantUrl(
+                                        $featured->featured_media_variant ?: 'watermarked'
+                                    )
+                                    ?: $featured->featuredMedia?->variantUrl('cropped')
+                                    ?: asset('assets/images/default.png');
+                            @endphp
+
+                            <a
+                                href="{{ route('news.show', $featured) }}"
+                                class="sidebar-featured-image"
+                                aria-label="{{ $featured->title }}"
+                            >
+                                <img
+                                    src="{{ $featuredImage }}"
+                                    alt="{{ $featured->featuredMedia?->alt ?: $featured->title }}"
+                                    loading="lazy"
+                                    decoding="async"
+                                >
+
+                                <span class="sidebar-featured-image-overlay"></span>
+
+                                <span class="sidebar-featured-image-title">
+                                    {{ $featured->title }}
+                                </span>
+                            </a>
+
+                            <div class="sidebar-featured-content">
+                                <p>
+                                    {{ \Illuminate\Support\Str::limit(
+                                        strip_tags($featured->lead ?? ''),
+                                        150,
+                                        '…'
+                                    ) }}
+                                </p>
+
+                                <div class="sidebar-featured-bottom">
+                                    @if ($featured->published_at)
+                                        <span class="sidebar-featured-date">
+                                            <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                            {{ \Morilog\Jalali\Jalalian::fromDateTime($featured->published_at)->format('Y/m/d') }}
+                                        </span>
+                                    @endif
+
+                                    <a
+                                        href="{{ route('news.show', $featured) }}"
+                                        class="sidebar-featured-readmore"
+                                    >
+                                        ادامه خبر
+                                        <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+
+                        {{-- سه خبر مکمل، بدون عکس --}}
+                        @if ($otherNews->isNotEmpty())
+                            <div class="sidebar-compact-news">
+                                @foreach ($otherNews as $item)
+                                    <a
+                                        href="{{ route('news.show', $item) }}"
+                                        class="sidebar-compact-news-item"
+                                    >
+                                        <span class="sidebar-compact-news-dot"></span>
+
+                                        <span class="sidebar-compact-news-title">
+                                            {{ $item->title }}
+                                        </span>
+
+                                        <i
+                                            class="bi bi-chevron-left sidebar-compact-news-arrow"
+                                            aria-hidden="true"
+                                        ></i>
+                                    </a>
+                                @endforeach
+                            </div>
+                        @endif
+
+                    </section>
+                @endif
+            @endforeach
 
         </div>
+
     </div>
     <!-- /NEWS LIST + SIDE SECTIONS -->
 
@@ -403,9 +454,6 @@
     @include('Customer.partials.featured-news')
 
 
-    <!-- اوقات شرعی -->
-    @include('Customer.partials.prayer-times')
-
     <!-- آب و هوا -->
     <!-- <div class="sidebar-widget fade-in">
         <div class="widget-header">
@@ -483,9 +531,17 @@
             </div>
         </div>
     </div> -->
+    
+    <!-- کلینیک های خراسان شمالی -->
+    @include('Customer.partials.clinics')
 
     <!-- اخبار پربازدید -->
     @include('Customer.partials.popular-news', ['popularNews' => $popularNews])
+
+    
+    <!-- اوقات شرعی -->
+    @include('Customer.partials.prayer-times')
+
 
     <!-- Newsletter Subscribe -->
     @include('Customer.partials.social-join')

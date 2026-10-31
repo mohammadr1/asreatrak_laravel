@@ -1,36 +1,5 @@
 
     /* ===========================
-       BREAKING NEWS TICKER
-    =========================== */
-    .breaking-bar {
-      background: #fff;
-      border-bottom: 1px solid var(--border-color);
-      display: flex; align-items: stretch; overflow: hidden;
-    }
-    .breaking-label {
-      background: var(--primary); color: #fff;
-      font-weight: 700; font-size: 12.5px;
-      padding: 7px 14px; white-space: nowrap;
-      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-    }
-    .breaking-label .dot {
-      width: 8px; height: 8px;
-      background: #fff; border-radius: 50%;
-      animation: pulse-dot 1.2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
-    .ticker-wrap { overflow: hidden; flex: 1; display: flex; align-items: center; }
-    .ticker-inner {
-      display: flex; gap: 60px; white-space: nowrap;
-      animation: ticker-scroll 50s linear infinite;
-      font-size: 13px; color: var(--text-dark);
-    }
-    .ticker-inner:hover { animation-play-state: paused; }
-    .ticker-inner span { flex-shrink: 0; cursor: pointer; }
-    .ticker-inner span:hover { color: var(--primary); }
-    @keyframes ticker-scroll { from{transform:translateX(-100%)} to{transform:translateX(100%)} }
-
-    /* ===========================
        SECTION TITLE
     =========================== */
     .section-title {

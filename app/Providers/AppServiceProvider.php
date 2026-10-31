@@ -135,7 +135,29 @@ class AppServiceProvider extends ServiceProvider
                     ->orderBy('sort_order')->orderBy('id')
                     ->get()
             ));
+
+
+
+            $footerCategories = Cache::remember(
+                'footer.categories',
+                now()->addHour(),
+                fn () => Category::query()
+                    ->orderBy('id')
+                    ->get()
+            );
+
+            $socials = collect(config('social.links'))
+                ->filter(fn ($social) => filled($social['url'] ?? null));
+
+            $view->with([
+                'footerCategories' => $footerCategories,
+                'footerSocials' => $socials,
+            ]);
+
+            
         });
+
+
 
     
         View::composer('Customer.layouts.breaking_bar', function ($view) {

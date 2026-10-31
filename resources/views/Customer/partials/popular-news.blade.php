@@ -1,3 +1,5 @@
+@if ($popularNews->isNotEmpty())
+    
 <div class="sidebar-widget fade-in">
     <div class="widget-header">
         <i class="bi bi-fire"></i>
@@ -26,3 +28,5 @@
         </ul>
     </div>
 </div>
+
+@endif

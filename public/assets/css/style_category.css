@@ -58,14 +58,33 @@
 .cat-empty{text-align:center;padding:4rem 1rem;opacity:.7}
 .cat-empty i{font-size:3rem;display:block;margin-bottom:.75rem}
 
-/* ===== صفحه‌بندی (سازگار با تم تیره) ===== */
-.cat-pagination p.small{display:none}                       /* متن انگلیسی «Showing ...» */
-.cat-pagination nav > div.d-none{justify-content:center !important}
-.cat-pagination .page-link{background:transparent;color:inherit;
-  border-color:rgba(128,128,128,.3)}
-.cat-pagination .page-link:hover,
-.cat-pagination .page-link:focus{background:rgba(128,128,128,.15);color:inherit}
-.cat-pagination .page-item.disabled .page-link{background:transparent;opacity:.45}
+/* ===== صفحه‌بندی فارسی و سازگار با تم ===== */
+.cat-pagination{display:flex;flex-direction:column;align-items:center;gap:1rem;
+  padding:1.25rem 1rem;border:1px solid rgba(128,128,128,.2);border-radius:16px;
+  background:rgba(128,128,128,.035)}
+.cat-pagination__summary{margin:0;color:inherit;opacity:.72;font-size:.9rem;line-height:1.8;text-align:center}
+.cat-pagination__summary strong{font-weight:800;opacity:1;color:var(--bs-primary,#0d6efd);font-variant-numeric:tabular-nums}
+.cat-pagination .archive-pagination{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.4rem}
+.cat-pagination .page-btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;
+  min-width:2.65rem;height:2.65rem;padding:0 .75rem;border:1px solid rgba(128,128,128,.28);
+  border-radius:10px;background:transparent;color:inherit;text-decoration:none;
+  font-size:.9rem;font-weight:700;line-height:1;
+  transition:background-color .2s,border-color .2s,color .2s,transform .2s}
+.cat-pagination .page-btn:not(.active):not(.dots):not(.is-disabled):hover,
+.cat-pagination .page-btn:not(.active):not(.dots):not(.is-disabled):focus-visible{
+  border-color:var(--bs-primary,#0d6efd);background:rgba(13,110,253,.08);color:var(--bs-primary,#0d6efd)}
+.cat-pagination .page-btn:focus-visible{outline:2px solid var(--bs-primary,#0d6efd);outline-offset:2px}
+.cat-pagination .page-btn.active{border-color:var(--bs-primary,#0d6efd);background:var(--bs-primary,#0d6efd);
+  color:#fff;box-shadow:0 3px 10px rgba(13,110,253,.22)}
+.cat-pagination .page-btn.dots{min-width:1.5rem;padding:0;border-color:transparent}
+.cat-pagination .page-btn.is-disabled{opacity:.4;cursor:not-allowed}
+.cat-pagination .page-btn--direction{padding-inline:.85rem}
+@media(max-width:480px){
+  .cat-pagination{padding:1rem .65rem}
+  .cat-pagination .archive-pagination{gap:.3rem}
+  .cat-pagination .page-btn{min-width:2.35rem;height:2.45rem;padding-inline:.55rem;font-size:.84rem}
+  .cat-pagination .page-btn--direction{gap:.3rem}
+}
 
 /* ===== موبایل ===== */
 @media (max-width:768px){

@@ -54,13 +54,18 @@ class HomeController extends Controller
         $latestNews = $publicNews()
             ->orderByDesc('published_at')
             ->orderByDesc('id')
-            ->limit(6)
+            ->limit(12)
             ->get();
 
+
         /*
-         * دریافت آخرین خبر از یک یا چند نوع گزارش.
-         */
-        $latestByReportType = function (array $names) use ($publicNews) {
+        * دریافت آخرین اخبار از یک یا چند نوع گزارش.
+        * خروجی همیشه Collection است.
+        */
+        $latestByReportType = function (
+            array $names,
+            int $limit = 4
+        ) use ($publicNews) {
             $typeIds = ReportType::query()
                 ->whereIn('name', $names)
                 ->select('id');
@@ -68,17 +73,45 @@ class HomeController extends Controller
             return $publicNews()
                 ->whereIn('report_type', $typeIds)
                 ->orderByDesc('published_at')
-                ->first();
+                ->orderByDesc('id')
+                ->limit($limit)
+                ->get();
         };
 
-        $reportNews = $latestByReportType(['گزارش']);
-        $conversationNews = $latestByReportType(['گفتگوی تفصیلی']);
-        $noteNews = $latestByReportType(['یادداشت']);
+        /*
+        * خبر اصلی + حداکثر سه خبر مکمل برای هر بخش
+        */
+        $reportNewsItems = $latestByReportType(['گزارش'], 4);
 
+        $conversationNewsItems = $latestByReportType(
+            ['گفتگوی تفصیلی'],
+            4
+        );
+
+        $noteNewsItems = $latestByReportType(['یادداشت'], 4);
+
+        /*
+        * برای حفظ سازگاری با سایر بخش‌های احتمالی قالب
+        */
+        $reportNews = $reportNewsItems->first();
+
+        $conversationNews = $conversationNewsItems->first();
+
+        $noteNews = $noteNewsItems->first();
+
+        $reportNewsItems = $latestByReportType(['گزارش'], 4);
+        $conversationNewsItems = $latestByReportType(['گفتگوی تفصیلی'], 4);
+        $noteNewsItems = $latestByReportType(['یادداشت'], 4);
+
+        $reportNews = $reportNewsItems->first();
+        $conversationNews = $conversationNewsItems->first();
+        $noteNews = $noteNewsItems->first();
         /*
          * پربازدیدترین خبرها
          */
         $popularNews = $publicNews()
+            ->where('published_at', '>=', now()->subDays(3))
+            ->where('published_at', '<=', now())
             ->orderByDesc('views_count')
             ->orderByDesc('published_at')
             ->orderByDesc('id')
@@ -153,8 +186,11 @@ class HomeController extends Controller
             'featuredNews',
             'latestNews',
             'reportNews',
+            'reportNewsItems',
             'conversationNews',
+            'conversationNewsItems',
             'noteNews',
+            'noteNewsItems',
             'multimediaItems',
             'popularNews',
         ));

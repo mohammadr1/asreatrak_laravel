@@ -1737,3 +1737,206 @@ img {
       border:1px solid rgba(128,128,128,.35);background:rgba(128,128,128,.14);
       transition:background-color .2s,border-color .2s}
     .nav-search-link:hover{background:rgba(128,128,128,.25);border-color:var(--bs-primary,#0d6efd);color:inherit}
+
+
+
+
+
+
+
+
+
+
+
+
+    /* start footer */
+    /* =====================================
+      Footer License Section
+    ===================================== */
+
+    .footer-license {
+        height: 100%;
+        overflow: hidden;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid rgba(15, 40, 75, .09);
+        box-shadow: 0 8px 28px rgba(15, 35, 65, .06);
+    }
+
+    /* Header */
+
+    .footer-license-header {
+        padding: 17px 18px;
+        background: linear-gradient(135deg, #102c50, #1c4774);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .footer-license-header::before {
+        content: "";
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 50%;
+        top: -95px;
+        left: -35px;
+    }
+
+    .footer-license-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+        color: #fff;
+    }
+
+    .footer-license-title-icon {
+        width: 43px;
+        height: 43px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(255,255,255,.13);
+        border: 1px solid rgba(255,255,255,.18);
+        font-size: 21px;
+    }
+
+    .footer-license-title h5 {
+        font-size: 15px;
+        font-weight: 800;
+        margin: 0 0 5px;
+        color: #fff;
+    }
+
+    .footer-license-title span:not(.footer-license-title-icon) {
+        font-size: 11px;
+        color: rgba(255,255,255,.7);
+    }
+
+    /* Body */
+
+    .footer-license-body {
+        padding: 16px;
+    }
+
+    .footer-license-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 11px;
+    }
+
+    /* License Cards */
+
+    .license-card {
+        min-width: 0;
+        min-height: 125px;
+        padding: 12px 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-align: center;
+        text-decoration: none;
+        color: #243b59;
+        background: #f8fafc;
+        border: 1px solid #e7edf4;
+        border-radius: 13px;
+        transition: all .25s ease;
+    }
+
+    .license-card:hover {
+        color: #164b80;
+        background: #fff;
+        border-color: #9bb8d6;
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(20, 55, 90, .10);
+    }
+
+    .license-card-image {
+        width: 100%;
+        height: 65px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .license-card-image img {
+        max-width: 100%;
+        max-height: 65px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+
+    .license-card span {
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.8;
+    }
+
+    /* Official Status */
+
+    .footer-license-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+        padding: 13px 11px;
+        background: #f1f7f4;
+        border: 1px solid #dceee2;
+        border-radius: 12px;
+    }
+
+    .license-status-icon {
+        width: 37px;
+        height: 37px;
+        flex: 0 0 37px;
+        display: grid;
+        place-items: center;
+        border-radius: 10px;
+        background: #dff2e5;
+        color: #18834b;
+        font-size: 20px;
+    }
+
+    .footer-license-status strong {
+        display: block;
+        color: #17683e;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .footer-license-status p {
+        margin: 4px 0 0;
+        color: #63816e;
+        font-size: 10px;
+        line-height: 1.7;
+    }
+
+    .license-status-check {
+        margin-right: auto;
+        color: #23965c;
+        font-size: 19px;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 767px) {
+        .footer-license {
+            max-width: 420px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .footer-license-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .license-card {
+            min-height: 110px;
+        }
+    }
+    /* end footer */

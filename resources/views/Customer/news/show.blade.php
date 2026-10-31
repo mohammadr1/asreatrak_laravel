@@ -321,6 +321,7 @@
         </div>
     </div> -->
 
+
     <!-- اخبار پربازدید -->
     @include('Customer.partials.popular-news', ['popularNews' => $popularNews])
 

@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center gap-3">
         <span class="top-date" id="top-shamsi-date"></span>
         <span class="d-none d-md-inline">|</span>
-        <span class="d-none d-md-inline">خراسان شمالی — بجنورد</span>
+        <span class="d-none d-md-inline">خراسان شمالی</span>
       </div>
       <div class="d-flex align-items-center gap-3">
         <a href="#" class="d-flex align-items-center gap-1"><i class="bi bi-rss-fill" ></i> خبرنامه</a>
