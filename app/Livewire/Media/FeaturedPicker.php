@@ -56,7 +56,7 @@ class FeaturedPicker extends Component
 
     public array $selectedMediaVariants = [];
 
-    public int $maxSelection = 15;
+    public int $maxSelection = 50;
 
     /*
     |--------------------------------------------------------------------------
@@ -325,7 +325,7 @@ class FeaturedPicker extends Component
         switch ($context) {
             case 'gallery':
                 $this->selectionMode = 'multiple';
-                $this->maxSelection = 15;
+                $this->maxSelection = 50;
                 break;
 
             case 'editor':

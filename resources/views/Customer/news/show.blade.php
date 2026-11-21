@@ -1,9 +1,48 @@
 @extends('customer.layouts.master-one-col')
 
+@php
+    $heroUrl = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked')
+        ?: $news->featuredMedia?->variantUrl('cropped')
+        ?: $news->featuredMedia?->variantUrl('original');
+
+    $shortLink = $news->short_link ?: route('news.show', $news);
+@endphp
+
 @section('news-seo-title', e(($news->meta_title ?: $news->title) . ' | ' . config('app.name')))
 
 @section('head-tag')
+
 <link rel="stylesheet" href="{{ asset('assets/css/style_single.css') }}">
+
+{{-- Open Graph برای پیش‌نمایش شبکه‌های اجتماعی --}}
+<meta property="og:type" content="article">
+
+<meta property="og:title" content="{{ $news->meta_title ?: $news->title }}">
+
+<meta property="og:description" content="{{ $news->meta_description ?: $news->lead }}">
+
+@if ($heroUrl)
+    <meta property="og:image" content="{{ $heroUrl }}">
+    <meta property="og:image:secure_url" content="{{ $heroUrl }}">
+@endif
+
+<meta property="og:url" content="{{ $shortLink ?? route('news.show', $news) }}">
+
+<meta property="og:site_name" content="عصر اترک">
+
+<meta property="og:locale" content="fa_IR">
+
+{{-- Twitter Card --}}
+<meta name="twitter:card" content="summary_large_image">
+
+<meta name="twitter:title" content="{{ $news->meta_title ?: $news->title }}">
+
+<meta name="twitter:description" content="{{ $news->meta_description ?: $news->lead }}">
+
+@if ($heroUrl)
+    <meta name="twitter:image" content="{{ $heroUrl }}">
+@endif
+
 @endsection
 
 @section('content')
@@ -13,11 +52,9 @@
     use Morilog\Jalali\Jalalian;
     use Morilog\Jalali\CalendarUtils;
 
-    $heroUrl = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked')
-        ?: $news->featuredMedia?->variantUrl('cropped')
-        ?: $news->featuredMedia?->variantUrl('original');
+    $shareUrl = route('news.show', $news);
+    $shareTitle = $news->title;
 
-    $shareUrl   = route('news.show', $news);
     $shareTitle = $news->title;
     $topCat     = $news->categories->firstWhere('pivot.is_top', true) ?? $news->categories->first();
 
@@ -109,12 +146,26 @@
 
                     <div class="article-share ms-auto">
                         <span class="share-label">اشتراک‌گذاری:</span>
-                        <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}"
-                           class="share-btn telegram" title="تلگرام" target="_blank" rel="noopener"><i class="bi bi-telegram"></i></a>
-                        <a href="https://wa.me/?text={{ urlencode($shareTitle . ' ' . $shareUrl) }}"
+                        <a href="https://t.me/share/url?url={{ urlencode($shortLink) }}&text={{ urlencode($shareTitle) }}"
+                            class="share-btn telegram" title="تلگرام" target="_blank" rel="noopener">
+                            <i class="bi bi-telegram"></i>
+                        </a>
+
+                        <a href="https://wa.me/?text={{ urlencode($shareTitle . ' ' . $shortLink) }}"
+                            class="share-btn whatsapp" title="واتساپ" target="_blank" rel="noopener">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+
+                        <a href="https://twitter.com/intent/tweet?url={{ urlencode($shortLink) }}&text={{ urlencode($shareTitle) }}"
+                            class="share-btn twitter" title="ایکس" target="_blank" rel="noopener">
+                            <i class="bi bi-twitter-x"></i>
+                        </a>
+                        <!-- <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}"
+                           class="share-btn telegram" title="تلگرام" target="_blank" rel="noopener"><i class="bi bi-telegram"></i></a> -->
+                        <!-- <a href="https://wa.me/?text={{ urlencode($shareTitle . ' ' . $shareUrl) }}"
                            class="share-btn whatsapp" title="واتساپ" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i></a>
                         <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}"
-                           class="share-btn twitter" title="ایکس" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
+                           class="share-btn twitter" title="ایکس" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a> -->
                         <button type="button" class="share-btn copy" title="کپی لینک" onclick="copyLink()"><i class="bi bi-link-45deg"></i></button>
                     </div>
                 </div>
@@ -149,9 +200,20 @@
 
         <div class="d-flex align-items-center gap-2 ms-auto">
             <span class="share-label" style="font-size:.8rem;opacity:.7">اشتراک‌گذاری:</span>
-            <a href="https://t.me/share/url?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}" class="share-btn telegram" title="تلگرام" target="_blank" rel="noopener"><i class="bi bi-telegram"></i></a>
-            <a href="https://wa.me/?text={{ urlencode($shareTitle . ' ' . $shareUrl) }}" class="share-btn whatsapp" title="واتساپ" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i></a>
-            <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode($shareTitle) }}" class="share-btn twitter" title="ایکس" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i></a>
+                        <a href="https://t.me/share/url?url={{ urlencode($shortLink) }}&text={{ urlencode($shareTitle) }}"
+                            class="share-btn telegram" title="تلگرام" target="_blank" rel="noopener">
+                            <i class="bi bi-telegram"></i>
+                        </a>
+
+                        <a href="https://wa.me/?text={{ urlencode($shareTitle . ' ' . $shortLink) }}"
+                            class="share-btn whatsapp" title="واتساپ" target="_blank" rel="noopener">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>
+
+                        <a href="https://twitter.com/intent/tweet?url={{ urlencode($shortLink) }}&text={{ urlencode($shareTitle) }}"
+                            class="share-btn twitter" title="ایکس" target="_blank" rel="noopener">
+                            <i class="bi bi-twitter-x"></i>
+                        </a>
         </div>
     </div>
 
@@ -352,22 +414,27 @@
     });
 
     const shareData = {
-        title: @json($news->title),
-        url: @json(route('news.show', $news)),
+        title: @json($shareTitle),
+        url: @json($shareUrl),
+        shortLink: @json($shortLink),
     };
 
     async function copyLink() {
+
+        const link = shareData.shortLink || shareData.url;
+
         try {
-            await navigator.clipboard.writeText(shareData.url);
+            await navigator.clipboard.writeText(link);
         } catch (e) {
             const t = document.createElement('textarea');
-            t.value = shareData.url;
+            t.value = link;
             document.body.appendChild(t);
             t.select();
             document.execCommand('copy');
             t.remove();
         }
-        alert('لینک خبر کپی شد');
+
+        alert('لینک کوتاه خبر کپی شد');
     }
 
     document.getElementById('shareBtn')?.addEventListener('click', async function (e) {

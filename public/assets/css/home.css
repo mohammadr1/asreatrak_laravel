@@ -721,7 +721,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, .media-card:focus-vi
     overflow: hidden;
     border: 1px solid var(--sn-border);
     border-radius: 20px;
-    background: var(--sn-panel);
+    /* background: var(--sn-panel); */
     box-shadow: 0 10px 28px rgba(0, 0, 0, .10);
 }
 
@@ -765,7 +765,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, .media-card:focus-vi
 
 .sidebar-news-modern .sidebar-news-modern-heading h2 {
     margin: 0;
-    color: var(--sn-text);
+    /* color: var(--sn-text); */
     font-size: 1rem;
     font-weight: 800;
     line-height: 1.8;
@@ -773,7 +773,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, .media-card:focus-vi
 
 .sidebar-news-modern .sidebar-news-modern-label {
     flex-shrink: 0;
-    color: var(--sn-muted);
+    /* color: var(--sn-muted); */
     font-size: .70rem;
 }
 
@@ -844,7 +844,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, .media-card:focus-vi
     display: -webkit-box;
     overflow: hidden;
     margin: 0 0 15px;
-    color: var(--sn-muted);
+    /* color: var(--sn-muted); */
     font-size: .85rem;
     line-height: 2.05;
     text-align: justify;
@@ -872,7 +872,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, .media-card:focus-vi
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    color: #8fd9e8;
+    /* color: #8fd9e8; */
     font-size: .82rem;
     font-weight: 800;
     text-decoration: none;
@@ -880,7 +880,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, .media-card:focus-vi
 }
 
 .sidebar-news-modern .sidebar-featured-readmore:hover {
-    color: #fff;
+    color: #5d5d5d;
 }
 
 /* Compact headlines */

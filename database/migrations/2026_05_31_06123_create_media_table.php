@@ -69,7 +69,7 @@ return new class extends Migration
                 ->nullOnDelete();
 
 
-
+            
             $table->string('cropped_path')->nullable();
 
             $table->string('watermarked_path')->nullable();

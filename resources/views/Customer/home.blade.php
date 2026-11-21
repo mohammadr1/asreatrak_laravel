@@ -254,7 +254,9 @@
                                     $featured->featuredMedia?->variantUrl(
                                         $featured->featured_media_variant ?: 'watermarked'
                                     )
+                                    ?: $featured->featuredMedia?->variantUrl('watermarked')
                                     ?: $featured->featuredMedia?->variantUrl('cropped')
+                                    ?: $featured->featuredMedia?->variantUrl('original')
                                     ?: asset('assets/images/default.png');
                             @endphp
 

@@ -24,7 +24,7 @@ return [
 
         'base' => env('NEWS_SHORT_LINK_BASE'),
 
-        'fallback_base' => 'https://asreatrak.ir',
+        'fallback_base' => env('NEWS_SHORT_LINK_BASE'),
 
         'prefix' => 'short',
 
