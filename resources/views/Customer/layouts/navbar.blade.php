@@ -34,8 +34,8 @@
       </ul> -->
 
       <ul class="nav-links" id="navLinks">
-        <li class="{{ request()->routeIs('customer.home') ? 'active' : '' }}">
-          <a href="{{ route('customer.home') }}"><i class="bi bi-house-fill"></i> خانه</a>
+        <li class="{{ request()->routeIs('Customer.home') ? 'active' : '' }}">
+          <a href="{{ route('Customer.home') }}"><i class="bi bi-house-fill"></i> خانه</a>
         </li>
 
         @include('Customer.layouts.partials.menu-items', ['items' => $navMenus])

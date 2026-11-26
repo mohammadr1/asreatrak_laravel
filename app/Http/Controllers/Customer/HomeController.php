@@ -180,7 +180,7 @@ class HomeController extends Controller
 
         $multimediaItems = $multimediaItems->unique('src')->values()->take(60);
 
-        return view('customer.home', compact(
+        return view('Customer.home', compact(
             'breakingNews',
             'sliderNews',
             'featuredNews',
