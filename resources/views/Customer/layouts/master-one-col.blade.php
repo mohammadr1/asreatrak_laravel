@@ -32,7 +32,7 @@
 
 
 
-@include('Customer.layouts.breaking_bar', ['news' => $news])
+@include('Customer.layouts.breaking_bar', ['news' => $breakingNews ?? collect()])
 
 
 <!-- ========================

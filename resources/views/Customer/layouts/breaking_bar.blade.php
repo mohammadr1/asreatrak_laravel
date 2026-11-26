@@ -1,7 +1,12 @@
 
-@if ($news->isNotEmpty())
+@php
+    $breakingItems = $news ?? collect();
+@endphp
+
+@if ($breakingItems instanceof \Illuminate\Support\Collection && $breakingItems->isNotEmpty())
     <div class="breaking-bar">
         <div class="container-xl p-0 d-flex align-items-stretch w-100">
+
             <div class="breaking-label">
                 <span class="dot" aria-hidden="true"></span>
                 آخرین اخبار
@@ -11,7 +16,7 @@
                 <div class="ticker-inner" id="ticker"
                      aria-live="polite" aria-atomic="true">
 
-                    @foreach ($news as $item)
+                    @foreach ($breakingItems as $item)
                         <a class="ticker-item"
                            href="{{ route('news.show', $item) }}">
                             {{ $item->title }}
@@ -20,6 +25,7 @@
 
                 </div>
             </div>
+
         </div>
     </div>
 @endif
