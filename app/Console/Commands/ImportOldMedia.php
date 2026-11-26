@@ -220,7 +220,7 @@ class ImportOldMedia extends Command
 
         $relative = $remote !== null
             ? $this->stripImagesPrefix((string) $row->original_image)
-            : $this->relativePath($source);
+            : $this->relativeSourcePath($source);
 
         $destination = 'media/old/'.$relative;
         $absolute = Storage::disk('public')->path($destination);
@@ -310,6 +310,11 @@ class ImportOldMedia extends Command
                 'featured_media_id' => $mediaId,
                 'featured_media_variant' => 'original',
             ]);
+
+        DB::table('news_media')->updateOrInsert(
+            ['news_id' => $newsId, 'media_id' => $mediaId],
+            ['sort_order' => 0, 'is_featured' => 1, 'updated_at' => now(), 'created_at' => now()]
+        );
 
         if ($updated > 0) {
             $this->linked++;
@@ -478,6 +483,14 @@ class ImportOldMedia extends Command
             if (is_file($path)) {
                 return $path;
             }
+
+            // Images copied manually into storage/app/public/media/old are valid sources too.
+            $relative = $this->stripImagesPrefix((string) $candidate);
+            $existingDestination = Storage::disk('public')->path('media/old/'.$relative);
+
+            if (is_file($existingDestination)) {
+                return $existingDestination;
+            }
         }
 
         // اگر نام دقیق نبود، هم‌نام‌های _original را در همان پوشه بگرد
@@ -507,8 +520,22 @@ class ImportOldMedia extends Command
         return str_replace('\\', '/', ltrim(substr($absolute, strlen($root)), '\\/'));
     }
 
+    private function relativeSourcePath(string $absolute): string
+    {
+        $normalized = str_replace('\\', '/', $absolute);
+        $destinationRoot = rtrim(str_replace('\\', '/', storage_path('app/public/media/old')), '/');
+
+        if (str_starts_with($normalized, $destinationRoot.'/')) {
+            return ltrim(substr($normalized, strlen($destinationRoot)), '/');
+        }
+
+        return $this->relativePath($absolute);
+    }
+
     private function stripImagesPrefix(string $path): string
     {
+        $path = ltrim(str_replace('\\', '/', trim($path)), '/');
+
         return preg_replace('~^images/~i', '', $path) ?? $path;
     }
 
@@ -778,3 +805,4 @@ class ImportOldMedia extends Command
         $this->line("منتقل‌شده: {$done} — پیدا نشد: {$skip}");
     }
 }
+

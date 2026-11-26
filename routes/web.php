@@ -10,7 +10,7 @@ use App\Http\Controllers\Customer\TagController;
 
 
 // صفحه اصلی سایت
-Route::get('/', [HomeController::class, 'home'])->name('customer.home');
+Route::get('/', [HomeController::class, 'home'])->name('Customer.home');
 
 // لینک کوتاه خبر: /short/{کد خبر یا کد ۵ کاراکتری خبرهای قدیمی}
 Route::get('/short/{code}', ShortLinkController::class)
