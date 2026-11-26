@@ -66,11 +66,11 @@ updateDateTime();
 </script>
 
 
-    @include('customer.layouts.theme')
+    @include('Customer.layouts.theme')
 
     <header>
         {{-- <nav class="navbar navbar-expand-md navbar-dark fixed-top p-0"> --}}
-            @include('customer.layouts.header')
+            @include('Customer.layouts.header')
         {{-- </nav> --}}
     </header>
 
@@ -90,7 +90,7 @@ updateDateTime();
     <!-- FOOTER -->
     <footer class="footer pt-4 pb-2 mt-5 border-top">
         <div class="container">
-            @include('customer.layouts.footer')
+            @include('Customer.layouts.footer')
         </div>
     </footer>
 
@@ -102,7 +102,7 @@ updateDateTime();
         <i class="fas fa-arrow-up"></i>
     </button> --}}
 
-    @include('customer.layouts.scripts')
+    @include('Customer.layouts.scripts')
     @yield('scripts')
     {{-- start sweetalert --}}
     <script src="{{ asset('assets/js/sweetalert2@11.js') }}"></script>

@@ -1,4 +1,4 @@
-@extends('customer.layouts.master-one-col')
+@extends('Customer.layouts.master-one-col')
 
 @php
     $heroUrl = $news->featuredMedia?->variantUrl($news->featured_media_variant ?: 'watermarked')

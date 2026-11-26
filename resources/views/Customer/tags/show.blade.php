@@ -1,4 +1,4 @@
-@extends('customer.layouts.master-one-col')
+@extends('Customer.layouts.master-one-col')
 
 @section('news-seo-title', e($tag->name . ' | ' . config('app.name')))
 
