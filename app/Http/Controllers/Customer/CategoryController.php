@@ -31,6 +31,6 @@ class CategoryController extends Controller
             ->orderByRaw($order)
             ->paginate(12);
 
-        return view('customer.category.show', compact('category', 'hero', 'news'));
+        return view('Customer.category.show', compact('category', 'hero', 'news'));
     }
 }
